@@ -1,0 +1,37 @@
+﻿@{
+    Layout = null;
+    var title = ViewBag.Title ?? "Website";
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>@title</title>
+
+    @*CSS*@
+    <link rel="stylesheet" href="~/Content/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/Content/site.css" />
+    @RenderSection("Styles", required: false)
+</head>
+
+<body>
+    @Html.Partial("_Header")
+
+    @Html.Action("Nav", "Shared", new { code = "Anh8715OP" })
+
+    @Html.Partial("_Slider")
+
+    <main class="container mt-4">
+        @RenderBody()
+    </main>
+    @Html.Partial("_Footer")
+
+    @*JS*@
+    <script src="~/Scripts/jquery-3.7.0.min.js"></script>
+    <script src="~/Scripts/bootstrap.bundle.min.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

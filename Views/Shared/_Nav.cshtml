@@ -1,0 +1,248 @@
+﻿@model IEnumerable<QLNSVATC.Models.MENU>
+
+@{
+    var menus = Model.ToList();
+    var roots = menus
+        .Where(x => x.ParentId == null)
+        .OrderBy(x => x.OrderNumber)
+        .ToList();
+
+    string themeColor = ViewBag.ThemeColor as string ?? "#121212";
+    string fontFamily = ViewBag.FontFamily as string ?? "Inter";
+    int fontSize = ViewBag.FontSize != null ? (int)ViewBag.FontSize : 14;
+    string currentLang = ViewBag.CurrentLang as string ?? "vi-VN";
+
+    bool isDarkMode = ViewBag.DarkMode != null ? (bool)ViewBag.DarkMode : false;
+    string textColor = isDarkMode ? "#000000" : "#ffffff";
+}
+
+<style>
+    .nav-neon {
+        box-shadow: 0 6px 18px rgba(0,0,0,.12);
+        border-radius: 0;
+        border: 0;
+    }
+
+    /* khung 1200px giữa màn hình */
+    .nav-inner {
+        max-width: 1200px;
+        width: 100%;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+    }
+
+    .nav-inner .navbar-brand {
+        margin-right: 32px;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-transform: none; /* để MySite không bị tách dòng */
+        white-space: nowrap;
+    }
+
+    .nav-container-flex {
+        flex: 1;
+        display: flex;
+        align-items: center;
+    }
+
+    /* MAIN MENU: sát logo, không chia đôi, không xuống dòng */
+    .main-menu {
+        display: flex;
+        align-items: center;
+        margin: 0;
+        padding: 0;
+    }
+
+    .main-menu > li > .nav-link {
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        font-weight: 600;
+        padding: 10px 14px;
+        white-space: nowrap;   /* không cho xuống dòng */
+    }
+
+    /* phần bên phải: tài khoản + ngôn ngữ */
+    .nav-right {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        white-space: nowrap;
+    }
+
+    /* Neon hover */
+    .nav-neon .navbar-brand,
+    .nav-neon .nav-link,
+    .nav-neon .dropdown-item {
+        position: relative;
+        transition:
+            color 0.2s ease,
+            text-shadow 0.25s ease,
+            box-shadow 0.25s ease,
+            background-color 0.2s ease,
+            transform 0.15s ease;
+    }
+
+    .nav-neon .navbar-brand:hover,
+    .nav-neon .nav-link:hover {
+        text-shadow: 0 0 4px @textColor,
+                     0 0 8px @textColor,
+                     0 0 12px @textColor;
+        transform: translateY(-1px);
+    }
+
+    .nav-neon .nav-link::after {
+        content: "";
+        position: absolute;
+        left: 10%;
+        right: 10%;
+        bottom: 0;
+        height: 2px;
+        background: @textColor;
+        opacity: 0;
+        box-shadow: 0 0 6px @textColor, 0 0 10px @textColor;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+        transform: scaleX(0.6);
+    }
+
+    .nav-neon .nav-link:hover::after {
+        opacity: 1;
+        transform: scaleX(1);
+    }
+
+    .nav-neon .dropdown-menu {
+        border-radius: 8px;
+        border: 1px solid rgba(255,255,255,0.08);
+        box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+        background: #181a1f;
+    }
+
+    .nav-neon .dropdown-item {
+        color: #dde4ff;
+        white-space: nowrap;
+    }
+
+    .nav-neon .dropdown-item:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+        text-shadow: 0 0 4px @textColor,
+                     0 0 8px @textColor;
+        color: #000;
+    }
+
+    @@media (max-width: 767px) {
+        .nav-inner {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .nav-container-flex {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .nav-right {
+            margin-left: 0;
+            margin-top: 8px;
+        }
+    }
+</style>
+
+<nav class="navbar navbar-expand-lg nav-neon"
+     style="
+        --nav-text-color:@textColor;
+        background-color:@themeColor;
+        font-family:@fontFamily, sans-serif;
+        font-size:@(fontSize);
+        color:@textColor;
+     "
+     data-current-lang="@currentLang">
+
+    <div class="container-fluid">
+        <div class="nav-inner">
+
+            <!-- LOGO -->
+            <a class="navbar-brand" href="/" style="color:@textColor;">
+                MySite
+            </a>
+
+            <!-- Toggler cho mobile -->
+            <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#mainNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- MENU + TÀI KHOẢN BÊN PHẢI -->
+            <div class="collapse navbar-collapse nav-container-flex" id="mainNavbar">
+
+                <!-- MENU CHÍNH SÁT BÊN TRÁI -->
+                <ul class="navbar-nav main-menu">
+                    @foreach (var root in roots)
+                    {
+                        var children = menus
+                            .Where(c => c.ParentId == root.MenuId)
+                            .OrderBy(c => c.OrderNumber)
+                            .ToList();
+
+                        if (children.Any())
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle"
+                                   href="@root.MenuLink"
+                                   id="navDrop_@root.MenuId"
+                                   data-bs-toggle="dropdown"
+                                   style="color:@textColor;">
+                                    @root.MenuName
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="navDrop_@root.MenuId">
+                                    @foreach (var child in children)
+                                    {
+                                        <li>
+                                            <a class="dropdown-item"
+                                               href="@child.MenuLink"
+                                               style="font-family:@fontFamily, sans-serif; font-size:@(fontSize - 1);">
+                                                @child.MenuName
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   href="@root.MenuLink"
+                                   style="color:@textColor;">
+                                    @root.MenuName
+                                </a>
+                            </li>
+                        }
+                    }
+                </ul>
+
+                <!-- BÊN PHẢI: TÀI KHOẢN + NGÔN NGỮ -->
+                <div class="nav-right">
+                    <div class="dropdown">
+                        <a class="nav-link dropdown-toggle"
+                           href="#"
+                           id="userMenu"
+                           data-bs-toggle="dropdown"
+                           style="color:@textColor;">
+                            Tài khoản
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                            <li><a class="dropdown-item" href="#">Đăng nhập</a></li>
+                            <li><a class="dropdown-item" href="#">Đăng ký</a></li>
+                        </ul>
+                    </div>
+
+                    <span class="navbar-text">
+                        <span class="badge bg-secondary">@currentLang</span>
+                    </span>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</nav>

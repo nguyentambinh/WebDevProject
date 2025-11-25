@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="d23215b2095840009728aa0bc4b50743" Name="Diagram1">
+        <EntityTypeShape EntityType="QLNSVATCModel.ACTIVITY_LOG" Width="1.5" PointX="0.75" PointY="3.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.BAOCAO" Width="1.5" PointX="3" PointY="17.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.BIENDONGTHITRUONG" Width="1.5" PointX="2.75" PointY="3.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.CHAMCONG" Width="1.5" PointX="8.25" PointY="5.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.CONFIRMAUTH" Width="1.5" PointX="0.75" PointY="0.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.CPDUAN" Width="1.5" PointX="6" PointY="28.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.DSBANGCAP" Width="1.5" PointX="1.5" PointY="9.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.DSCHUYENMON" Width="1.5" PointX="1.5" PointY="12" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.DSKYNANG" Width="1.5" PointX="1.5" PointY="6.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.DSNGAYLE" Width="1.5" PointX="4.75" PointY="3.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.DSNGONNGU" Width="1.5" PointX="1.5" PointY="21" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.DSTHUONGPHAT" Width="1.5" PointX="8.25" PointY="8.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.DTDICHVU" Width="1.5" PointX="3.75" PointY="30.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.DTDUAN" Width="1.5" PointX="11" PointY="23.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.DTTHEOKV" Width="1.5" PointX="8.75" PointY="35.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.DTTHEOLHCT" Width="1.5" PointX="8.75" PointY="38.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.DUAN" Width="1.5" PointX="3.75" PointY="23.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.DUANTHEOHOPDONG" Width="1.5" PointX="6" PointY="25.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.FONT" Width="1.5" PointX="5.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.HOPDONG" Width="1.5" PointX="3.75" PointY="27" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.HOSOVIECLAM" Width="1.5" PointX="3.75" PointY="6.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.KHACHHANG" Width="1.5" PointX="1.5" PointY="23.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.LANGUAGE" Width="1.5" PointX="7.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.LAYOUT_MODE" Width="1.5" PointX="9.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.LICHLAMVIEC" Width="1.5" PointX="8.25" PointY="11.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.LUONG" Width="1.5" PointX="8.25" PointY="14.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.MENU" Width="1.5" PointX="10.75" PointY="3.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.NHANTHAN" Width="1.5" PointX="8.25" PointY="17.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.NHANVIEN" Width="1.5" PointX="6" PointY="15.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.NHAPNVL" Width="1.5" PointX="3.75" PointY="34.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.NVTHAMGIADA" Width="1.5" PointX="8.25" PointY="20.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.PHIENDICH" Width="1.5" PointX="3.75" PointY="9.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.PHONGBAN" Width="1.5" PointX="8.25" PointY="23.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.RUIRO" Width="1.5" PointX="8.75" PointY="40.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.sysdiagram" Width="1.5" PointX="10.75" PointY="6.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.THEME" Width="1.5" PointX="10.75" PointY="9.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.THONGTINBAOHIEM" Width="1.5" PointX="8.25" PointY="26.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.THONGTINDOANHNGHIEP" Width="1.5" PointX="0.75" PointY="17.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.THONGTINLIENHE" Width="1.5" PointX="8.25" PointY="28.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.THONGTINSUCKHOE" Width="1.5" PointX="8.25" PointY="32" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.USER_SETTINGS" Width="1.5" PointX="12.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.USER" Width="1.5" PointX="3" PointY="1" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.VANCHUYENNVL" Width="1.5" PointX="3.75" PointY="37.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.VITRICONGVIEC" Width="1.5" PointX="3.75" PointY="12.375" IsExpanded="true" />
+        <AssociationConnector Association="QLNSVATCModel.FK__BAOCAO__MADN__1EA48E88" ManuallyRouted="false" />
+        <AssociationConnector Association="QLNSVATCModel.FK__CHAMCONG__MANV__6EF57B66" ManuallyRouted="false" />
+        <AssociationConnector Association="QLNSVATCModel.FK__USERS__AUTH__17F790F9" ManuallyRouted="false" />
+        <AssociationConnector Association="QLNSVATCModel.FK__CPDUAN__MADA__0C85DE4D" ManuallyRouted="false" />
+        <AssociationConnector Association="QLNSVATCModel.FK__CPDUAN__MANHAP__0D7A0286" ManuallyRouted="false" />
+        <AssociationConnector Association="QLNSVATCModel.FK__CPDUAN__MAVC__0E6E26BF" ManuallyRouted="false" />
+        <AssociationConnector Association="QLNSVATCModel.FK__DSCHUYENM__CACBC__3E52440B" ManuallyRouted="false" />
+        <AssociationConnector Association="QLNSVATCModel.FK__DSCHUYENM__CACKN__3D5E1FD2" ManuallyRouted="false" />
+        <AssociationConnector Association="QLNSVATCModel.FK__DSCHUYENM__CACNN__3F466844" ManuallyRouted="false" />
+        <AssociationConnector Association="QLNSVATCModel.FK__VITRICONGV__MACM__4316F928" ManuallyRouted="false" />
+        <AssociationConnector Association="QLNSVATCModel.FK__DSTHUONGPH__MANV__71D1E811" ManuallyRouted="false" />
+        <AssociationConnector Association="QLNSVATCModel.FK__DTDICHVU__MAKH__7A672E12" ManuallyRouted="false" />
+        <AssociationConnector Association="QLNSVATCModel.FK__DTDUAN__DSMARR__05D8E0BE" ManuallyRouted="false" />
+        <AssociationConnector Association="QLNSVATCModel.FK__DTDUAN__MADA__02FC7413" ManuallyRouted="false" />
+        <AssociationConnector Association="QLNSVATCModel.FK__DTDUAN__MAKV__04E4BC85" ManuallyRouted="false" />
+        <AssociationConnector Association="QLNSVATCModel.FK__DTDUAN__MALH__03F0984C" ManuallyRouted="false" />
+        <AssociationConnector Association="QLNSVATCModel.FK__DUAN__MAKH__5CD6CB2B" ManuallyRouted="false" />
+        <AssociationConnector Association="QLNSVATCModel.FK__DUANTHEOHO__MADA__6383C8BA" ManuallyRouted="false" />
+        <AssociationConnector Association="QLNSVATCModel.FK__DUANTHEOHO__MAHD__6477ECF3" ManuallyRouted="false" />
+        <AssociationConnector Association="QLNSVATCModel.FK__NVTHAMGIA__MADAH__1AD3FDA4" ManuallyRouted="false" />
+        <AssociationConnector Association="QLNSVATCModel.FK__LICHLAMVIE__MANV__693CA210" ManuallyRouted="false" />
+        <AssociationConnector Association="QLNSVATCModel.FK__LUONG__MANV__7F2BE32F" ManuallyRouted="false" />
+        <AssociationConnector Association="QLNSVATCModel.FK__NHANTHAN__MANV__59FA5E80" ManuallyRouted="false" />
+        <AssociationConnector Association="QLNSVATCModel.FK__NHANVIEN__MACV__4CA06362" ManuallyRouted="false" />
+        <AssociationConnector Association="QLNSVATCModel.FK__NHANVIEN__MADN__4D94879B" ManuallyRouted="false" />
+        <AssociationConnector Association="QLNSVATCModel.FK__NHANVIEN__MAPB__4BAC3F29" ManuallyRouted="false" />
+        <AssociationConnector Association="QLNSVATCModel.FK__NVTHAMGIAD__MANV__1BC821DD" ManuallyRouted="false" />
+        <AssociationConnector Association="QLNSVATCModel.FK__THONGTINBA__MANV__571DF1D5" ManuallyRouted="false" />
+        <AssociationConnector Association="QLNSVATCModel.FK__THONGTINLI__MANV__5165187F" ManuallyRouted="false" />
+        <AssociationConnector Association="QLNSVATCModel.FK__THONGTINSU__MANV__5441852A" ManuallyRouted="false" />
+        <AssociationConnector Association="QLNSVATCModel.FK_TRGPHG" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>
