@@ -291,6 +291,7 @@
     <Compile Include="Models\USER.cs">
       <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\UserViewBagModel.cs" />
     <Compile Include="Models\USER_SETTINGS.cs">
       <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
     </Compile>

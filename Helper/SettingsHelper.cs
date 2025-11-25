@@ -48,7 +48,7 @@ namespace QLNSVATC.Helpers
                     fontName = f.FontName;
             }
 
-            // 3. Lấy ngôn ngữ
+            // Lấy ngôn ngữ
             string lang = st.LanguageCode ?? "vi-VN";
             string langCol = lang.Replace("-", "_");     // vi-VN -> vi_VN
 
@@ -70,7 +70,6 @@ namespace QLNSVATC.Helpers
                 dict[t.TranslateKey] = text;
             }
 
-            // Trả về model gom tất cả
             return new UserViewBagModel
             {
                 TranslateDict = dict,
@@ -86,15 +85,5 @@ namespace QLNSVATC.Helpers
         }
     }
 
-    public class UserViewBagModel
-    {
-        public IDictionary<string, string> TranslateDict { get; set; }
-        public string Lang { get; set; }
-        public string Theme { get; set; }
-        public string ThemeHex { get; set; }
-        public bool DarkMode { get; set; }
-        public string FontFamily { get; set; }
-        public int FontSize { get; set; }
-        public string LayoutCode { get; set; }
-    }
+    
 }
