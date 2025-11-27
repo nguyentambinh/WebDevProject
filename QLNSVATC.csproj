@@ -320,6 +320,10 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
+    <Content Include="Content\Footer.css" />
+    <Content Include="Content\img\img1.jpg" />
+    <Content Include="Content\img\img2.jpg" />
+    <Content Include="Content\img\img3.jpg" />
     <Content Include="Content\Slider.css" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
