@@ -329,12 +329,15 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
-<Content Include="Content\Images\mainbg.png" />
-<Content Include="Content\Footer.css" />
-<Content Include="Content\img\img1.jpg" />
-<Content Include="Content\img\img2.jpg" />
-<Content Include="Content\img\img3.jpg" />
-<Content Include="Content\Slider.css" />
+<<<<<<< HEAD
+    <Content Include="Content\Images\mainbg.png" />
+=======
+    <Content Include="Content\Footer.css" />
+    <Content Include="Content\img\img1.jpg" />
+    <Content Include="Content\img\img2.jpg" />
+    <Content Include="Content\img\img3.jpg" />
+    <Content Include="Content\Slider.css" />
+>>>>>>> 6aa0f0da51105be593cdd930286967d386e51708
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />

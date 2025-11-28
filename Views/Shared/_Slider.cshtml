@@ -1,1 +1,132 @@
+<<<<<<< HEAD
 ﻿
+=======
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="~/Content/Slider.css" />
+</head>
+<body>
+    <div class="slider" id="mySlider">
+        <div class="slider-track">
+            <div class="slide">
+                <!-- Frame 1 -->
+                <img src="~/Content/img/img1.jpg" alt="Slide 1" />
+            </div>
+            <div class="slide">
+                <!-- Frame 2 -->
+                <img src="~/Content/img/img2.jpg" alt="Slide 2" />
+            </div>
+            <div class="slide">
+                <!-- Frame 3 -->
+                <img src="~/Content/img/img3.jpg" alt="Slide 3" />
+            </div>
+        </div>
+
+        <button class="slider-btn prev">&lsaquo;</button>
+        <button class="slider-btn next">&rsaquo;</button>
+
+        <div class="slider-dots"></div>
+    </div>
+</body>
+</html>
+
+<script>
+(function () {
+    const slider   = document.getElementById('mySlider');
+    const track    = slider.querySelector('.slider-track');
+    const slides   = Array.from(slider.querySelectorAll('.slide'));
+    const btnPrev  = slider.querySelector('.slider-btn.prev');
+    const btnNext  = slider.querySelector('.slider-btn.next');
+    const dotsWrap = slider.querySelector('.slider-dots');
+
+    let currentIndex = 0;
+    const total = slides.length;
+
+    // Tạo dots theo số slide
+    slides.forEach((_, i) => {
+        const dot = document.createElement('button');
+        if (i === 0) dot.classList.add('active');
+        dot.addEventListener('click', () => goToSlide(i));
+        dotsWrap.appendChild(dot);
+    });
+    const dots = Array.from(dotsWrap.children);
+
+    function updateSlider() {
+        const offset = -currentIndex * 100;
+        track.style.transform = 'translateX(' + offset + '%)';
+
+        dots.forEach(d => d.classList.remove('active'));
+        dots[currentIndex].classList.add('active');
+    }
+
+    function goToSlide(index) {
+        if (index < 0) index = total - 1;
+        if (index >= total) index = 0;
+        currentIndex = index;
+        updateSlider();
+    }
+
+    btnPrev.addEventListener('click', () => goToSlide(currentIndex - 1));
+    btnNext.addEventListener('click', () => goToSlide(currentIndex + 1));
+
+    // --- Vuốt tay trên mobile ---
+    let startX = 0;
+    let isDragging = false;
+    let currentTranslate = 0;
+    let prevTranslate = 0;
+
+    function touchStart(e) {
+        isDragging = true;
+        startX = getX(e);
+        prevTranslate = -currentIndex * slider.offsetWidth;
+        track.style.transition = 'none';
+    }
+
+    function touchMove(e) {
+        if (!isDragging) return;
+        const currentX = getX(e);
+        const diff = currentX - startX;
+        currentTranslate = prevTranslate + diff;
+        track.style.transform = 'translateX(' + currentTranslate + 'px)';
+    }
+
+    function touchEnd() {
+        if (!isDragging) return;
+        isDragging = false;
+        const movedBy = currentTranslate - prevTranslate;
+        const threshold = slider.offsetWidth * 0.2; // kéo 20% chiều rộng là đổi slide
+
+        if (movedBy < -threshold) {
+            goToSlide(currentIndex + 1);
+        } else if (movedBy > threshold) {
+            goToSlide(currentIndex - 1);
+        } else {
+            updateSlider();
+        }
+        track.style.transition = 'transform 0.35s ease';
+    }
+
+    function getX(e) {
+        return e.type.startsWith('mouse') ? e.pageX : e.touches[0].clientX;
+    }
+
+    // Gắn event cho cả touch + mouse (để test trên PC)
+    track.addEventListener('touchstart', touchStart);
+    track.addEventListener('touchmove', touchMove);
+    track.addEventListener('touchend', touchEnd);
+
+    track.addEventListener('mousedown', touchStart);
+    window.addEventListener('mousemove', touchMove);
+    window.addEventListener('mouseup', touchEnd);
+
+    // Cập nhật lại khi resize (tránh lệch)
+    window.addEventListener('resize', () => {
+        updateSlider();
+    });
+
+    // Init
+    updateSlider();
+})();
+</script>
+>>>>>>> 6aa0f0da51105be593cdd930286967d386e51708

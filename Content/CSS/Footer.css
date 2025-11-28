@@ -1,0 +1,95 @@
+﻿/* WRAPPER FULL WIDTH */
+.footer-wrapper {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* CTA SECTION */
+.cta-footer {
+    width: 100%;
+    background: #7b81d3;
+    padding: 35px 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 0; /* bỏ bo góc để nằm sát mép như mẫu */
+}
+
+    .cta-footer h2 {
+        color: #fff;
+        margin: 0;
+        font-size: 26px;
+    }
+
+    .cta-footer p {
+        color: #eee;
+        margin-top: 4px;
+    }
+
+.cta-btn {
+    background: #2d2f39;
+    padding: 12px 28px;
+    border-radius: 6px;
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    transition: .3s;
+}
+
+/* FOOTER MAIN (FULL WIDTH) */
+.main-footer {
+    background: #0d1117;
+    padding: 70px 50px 30px;
+    color: #bfbfbf;
+}
+
+.footer-container {
+    max-width: 1300px; /* căn giữa nội dung */
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 50px;
+}
+
+.footer-col h3, .footer-col h4 {
+    color: #fff;
+    margin-bottom: 14px;
+}
+
+/* Social */
+.social-icons a {
+    margin-right: 12px;
+    color: #fff;
+    font-size: 20px;
+    transition: .3s;
+}
+
+/* FOOTER BOTTOM */
+.footer-bottom {
+    margin-top: 40px;
+    text-align: center;
+    font-size: 14px;
+    color: #888;
+    padding-top: 25px;
+    border-top: 1px solid #222;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .footer-container {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .footer-container {
+        grid-template-columns: 1fr;
+    }
+
+    .cta-footer {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+}
