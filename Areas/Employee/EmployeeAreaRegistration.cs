@@ -2,22 +2,20 @@
 
 namespace QLNSVATC.Areas.Employee
 {
-    public class EmployeeAreaRegistration : AreaRegistration 
+    public class EmployeeAreaRegistration : AreaRegistration
     {
-        public override string AreaName 
+        public override string AreaName
         {
-            get 
-            {
-                return "Employee";
-            }
+            get { return "Employee"; }
         }
 
-        public override void RegisterArea(AreaRegistrationContext context) 
+        public override void RegisterArea(AreaRegistrationContext context)
         {
             context.MapRoute(
                 "Employee_default",
                 "Employee/{controller}/{action}/{id}",
-                new { action = "Index", id = UrlParameter.Optional }
+                new { controller = "Home", action = "Index", id = UrlParameter.Optional },
+                namespaces: new[] { "QLNSVATC.Areas.Employee.Controllers" }
             );
         }
     }

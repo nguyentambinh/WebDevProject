@@ -4,7 +4,7 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="d23215b2095840009728aa0bc4b50743" Name="Diagram1">
+      <Diagram DiagramId="d23215b2095840009728aa0bc4b50743" Name="Diagram1" ZoomLevel="82">
         <EntityTypeShape EntityType="QLNSVATCModel.ACTIVITY_LOG" Width="1.5" PointX="0.75" PointY="3.75" IsExpanded="true" />
         <EntityTypeShape EntityType="QLNSVATCModel.BAOCAO" Width="1.5" PointX="3" PointY="17.375" IsExpanded="true" />
         <EntityTypeShape EntityType="QLNSVATCModel.BIENDONGTHITRUONG" Width="1.5" PointX="2.75" PointY="3.75" IsExpanded="true" />
@@ -39,7 +39,6 @@
         <EntityTypeShape EntityType="QLNSVATCModel.PHIENDICH" Width="1.5" PointX="3.75" PointY="9.75" IsExpanded="true" />
         <EntityTypeShape EntityType="QLNSVATCModel.PHONGBAN" Width="1.5" PointX="8.25" PointY="23.25" IsExpanded="true" />
         <EntityTypeShape EntityType="QLNSVATCModel.RUIRO" Width="1.5" PointX="8.75" PointY="40.5" IsExpanded="true" />
-        <EntityTypeShape EntityType="QLNSVATCModel.sysdiagram" Width="1.5" PointX="10.75" PointY="6.75" IsExpanded="true" />
         <EntityTypeShape EntityType="QLNSVATCModel.THEME" Width="1.5" PointX="10.75" PointY="9.75" IsExpanded="true" />
         <EntityTypeShape EntityType="QLNSVATCModel.THONGTINBAOHIEM" Width="1.5" PointX="8.25" PointY="26.25" IsExpanded="true" />
         <EntityTypeShape EntityType="QLNSVATCModel.THONGTINDOANHNGHIEP" Width="1.5" PointX="0.75" PointY="17.375" IsExpanded="true" />

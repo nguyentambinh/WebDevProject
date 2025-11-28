@@ -18,8 +18,8 @@ namespace QLNSVATC.Models
         public string SODT { get; set; }
         public string DIACHI { get; set; }
         public string FB { get; set; }
-        public string X { get; set; }
         public Nullable<byte> QUEQUAN { get; set; }
+        public string GMAIL { get; set; }
     
         public virtual NHANVIEN NHANVIEN { get; set; }
     }

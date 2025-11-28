@@ -2,247 +2,593 @@
 
 @{
     var menus = Model.ToList();
-    var roots = menus
-        .Where(x => x.ParentId == null)
-        .OrderBy(x => x.OrderNumber)
-        .ToList();
+    var roots = menus.Where(x => x.ParentId == null).OrderBy(x => x.OrderNumber).ToList();
 
     string themeColor = ViewBag.ThemeColor as string ?? "#121212";
     string fontFamily = ViewBag.FontFamily as string ?? "Inter";
     int fontSize = ViewBag.FontSize != null ? (int)ViewBag.FontSize : 14;
-    string currentLang = ViewBag.CurrentLang as string ?? "vi-VN";
-
+    string currentLang = ViewBag.CurrentLang as string ?? "vi_VN";
     bool isDarkMode = ViewBag.DarkMode != null ? (bool)ViewBag.DarkMode : false;
-    string textColor = isDarkMode ? "#000000" : "#ffffff";
+
+    string textColor = isDarkMode ? "#ffffff" : "#000000";
+    string gradient1 = isDarkMode ? "#000000" : "#ffffff";
+    string gradient2 = isDarkMode ? "#ffffff" : "#000000";
+    string gradientDirection = isDarkMode ? "to left" : "to right";
+
+    string userName = Session["FullName"] as string ?? null;
+
+    var langAccount = new Dictionary<string, string>
+{
+        { "vi_VN", userName == null ? "TÀI KHOẢN" : $"XIN CHÀO, {userName.ToUpper()}" },
+        { "en_US", userName == null ? "ACCOUNT" : $"HELLO, {userName.ToUpper()}" },
+        { "jp_JP", userName == null ? "アカウント" : $"こんにちは, {userName}" },
+        { "kr_KR", userName == null ? "계정" : $"환영합니다, {userName}" },
+        { "cn_CN", userName == null ? "账户" : $"您好, {userName}" }
+    };
+
+    var langLogin = new Dictionary<string, string>
+{
+        { "vi_VN", "Đăng nhập" },
+        { "en_US", "Login" },
+        { "jp_JP", "ログイン" },
+        { "kr_KR", "로그인" },
+        { "cn_CN", "登录" }
+    };
+
+    var langRegister = new Dictionary<string, string>
+{
+        { "vi_VN", "Đăng ký" },
+        { "en_US", "Register" },
+        { "jp_JP", "新規登録" },
+        { "kr_KR", "회원가입" },
+        { "cn_CN", "注册" }
+    };
+
+    var langProfile = new Dictionary<string, string>
+{
+        { "vi_VN", "Hồ sơ" },
+        { "en_US", "Profile" },
+        { "jp_JP", "プロフィール" },
+        { "kr_KR", "프로필" },
+        { "cn_CN", "资料" }
+    };
+
+    var langLogout = new Dictionary<string, string>
+{
+        { "vi_VN", "Đăng xuất" },
+        { "en_US", "Logout" },
+        { "jp_JP", "ログアウト" },
+        { "kr_KR", "로그아웃" },
+        { "cn_CN", "退出登录" }
+    };
+
+    string accountLabel = langAccount[currentLang];
+    string loginLabel = langLogin[currentLang];
+    string registerLabel = langRegister[currentLang];
+    string profileLabel = langProfile[currentLang];
+    string logoutLabel = langLogout[currentLang];
 }
 
 <style>
-    .nav-neon {
+    :root {
+    --text-color: @textColor;
+    --theme-color: @themeColor;
+    --font: @fontFamily, sans-serif;
+    --fz: @(fontSize)px;
+    --g1: @gradient1;
+    --g2: @gradient2;
+    --gd: @gradientDirection;
+    }
+
+    /* NAVBAR */
+    nav {
+/*        overflow-x: hidden;*/
+/*        overflow-y: hidden;*/
+        background: var(--theme-color);
+        padding: 12px 0;
         box-shadow: 0 6px 18px rgba(0,0,0,.12);
-        border-radius: 0;
-        border: 0;
-    }
-
-    /* khung 1200px giữa màn hình */
-    .nav-inner {
-        max-width: 1200px;
-        width: 100%;
-        margin: 0 auto;
-        display: flex;
-        align-items: center;
-    }
-
-    .nav-inner .navbar-brand {
-        margin-right: 32px;
-        font-weight: 700;
-        letter-spacing: .06em;
-        text-transform: none; /* để MySite không bị tách dòng */
-        white-space: nowrap;
-    }
-
-    .nav-container-flex {
-        flex: 1;
-        display: flex;
-        align-items: center;
-    }
-
-    /* MAIN MENU: sát logo, không chia đôi, không xuống dòng */
-    .main-menu {
-        display: flex;
-        align-items: center;
-        margin: 0;
-        padding: 0;
-    }
-
-    .main-menu > li > .nav-link {
-        text-transform: uppercase;
-        letter-spacing: .05em;
-        font-weight: 600;
-        padding: 10px 14px;
-        white-space: nowrap;   /* không cho xuống dòng */
-    }
-
-    /* phần bên phải: tài khoản + ngôn ngữ */
-    .nav-right {
-        margin-left: auto;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        white-space: nowrap;
-    }
-
-    /* Neon hover */
-    .nav-neon .navbar-brand,
-    .nav-neon .nav-link,
-    .nav-neon .dropdown-item {
         position: relative;
-        transition:
-            color 0.2s ease,
-            text-shadow 0.25s ease,
-            box-shadow 0.25s ease,
-            background-color 0.2s ease,
-            transform 0.15s ease;
+        z-index: 9999;
     }
 
-    .nav-neon .navbar-brand:hover,
-    .nav-neon .nav-link:hover {
-        text-shadow: 0 0 4px @textColor,
-                     0 0 8px @textColor,
-                     0 0 12px @textColor;
-        transform: translateY(-1px);
+    .nav-inner {
+/*        max-width: 1200px;*/
+/*        margin: auto;*/
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        height: 58px;
+        white-space: nowrap;
     }
 
-    .nav-neon .nav-link::after {
+    .navbar-brand {
+        align-items: center;
+        font-size: 1.6em;
+        font-weight: 700;
+        color: var(--text-color);
+        text-decoration: none;
+        user-select: none;
+    }
+
+    /* MENU */
+    .main-menu {
+        list-style: none;
+        display: flex;
+        gap: 22px;
+        align-items: center;
+    }
+
+    .main-menu > li {
+        position: relative;
+    }
+
+    .main-menu > li > a {
+        position: relative;
+        padding: 12px 14px;
+        color: var(--text-color);
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: var(--fz);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: .25s;
+    }
+
+    .main-menu > li > a:hover {
+        text-shadow: 0 0 8px var(--g1), 0 0 15px var(--g1);
+    }
+
+    .main-menu > li > a::after {
         content: "";
         position: absolute;
-        left: 10%;
-        right: 10%;
-        bottom: 0;
-        height: 2px;
-        background: @textColor;
+        bottom: 2px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(var(--gd), var(--g1), var(--g2));
+        border-radius: 50px;
         opacity: 0;
-        box-shadow: 0 0 6px @textColor, 0 0 10px @textColor;
-        transition: opacity 0.2s ease, transform 0.2s ease;
-        transform: scaleX(0.6);
+        transform: scaleX(0);
+        transform-origin: left center;
+        transition: .25s;
     }
 
-    .nav-neon .nav-link:hover::after {
+    .main-menu > li > a:hover::after {
         opacity: 1;
         transform: scaleX(1);
     }
 
-    .nav-neon .dropdown-menu {
+    /* DROPDOWN */
+    .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        min-width: 180px;
+        padding: 6px 0 10px;
         border-radius: 8px;
-        border: 1px solid rgba(255,255,255,0.08);
-        box-shadow: 0 8px 18px rgba(0,0,0,0.25);
-        background: #181a1f;
+        background: #1a1c22;
+        display: none;
+        box-shadow: 0 10px 20px rgba(0,0,0,.35);
+        z-index: 10000;
+        margin-top: -10px;
     }
 
-    .nav-neon .dropdown-item {
-        color: #dde4ff;
+    .main-menu > li:hover > .dropdown-menu,
+    .dropdown-menu:hover {
+        display: block;
+    }
+
+    .dropdown-menu a {
+        padding: 8px 16px;
+        display: block;
+        color: #e2e6ff;
+        text-decoration: none;
         white-space: nowrap;
+        transition: .2s;
     }
 
-    .nav-neon .dropdown-item:hover {
-        background-color: rgba(255, 255, 255, 0.05);
-        text-shadow: 0 0 4px @textColor,
-                     0 0 8px @textColor;
-        color: #000;
+    .dropdown-menu a:hover {
+        background: rgba(255,255,255,0.08);
+        text-shadow: 0 0 6px #fff;
     }
 
-    @@media (max-width: 767px) {
+    /* MOBILE */
+    .menu-toggle {
+/*        overflow-x: hidden;*/
+        display: none;
+        font-size: 32px;
+        color: var(--text-color);
+        cursor: pointer;
+        background: var(--theme-color);
+        padding: 4px 10px;
+        border-radius: 6px;
+    }
+    @@media (max-width:1200px) {
+        nav {
+            width: 100vw;
+            width: 100%;
+        }
         .nav-inner {
-            flex-direction: column;
-            align-items: stretch;
+            padding: 0 12px;
         }
 
-        .nav-container-flex {
+        .menu-toggle {
+            display: block;
+            position: relative;
+            margin-right: -30px;
+            transform: translateX(-100%);
+            width:70px;
+        }
+
+        .main-menu {
+            overflow-x: hidden;
             flex-direction: column;
             align-items: flex-start;
+            position: fixed;
+            top: 82px;
+            left: -60%;
+            width: 55%;
+            height: 100vh;
+            background: var(--theme-color);
+            padding-top: 80px;
+            padding-left: 24px;
+            transition: .35s;
+            gap: 0;
+            overflow-y: auto;
+        }
+        nav.open .main-menu {
+            left: 0;
         }
 
-        .nav-right {
-            margin-left: 0;
-            margin-top: 8px;
+        .main-menu > li > a {
+            justify-content: flex-start;
+            text-align: left;
+            width: 100%;
+            padding: 13px 13px;
+            color: var(--text-color);
         }
+
+        .dropdown-menu {
+            position: relative;
+            display: none;
+            top: 0;
+            left: 0;
+            background: var(--theme-color);
+            color: var(--text-color);
+            box-shadow: none;
+            margin-top: -20px;
+            padding: 4px 0 4px 16px;
+        }
+
+        .dropdown-menu a {
+            padding: 6px 6px;
+            color: var(--text-color);
+        }
+
+        .dropdown-menu a:hover {
+            background: rgba(255,255,255,0.12);
+            text-shadow: 0 0 6px var(--text-color);
+        }
+
+    }
+
+    /* SETTINGS */
+    .settings-btn {
+        font-size: 22px;
+        cursor: pointer;
+        color: var(--text-color);
+        user-select: none;
+        transition: .2s;
+        margin-left:10px;
+    }
+
+        .settings-btn:hover {
+            animation: spinSlow 1s linear forwards;
+        }
+
+
+        @@keyframes spinSlow {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(720deg); }
+        }
+    @@media (max-width:1200px) {
+        .settings-btn:hover {
+            animation:none;
+            transform: scale(0.9)
+        }
+    }
+    .settings-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.55);
+        display: none;
+        z-index: 6000;
+    }
+
+    .settings-overlay.show {
+        display: block;
+    }
+
+    .settings-panel {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(.9);
+        width: 330px;
+        max-width: 95%;
+        background: #11141f;
+        border-radius: 18px;
+        padding: 24px 26px;
+        display: none;
+        z-index: 7000;
+        transition: .25s;
+        box-shadow: 0 18px 45px rgba(0,0,0,0.4);
+        color: #f5f5ff;
+    }
+
+    .settings-panel.show {
+        display: block;
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    /* SETTINGS FORM */
+    .settings-panel form {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .settings-title {
+        font-size: 20px;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 6px;
+    }
+
+    .settings-row {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .settings-label {
+        font-weight: 600;
+        margin-bottom: 4px;
+        font-size: 14px;
+    }
+
+    .settings-input {
+        width: 100%;
+        padding: 8px 10px;
+        border-radius: 10px;
+        background: #1a1e2b;
+        border: 1px solid rgba(255,255,255,0.15);
+        color: #f5f5ff;
+        font-size: 14px;
+    }
+
+    .settings-input:focus {
+        border-color: #40c9ff;
+        outline: none;
+        box-shadow: 0 0 0 1px #40c9ff;
+    }
+
+    .settings-save {
+        width: 100%;
+        padding: 10px 0;
+        margin-top: 4px;
+        background: linear-gradient(135deg, #0d6efd, #40c9ff);
+        border-radius: 999px;
+        border: none;
+        color: #fff;
+        font-size: 16px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .settings-save:hover {
+        opacity: .9;
+    }
+
+    /* POPUP */
+    .msg-popup {
+        position: fixed;
+        top: -80px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #222;
+        color: #fff;
+        padding: 14px 22px;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 600;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+        z-index: 9999;
+        opacity: 0;
+        transition: .35s;
+    }
+
+    .msg-popup.show {
+        top: 20px;
+        opacity: 1;
+    }
+
+    .msg-popup.success {
+        background: #28a745;
+    }
+
+    .msg-popup.error {
+        background: #dc3545;
+    }
+    body.blur-active {
+        filter: blur(4px);
+        transition: .25s;
+    }
+    #logo {
+        height: 100%;
+        max-height: 58px;
+        width:auto;
+    }
+    ul.main-menu {
+        margin: 0 !important;
+        padding: 0 !important;
     }
 </style>
 
-<nav class="navbar navbar-expand-lg nav-neon"
-     style="
-        --nav-text-color:@textColor;
-        background-color:@themeColor;
-        font-family:@fontFamily, sans-serif;
-        font-size:@(fontSize);
-        color:@textColor;
-     "
-     data-current-lang="@currentLang">
+<nav class="nav-neon">
+    <div id="msgPopup" class="msg-popup"></div>
 
-    <div class="container-fluid">
-        <div class="nav-inner">
+    <div class="nav-inner">
 
-            <!-- LOGO -->
-            <a class="navbar-brand" href="/" style="color:@textColor;">
-                MySite
-            </a>
+        <a class="navbar-brand" href="/">
+            <img id="logo" src="~/Content/Images/mainbg.png"
+                 style="margin-right:8px;vertical-align:middle;" />
+            MySite
+        </a>
 
-            <!-- Toggler cho mobile -->
-            <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#mainNavbar">
-                <span class="navbar-toggler-icon"></span>
-            </button>
 
-            <!-- MENU + TÀI KHOẢN BÊN PHẢI -->
-            <div class="collapse navbar-collapse nav-container-flex" id="mainNavbar">
+        <div class="menu-toggle" onclick="document.querySelector('nav').classList.toggle('open')">☰</div>
 
-                <!-- MENU CHÍNH SÁT BÊN TRÁI -->
-                <ul class="navbar-nav main-menu">
-                    @foreach (var root in roots)
+        <ul class="main-menu">
+
+            @foreach (var root in roots)
+            {
+                var children = menus.Where(c => c.ParentId == root.MenuId).OrderBy(c => c.OrderNumber).ToList();
+
+                if (children.Any())
+                {
+                    <li>
+                        <a href="@root.MenuLink">@root.MenuName</a>
+                        <ul class="dropdown-menu">
+                            @foreach (var child in children)
+                            {
+                                <li><a href="@child.MenuLink">@child.MenuName</a></li>
+                            }
+                        </ul>
+                    </li>
+                }
+                else
+                {
+                    <li><a href="@root.MenuLink">@root.MenuName</a></li>
+                }
+            }
+
+            <!-- Account -->
+            <li>
+                <a href="#">@accountLabel</a>
+                <ul class="dropdown-menu">
+                    @if (userName == null)
                     {
-                        var children = menus
-                            .Where(c => c.ParentId == root.MenuId)
-                            .OrderBy(c => c.OrderNumber)
-                            .ToList();
-
-                        if (children.Any())
-                        {
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle"
-                                   href="@root.MenuLink"
-                                   id="navDrop_@root.MenuId"
-                                   data-bs-toggle="dropdown"
-                                   style="color:@textColor;">
-                                    @root.MenuName
-                                </a>
-                                <ul class="dropdown-menu" aria-labelledby="navDrop_@root.MenuId">
-                                    @foreach (var child in children)
-                                    {
-                                        <li>
-                                            <a class="dropdown-item"
-                                               href="@child.MenuLink"
-                                               style="font-family:@fontFamily, sans-serif; font-size:@(fontSize - 1);">
-                                                @child.MenuName
-                                            </a>
-                                        </li>
-                                    }
-                                </ul>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link"
-                                   href="@root.MenuLink"
-                                   style="color:@textColor;">
-                                    @root.MenuName
-                                </a>
-                            </li>
-                        }
+                        <li>@Html.ActionLink(loginLabel, "Login", "Account")</li>
+                        <li>@Html.ActionLink(registerLabel, "Register", "Account")</li>
+                    }
+                    else
+                    {
+                        <li>@Html.ActionLink(profileLabel, "Profile", "Account")</li>
+                        <li>@Html.ActionLink(logoutLabel, "Logout", "Account")</li>
                     }
                 </ul>
+            </li>
 
-                <!-- BÊN PHẢI: TÀI KHOẢN + NGÔN NGỮ -->
-                <div class="nav-right">
-                    <div class="dropdown">
-                        <a class="nav-link dropdown-toggle"
-                           href="#"
-                           id="userMenu"
-                           data-bs-toggle="dropdown"
-                           style="color:@textColor;">
-                            Tài khoản
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
-                            <li><a class="dropdown-item" href="#">Đăng nhập</a></li>
-                            <li><a class="dropdown-item" href="#">Đăng ký</a></li>
-                        </ul>
-                    </div>
+            <!-- Setting -->
+            <li class="settings-btn" onclick="openSettingCheck()">⚙</li>
 
-                    <span class="navbar-text">
-                        <span class="badge bg-secondary">@currentLang</span>
-                    </span>
-                </div>
+        </ul>
 
-            </div>
+        <!-- Setting -->
+        <div id="settingsOverlay" class="settings-overlay" onclick="closeSettingsPanel()"></div>
+
+        <div id="settingsPanel" class="settings-panel" onclick="event.stopPropagation()">
+
+            <h2 class="settings-title">UI SETTING</h2>
+
+            <form action="/Shared/SaveSettings" method="post">
+
+                <label>Theme Color</label>
+                <input type="color" name="ThemeColor" class="settings-input" value="@themeColor" />
+
+                <label>Type</label>
+                <select name="DarkMode" class="settings-input">
+                    <option value="true" @(isDarkMode ? "selected" : "")>Black</option>
+                    <option value="false" @(!isDarkMode ? "selected" : "")>White</option>
+                </select>
+
+
+                <label>Language</label>
+                <select name="LanguageCode" class="settings-input">
+                    <option value="vi_VN" @(currentLang == "vi_VN" ? "selected" : "")>Việt Nam</option>
+                    <option value="en_US" @(currentLang == "en_US" ? "selected" : "")>English</option>
+                    <option value="jp_JP" @(currentLang == "jp_JP" ? "selected" : "")>日本語</option>
+                    <option value="kr_KR" @(currentLang == "kr_KR" ? "selected" : "")>한국어</option>
+                    <option value="cn_CN" @(currentLang == "cn_CN" ? "selected" : "")>中文</option>
+                </select>
+
+                <label>Font family</label>
+                <select name="FontCode" class="settings-input">
+                    <option value="inter">Inter</option>
+                    <option value="arial">Arial</option>
+                    <option value="roboto">Roboto</option>
+                </select>
+
+                <label>Text size</label>
+                <input type="number" name="FontSize" class="settings-input" min="10" max="24" value="@fontSize" />
+
+                <button type="submit" class="settings-save">Lưu thay đổi</button>
+
+            </form>
         </div>
+
     </div>
 </nav>
+
+<script>
+    function openSettingsPanel() {
+        document.getElementById("settingsOverlay").classList.add("show");
+        document.getElementById("settingsPanel").classList.add("show");
+    }
+
+    function closeSettingsPanel() {
+        document.getElementById("settingsOverlay").classList.remove("show");
+        document.getElementById("settingsPanel").classList.remove("show");
+    }
+    document.querySelectorAll(".main-menu > li > a").forEach(link => {
+
+        link.addEventListener("click", function (e) {
+            if (window.innerWidth > 1200) return;
+            const li = this.parentElement;
+            const submenu = li.querySelector(".dropdown-menu");
+            if (!submenu) return;
+            e.preventDefault();
+            e.stopPropagation()
+            document.querySelectorAll(".dropdown-menu").forEach(menu => {
+                if (menu !== submenu) menu.style.display = "none";
+            });
+            submenu.style.display =
+                submenu.style.display === "block" ? "none" : "block";
+        });
+    });
+
+    document.addEventListener("click", function () {
+        if (window.innerWidth > 1200) return;
+        document.querySelectorAll(".dropdown-menu")
+            .forEach(menu => menu.style.display = "none");
+    });
+    function openSettingCheck() {
+        var user = "@(Session["UserId"] ?? "")";
+        if (!user || user.trim() === "") {
+            window.location.href = "/Account/Login?returnUrl=/";
+            return;
+        }
+        openSettingsPanel();
+    }
+
+    function showPopup(type, message) {
+        const popup = document.getElementById("msgPopup");
+        popup.className = "msg-popup " + type + " show";
+        popup.innerText = message;
+        setTimeout(() => popup.classList.remove("show"), 2500);
+    }
+</script>
+

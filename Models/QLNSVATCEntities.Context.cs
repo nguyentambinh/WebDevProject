@@ -61,7 +61,6 @@ namespace QLNSVATC.Models
         public virtual DbSet<PHIENDICH> PHIENDICHes { get; set; }
         public virtual DbSet<PHONGBAN> PHONGBANs { get; set; }
         public virtual DbSet<RUIRO> RUIROes { get; set; }
-        public virtual DbSet<sysdiagram> sysdiagrams { get; set; }
         public virtual DbSet<THEME> THEMEs { get; set; }
         public virtual DbSet<THONGTINBAOHIEM> THONGTINBAOHIEMs { get; set; }
         public virtual DbSet<THONGTINDOANHNGHIEP> THONGTINDOANHNGHIEPs { get; set; }

@@ -21,11 +21,11 @@ namespace QLNSVATC.Helpers
                 st = new USER_SETTINGS
                 {
                     UserId = userId ?? "GUEST",
-                    ThemeCode = "blue",
-                    DarkMode = false,
-                    LanguageCode = "vi-VN",
+                    ThemeCode = "black",
+                    DarkMode = true,
+                    LanguageCode = "vi_VN",
                     FontCode = "inter",
-                    FontSize = 14,
+                    FontSize = 18,
                     LayoutCode = "default"
                 };
             }
@@ -36,9 +36,16 @@ namespace QLNSVATC.Helpers
 
             if (!string.IsNullOrEmpty(st.ThemeCode))
             {
-                var t = db.THEMEs.FirstOrDefault(x => x.ThemeCode == st.ThemeCode);
-                if (t != null)
-                    themeHexColor = t.HexColor;
+                if (st.ThemeCode.StartsWith("#"))          
+                {
+                    themeHexColor = st.ThemeCode;
+                }
+                else
+                {
+                    var t = db.THEMEs.FirstOrDefault(x => x.ThemeCode == st.ThemeCode);
+                    if (t != null)
+                        themeHexColor = t.HexColor;
+                }
             }
 
             if (!string.IsNullOrEmpty(st.FontCode))

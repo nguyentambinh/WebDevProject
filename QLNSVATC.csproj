@@ -129,16 +129,28 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
-    <Compile Include="Areas\Admin\AdminAreaAreaRegistration.cs" />
+    <Compile Include="Areas\Admin\AdminAreaRegistration.cs" />
+    <Compile Include="Areas\Admin\Controllers\HomeController.cs" />
+    <Compile Include="Areas\Admin\Controllers\SharedController.cs" />
+    <Compile Include="Areas\Employee\Controllers\HomeController.cs" />
+    <Compile Include="Areas\Employee\Controllers\SharedController.cs" />
     <Compile Include="Areas\Employee\EmployeeAreaRegistration.cs" />
-    <Compile Include="Areas\Financial\FinancialAreaRegistration.cs" />
-    <Compile Include="Areas\HOffice\HOAreaRegistration.cs" />
+    <Compile Include="Areas\FN\Controllers\HomeController.cs" />
+    <Compile Include="Areas\FN\Controllers\SharedController.cs" />
+    <Compile Include="Areas\FN\FNAreaRegistration.cs" />
+    <Compile Include="Areas\HR\Controllers\HomeController.cs" />
+    <Compile Include="Areas\HR\Controllers\SharedController.cs" />
+    <Compile Include="Areas\OF\Controllers\HomeController.cs" />
+    <Compile Include="Areas\OF\Controllers\SharedController.cs" />
+    <Compile Include="Areas\OF\OFAreaRegistration.cs" />
     <Compile Include="Areas\HR\HRAreaRegistration.cs" />
+    <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\SharedController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Helper\CheckAccess.cs" />
     <Compile Include="Helper\DateTimeVNHelper.cs" />
     <Compile Include="Helper\FileHelper.cs" />
     <Compile Include="Helper\HashPassword.cs" />
@@ -270,9 +282,6 @@
     <Compile Include="Models\sp_helpdiagrams_Result.cs">
       <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\sysdiagram.cs">
-      <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
-    </Compile>
     <Compile Include="Models\THEME.cs">
       <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
     </Compile>
@@ -320,6 +329,7 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
+    <Content Include="Content\Images\mainbg.png" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
@@ -341,9 +351,9 @@
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Areas\Admin\Views\web.config" />
     <Content Include="Areas\HR\Views\web.config" />
-    <Content Include="Areas\Financial\Views\web.config" />
+    <Content Include="Areas\FN\Views\web.config" />
     <Content Include="Areas\Employee\Views\web.config" />
-    <Content Include="Areas\HOffice\Views\web.config" />
+    <Content Include="Areas\OF\Views\web.config" />
     <EntityDeploy Include="Models\QLNSVATCEntities.edmx">
       <Generator>EntityModelCodeGenerator</Generator>
       <LastGenOutput>QLNSVATCEntities.Designer.cs</LastGenOutput>
@@ -351,6 +361,41 @@
     <Content Include="Models\QLNSVATCEntities.edmx.diagram">
       <DependentUpon>QLNSVATCEntities.edmx</DependentUpon>
     </Content>
+    <Content Include="Areas\OF\Views\Home\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Home\Index.cshtml" />
+    <Content Include="Areas\Employee\Views\Home\Index.cshtml" />
+    <Content Include="Areas\FN\Views\Home\Index.cshtml" />
+    <Content Include="Areas\HR\Views\Home\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Shared\_LayoutAdmin.cshtml" />
+    <Content Include="Areas\Employee\Views\Shared\_LayoutEmployee.cshtml" />
+    <Content Include="Areas\FN\Views\Shared\_LayoutFN.cshtml" />
+    <Content Include="Areas\HR\Views\Shared\_LayoutHR.cshtml" />
+    <Content Include="Areas\OF\Views\Shared\_LayoutOF.cshtml" />
+    <Content Include="Areas\Admin\Views\Shared\Error.cshtml" />
+    <Content Include="Areas\Admin\Views\Shared\_Footer.cshtml" />
+    <Content Include="Areas\Admin\Views\Shared\_Header.cshtml" />
+    <Content Include="Areas\Admin\Views\Shared\_Nav.cshtml" />
+    <Content Include="Areas\Admin\Views\Shared\_Slider.cshtml" />
+    <Content Include="Areas\Employee\Views\Shared\Error.cshtml" />
+    <Content Include="Areas\Employee\Views\Shared\_Footer.cshtml" />
+    <Content Include="Areas\Employee\Views\Shared\_Header.cshtml" />
+    <Content Include="Areas\Employee\Views\Shared\_Nav.cshtml" />
+    <Content Include="Areas\Employee\Views\Shared\_Slider.cshtml" />
+    <Content Include="Areas\FN\Views\Shared\_Footer.cshtml" />
+    <Content Include="Areas\FN\Views\Shared\_Header.cshtml" />
+    <Content Include="Areas\FN\Views\Shared\_Nav.cshtml" />
+    <Content Include="Areas\FN\Views\Shared\_Slider.cshtml" />
+    <Content Include="Areas\FN\Views\Shared\Error.cshtml" />
+    <Content Include="Areas\OF\Views\Shared\_Footer.cshtml" />
+    <Content Include="Areas\OF\Views\Shared\_Header.cshtml" />
+    <Content Include="Areas\OF\Views\Shared\_Nav.cshtml" />
+    <Content Include="Areas\OF\Views\Shared\_Slider.cshtml" />
+    <Content Include="Areas\OF\Views\Shared\Error.cshtml" />
+    <Content Include="Areas\HR\Views\Shared\_Footer.cshtml" />
+    <Content Include="Areas\HR\Views\Shared\_Header.cshtml" />
+    <Content Include="Areas\HR\Views\Shared\_Nav.cshtml" />
+    <Content Include="Areas\HR\Views\Shared\_Slider.cshtml" />
+    <Content Include="Areas\HR\Views\Shared\Error.cshtml" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -377,27 +422,18 @@
     <Content Include="Views\Shared\_Nav.cshtml" />
     <Content Include="Views\Shared\_Footer.cshtml" />
     <Content Include="Views\Shared\_Slider.cshtml" />
-    <Content Include="Views\Shared\_LayoutGuess.cshtml" />
+    <Content Include="Views\Shared\_LayoutGuest.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Home\About.cshtml" />
+    <Content Include="Views\Account\Login.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Areas\Admin\Controllers\" />
     <Folder Include="Areas\Admin\Data\" />
-    <Folder Include="Areas\Admin\Views\Shared\" />
-    <Folder Include="Areas\Employee\Controllers\" />
     <Folder Include="Areas\Employee\Data\" />
-    <Folder Include="Areas\Employee\Views\Shared\" />
-    <Folder Include="Areas\Financial\Controllers\" />
-    <Folder Include="Areas\Financial\Data\" />
-    <Folder Include="Areas\Financial\Views\Shared\" />
-    <Folder Include="Areas\HOffice\Controllers\" />
-    <Folder Include="Areas\HOffice\Data\" />
-    <Folder Include="Areas\HOffice\Views\Shared\" />
-    <Folder Include="Areas\HR\Controllers\" />
+    <Folder Include="Areas\FN\Data\" />
     <Folder Include="Areas\HR\Data\" />
-    <Folder Include="Areas\HR\Views\Shared\" />
+    <Folder Include="Areas\OF\Data\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />

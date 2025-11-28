@@ -18,5 +18,7 @@ namespace QLNSVATC.Models
         public string vi_VN { get; set; }
         public string en_US { get; set; }
         public string jp_JP { get; set; }
+        public string kr_KR { get; set; }
+        public string cn_CN { get; set; }
     }
 }
