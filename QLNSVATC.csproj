@@ -330,6 +330,9 @@
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
     <Content Include="Content\CSS\Slider.css" />
+    <Content Include="Content\Images\slider1.jpg" />
+    <Content Include="Content\Images\slider3.jpg" />
+    <Content Include="Content\Images\slider2.jpg" />
     <Content Include="Content\Images\mainbg.png" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />

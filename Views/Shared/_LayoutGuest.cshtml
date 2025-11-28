@@ -19,6 +19,7 @@
 </head>
 
 <body style="background:@backgroundColor; z-index: 1; ">
+
     @Html.Action("_Header", "Shared", new { userId = userId, area = "" })
     @Html.Action("_Nav", "Shared", new { code = userId, area = "" })
     @Html.Partial("_Slider")
