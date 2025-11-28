@@ -1,6 +1,10 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using System.Net.Mail;
+using System.Net;
 using System.Web.Mvc;
 using QLNSVATC.Models;
+using QLNSVATC.Helpers;   // <-- IMPORT SecurityHelper
 
 namespace QLNSVATC.Controllers
 {
@@ -8,10 +12,13 @@ namespace QLNSVATC.Controllers
     {
         private QLNSVATCEntities db = new QLNSVATCEntities();
 
+        // ========================= LOGIN =========================
+
         [HttpGet]
-        public ActionResult Login()
+        public ActionResult Login(string username)
         {
-            return View();
+            USER u = new USER { USERNAME = username };
+            return View(u);
         }
 
         [HttpPost]
@@ -19,7 +26,7 @@ namespace QLNSVATC.Controllers
         {
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(pass))
             {
-                ModelState.AddModelError("", "Vui lòng nhập đầy đủ thông tin!");
+                ModelState.AddModelError("", "Please enter all required information.");
                 return View(new USER { USERNAME = username });
             }
 
@@ -27,59 +34,483 @@ namespace QLNSVATC.Controllers
 
             if (user == null)
             {
-                ModelState.AddModelError("", "Tài khoản không tồn tại!");
+                ModelState.AddModelError("", "Account does not exist.");
                 return View(new USER { USERNAME = username });
             }
 
-            if (user.PASS != pass)
+            string hash = pass.HashPassword();
+            if (user.PASS != hash)
             {
-                ModelState.AddModelError("", "Mật khẩu không đúng!");
+                ModelState.AddModelError("", "Incorrect password.");
                 return View(new USER { USERNAME = username });
             }
+
             string auth = user.AUTH;
             var authInfo = db.CONFIRMAUTHs.FirstOrDefault(x => x.AUTH == auth);
 
             if (authInfo == null)
             {
-                ModelState.AddModelError("", "Không tìm thấy quyền trong hệ thống!");
+                ModelState.AddModelError("", "Permission data not found.");
                 return View(new USER { USERNAME = username });
             }
 
             string codeBus = authInfo.CODEBUS;
             string prefix = auth.Substring(0, 2).ToUpper();
             string code = authInfo.CODE;
+
             var nv = db.NHANVIENs.FirstOrDefault(x => x.MANV == code);
-            if(nv != null)
+
+            if (nv != null)
             {
                 Session["UserId"] = nv.MANV;
                 Session["FullName"] = nv.TENNV;
                 Session["Role"] = auth;
             }
-            
+
             switch (prefix)
             {
-                case "AD":
-                    return RedirectToAction("Index", "Home", new { area = "Admin" });
-
-                case "HR":
-                    return RedirectToAction("Index", "Home", new { area = "HR", id = codeBus });
-
-                case "FN":
-                    return RedirectToAction("Index", "Home", new { area = "FN", id = codeBus });
-
-                case "OF":
-                    return RedirectToAction("Index", "Home", new { area = "OF", id = codeBus });
-
-                case "EM":
-                    return RedirectToAction("Index", "Home", new { area = "Employee", id = codeBus });
-
-                default:
-                    ModelState.AddModelError("", "Phân quyền không hợp lệ!");
-                    return View(new USER { USERNAME = username });
+                case "AD": return RedirectToAction("Index", "Home", new { area = "Admin" });
+                case "HR": return RedirectToAction("Index", "Home", new { area = "HR", id = codeBus });
+                case "FN": return RedirectToAction("Index", "Home", new { area = "FN", id = codeBus });
+                case "OF": return RedirectToAction("Index", "Home", new { area = "OF", id = codeBus });
+                case "EM": return RedirectToAction("Index", "Home", new { area = "Employee", id = codeBus });
             }
+
+            ModelState.AddModelError("", "Invalid role.");
+            return View(new USER { USERNAME = username });
         }
 
 
+        //REGISTER
+
+        [HttpGet]
+        public ActionResult Register()
+        {
+            return View(new RegisterViewModel());
+        }
+
+        [HttpPost]
+        public ActionResult Register(RegisterViewModel model)
+        {
+            ViewBag.ShowOtp = false;
+
+            if (string.IsNullOrEmpty(model.EmployeeCode) ||
+                string.IsNullOrEmpty(model.Email) ||
+                string.IsNullOrEmpty(model.USERNAME) ||
+                string.IsNullOrEmpty(model.PASS) ||
+                string.IsNullOrEmpty(model.ConfirmPassword))
+            {
+                ModelState.AddModelError("", "Please fill in all fields.");
+                return View(model);
+            }
+
+            if (!model.PASS.IsStrongPassword())
+            {
+                ModelState.AddModelError("", "Strong Password - EX: Abc@1234");
+                return View(model);
+            }
+
+            if (model.PASS != model.ConfirmPassword)
+            {
+                ModelState.AddModelError("", "Passwords do not match.");
+                return View(model);
+            }
+
+            var nv = db.NHANVIENs.FirstOrDefault(x => x.MANV == model.EmployeeCode);
+            if (nv == null)
+            {
+                ModelState.AddModelError("", "Employee does not exist.");
+                return View(model);
+            }
+
+            var confirm = db.CONFIRMAUTHs.FirstOrDefault(x => x.CODE == model.EmployeeCode);
+            if (confirm != null)
+            {
+                ModelState.AddModelError("", "This employee already has an account.");
+                return View(model);
+            }
+
+            var existU = db.USERS.FirstOrDefault(x => x.USERNAME == model.USERNAME);
+            if (existU != null)
+            {
+                ModelState.AddModelError("", "Username already exists.");
+                return View(model);
+            }
+
+            Random r = new Random();
+            string otp = r.Next(100000, 999999).ToString();
+
+            Session["OTP"] = otp;
+            Session["RegData"] = model;
+
+            string fullName = nv.TENNV ?? "User";
+            SendOtpRegister(model.Email, otp, fullName);
+
+            ViewBag.ShowOtp = true;
+            return View(model);
+        }
+
+
+        //CONFIRM OTP REGISTER
+
+        [HttpPost]
+        public ActionResult ConfirmOtp(RegisterViewModel model)
+        {
+            string otp = Session["OTP"]?.ToString();
+            var data = Session["RegData"] as RegisterViewModel;
+
+            if (otp == null || data == null)
+            {
+                ModelState.AddModelError("", "Registration session has expired.");
+                return View("Register", model);
+            }
+
+            if (model.OtpCode != otp)
+            {
+                ModelState.AddModelError("", "Incorrect OTP.");
+                ViewBag.ShowOtp = true;
+                return View("Register", model);
+            }
+
+            var nv = db.NHANVIENs.FirstOrDefault(x => x.MANV == data.EmployeeCode);
+            var vt = db.VITRICONGVIECs.FirstOrDefault(x => x.MACV == nv.MACV);
+
+            string auth;
+
+            if (nv.MACV == "VPQL36") auth = "OF";
+            else if (nv.MACV == "QLNS36") auth = "HR";
+            else if (nv.MACV == "QLTC36") auth = "FN";
+            else
+            {
+                string lastTwo = nv.MADN.Length >= 2
+                    ? nv.MADN.Substring(nv.MADN.Length - 2, 2)
+                    : nv.MADN;
+
+                string random3 = new Random().Next(100, 999).ToString();
+
+                auth = "EM" + lastTwo + random3;
+            }
+
+            USER u = new USER
+            {
+                USERNAME = data.USERNAME,
+                PASS = data.PASS.HashPassword(),  
+                AUTH = auth
+            };
+            db.USERS.Add(u);
+
+            db.CONFIRMAUTHs.Add(new CONFIRMAUTH
+            {
+                AUTH = auth,
+                NAMEAUTH = vt != null ? vt.TENCV : "Employee",
+                CODE = nv.MANV,
+                CODEBUS = nv.MADN
+            });
+
+            var tt = db.THONGTINLIENHEs.FirstOrDefault(x => x.MANV == nv.MANV);
+            if (tt != null) tt.GMAIL = data.Email;
+            else
+            {
+                db.THONGTINLIENHEs.Add(new THONGTINLIENHE
+                {
+                    MANV = nv.MANV,
+                    DIACHI = "Updating...",
+                    SODT = "0000000000",
+                    FB = "",
+                    GMAIL = data.Email,
+                    QUEQUAN = 0
+                });
+            }
+
+            db.SaveChanges();
+
+            Session.Remove("OTP");
+            Session.Remove("RegData");
+
+            return RedirectToAction("Login",
+                new { username = data.USERNAME });
+        }
+
+
+
+        //SEND EMAIL OTP REGISTER
+        private void SendOtpRegister(string email, string otp, string fullName)
+        {
+            var from = "httbworkstation@gmail.com";
+            var pass = "cotu wurg gbve crbk";
+
+            var subject = "TBT Center - OTP Confirmation";
+
+            var body = $@"
+                        <html>
+                        <head>
+                        <meta charset='UTF-8' />
+                        <style>
+                        @media only screen and (max-width: 600px) {{
+                            .container {{ width: 94% !important; }}
+                            .section {{ padding: 20px 18px !important; }}
+                            .otp-box {{ font-size: 20px !important; padding: 10px 18px !important; letter-spacing: 4px !important; }}
+                        }}
+                        </style>
+                        </head>
+
+                        <body style='font-family:Segoe UI, Arial, sans-serif;background:#f4f4f4;margin:0;padding:20px;'>
+
+                        <div class='container' style='max-width:600px;margin:auto;background:#111;
+                                    color:#f5f5f5;border-radius:12px;overflow:hidden;
+                                    box-shadow:0 10px 25px rgba(0,0,0,0.35);'>
+
+                            <div style='background:linear-gradient(135deg,#fceabb,#f8b500);padding:20px 26px;'>
+                                <h2 style='margin:0;color:#1a1a1a;'>TBT Center</h2>
+                                <p style='margin:4px 0 0;font-size:13px;color:#4a3b0a;'>Account verification code</p>
+                            </div>
+
+                            <div class='section' style='padding:26px 32px;'>
+                                <p style='font-size:14px;line-height:1.6;margin-top:0;'>
+                                    Hello <b>{fullName}</b>,<br />
+                                    Thank you for registering on <b>TBT HR & Finance Management System</b>.
+                                </p>
+
+                                <p style='margin:18px 0 8px;font-size:13px;color:#bbbbbb;'>Your OTP:</p>
+
+                                <div style='text-align:center;margin:12px 0 20px;'>
+                                    <span class='otp-box' style='display:inline-block;padding:12px 22px;
+                                        border-radius:999px;background:linear-gradient(135deg,#fceabb,#f8b500);
+                                        color:#1a1a1a;font-size:22px;font-weight:700;letter-spacing:6px;'>
+                                        {otp}
+                                    </span>
+                                </div>
+
+                                <p style='font-size:13px;line-height:1.6;color:#d0d0d0;'>
+                                    Enter this code on the registration screen to complete your account creation.
+                                </p>
+
+                                <p style='font-size:12px;color:#9c9c9c;margin-top:6px;'>
+                                    If you did not perform this action, just ignore this email.
+                                </p>
+                            </div>
+
+                            <div style='padding:14px 22px;border-top:1px solid #333;font-size:11px;color:#777;'>
+                                © {DateTime.Now.Year} TBT Center. All rights reserved.
+                            </div>
+                        </div>
+
+                        </body>
+                        </html>";
+
+
+            MailMessage mail = new MailMessage();
+            mail.From = new MailAddress(from, "TBT Center");
+            mail.To.Add(email);
+            mail.Subject = subject;
+            mail.Body = body;
+            mail.IsBodyHtml = true;
+
+            new SmtpClient("smtp.gmail.com", 587)
+            {
+                EnableSsl = true,
+                Credentials = new NetworkCredential(from, pass)
+            }.Send(mail);
+        }
+
+
+        //FORGOT PASSWORD
+
+        [HttpGet]
+        public ActionResult ForgotPassword()
+        {
+            return View(new ForgotPasswordViewModel());
+        }
+
+        [HttpPost]
+        public ActionResult ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (string.IsNullOrEmpty(model.Username) || string.IsNullOrEmpty(model.Email))
+            {
+                ModelState.AddModelError("", "Please fill in all fields.");
+                return View(model);
+            }
+
+            var user = db.USERS.FirstOrDefault(x => x.USERNAME == model.Username);
+            if (user == null)
+            {
+                ModelState.AddModelError("", "Account does not exist.");
+                return View(model);
+            }
+
+            var cf = db.CONFIRMAUTHs.FirstOrDefault(x => x.AUTH == user.AUTH);
+            var nv = db.NHANVIENs.FirstOrDefault(x => x.MANV == cf.CODE);
+            var tt = db.THONGTINLIENHEs.FirstOrDefault(x => x.MANV == nv.MANV);
+
+            if (tt == null || tt.GMAIL != model.Email)
+            {
+                ModelState.AddModelError("", "Email does not match.");
+                return View(model);
+            }
+
+            string otp = new Random().Next(100000, 999999).ToString();
+
+            Session["FP_OTP"] = otp;
+            Session["FP_Username"] = model.Username;
+
+            SendOtpForgot(model.Email, otp, nv.TENNV);
+
+            model.ShowOtp = true;
+            return View(model);
+        }
+
+
+        //SEND EMAIL OTP FORGOT
+
+        private void SendOtpForgot(string email, string otp, string fullName)
+        {
+            var from = "httbworkstation@gmail.com";
+            var pass = "cotu wurg gbve crbk";
+
+            var subject = "TBT Center - Password Reset OTP";
+            var body = $@"
+                    <html>
+                    <head>
+                    <meta charset='UTF-8' />
+                    <style>
+                    @media only screen and (max-width: 600px) {{
+                        .container {{ width: 94% !important; }}
+                        .section {{ padding: 20px 18px !important; }}
+                        .otp-box {{ padding: 10px 18px !important;font-size:20px !important;letter-spacing:4px !important; }}
+                    }}
+                    </style>
+                    </head>
+
+                    <body style='font-family:Segoe UI, Arial,sans-serif;background:#f4f4f4;margin:0;padding:20px;'>
+
+                    <div class='container' style='max-width:600px;margin:auto;background:#111;
+                                color:#f5f5f5;border-radius:12px;overflow:hidden;
+                                box-shadow:0 10px 25px rgba(0,0,0,0.35);'>
+
+                        <div style='background:linear-gradient(135deg,#fceabb,#f8b500);padding:20px 26px;'>
+                            <h2 style='margin:0;color:#1a1a1a;'>TBT Center</h2>
+                            <p style='margin:4px 0 0;font-size:13px;color:#4a3b0a;'>Password reset verification</p>
+                        </div>
+
+                        <div class='section' style='padding:26px 32px;'>
+
+                            <p style='font-size:14px;line-height:1.6;margin-top:0;'>
+                                Hello <b>{fullName}</b>,<br />
+                                You requested to reset your TBT account password.
+                            </p>
+
+                            <p style='margin:18px 0 8px;font-size:13px;color:#bbbbbb;'>Your OTP:</p>
+
+                            <div style='text-align:center;margin:12px 0 20px;'>
+                                <span class='otp-box' style='display:inline-block;padding:12px 22px;
+                                    border-radius:999px;background:linear-gradient(135deg,#fceabb,#f8b500);
+                                    color:#1a1a1a;font-size:22px;font-weight:700;letter-spacing:6px;'>
+                                    {otp}
+                                </span>
+                            </div>
+
+                            <p style='font-size:13px;line-height:1.6;color:#d0d0d0;'>
+                                Enter this OTP in the reset screen to continue.
+                            </p>
+
+                            <p style='font-size:12px;color:#9c9c9c;margin-top:6px;'>
+                                If you did not request this, ignore the email.
+                            </p>
+                        </div>
+
+                        <div style='padding:14px 22px;border-top:1px solid #333;font-size:11px;color:#777;'>
+                            © {DateTime.Now.Year} TBT Center. All rights reserved.
+                        </div>
+                    </div>
+
+                    </body>
+                    </html>";
+
+
+            MailMessage mail = new MailMessage();
+            mail.From = new MailAddress(from, "TBT Center");
+            mail.To.Add(email);
+            mail.Subject = subject;
+            mail.Body = body;
+            mail.IsBodyHtml = true;
+
+            new SmtpClient("smtp.gmail.com", 587)
+            {
+                EnableSsl = true,
+                Credentials = new NetworkCredential(from, pass)
+            }.Send(mail);
+        }
+
+        //OTP CHECK
+
+        [HttpPost]
+        public ActionResult ForgotPasswordOtp(ForgotPasswordViewModel model)
+        {
+            string otp = Session["FP_OTP"]?.ToString();
+            string username = Session["FP_Username"]?.ToString();
+
+            if (otp == null || username == null)
+            {
+                ModelState.AddModelError("", "Session expired.");
+                return View("ForgotPassword", model);
+            }
+
+            if (model.OtpCode != otp)
+            {
+                ModelState.AddModelError("", "Incorrect OTP.");
+                model.ShowOtp = true;
+                return View("ForgotPassword", model);
+            }
+
+            model.Username = username;
+            model.ShowReset = true;
+            return View("ForgotPassword", model);
+        }
+
+
+
+        //RESET PASSWORD
+
+        [HttpPost]
+        public ActionResult ResetPassword(ForgotPasswordViewModel model)
+        {
+            string username = Session["FP_Username"]?.ToString();
+
+            if (username == null)
+            {
+                ModelState.AddModelError("", "Session expired.");
+                return View("ForgotPassword", model);
+            }
+
+            if (!model.NewPass.IsStrongPassword())
+            {
+                ModelState.AddModelError("", "Strong Password - EX: Abc@1234");
+                model.ShowReset = true;
+                return View("ForgotPassword", model);
+            }
+
+            if (model.NewPass != model.ConfirmPass)
+            {
+                ModelState.AddModelError("", "Passwords do not match.");
+                model.ShowReset = true;
+                return View("ForgotPassword", model);
+            }
+
+            var user = db.USERS.FirstOrDefault(x => x.USERNAME == username);
+            user.PASS = model.NewPass.HashPassword();  
+
+            db.SaveChanges();
+
+            Session.Remove("FP_OTP");
+            Session.Remove("FP_Username");
+
+            model.Success = true;
+            model.Username = username;
+
+            return View("ForgotPassword", model);
+        }
+
+        //LOGOUT
         public ActionResult Logout()
         {
             Session.Clear();

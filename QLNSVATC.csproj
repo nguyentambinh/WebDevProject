@@ -183,6 +183,9 @@
     <Compile Include="Models\DSCHUYENMON.cs">
       <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\DSHESO.cs">
+      <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\DSKYNANG.cs">
       <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
     </Compile>
@@ -216,6 +219,7 @@
     <Compile Include="Models\FONT.cs">
       <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\ForgotPasswordViewModel.cs" />
     <Compile Include="Models\HOPDONG.cs">
       <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
     </Compile>
@@ -273,6 +277,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>QLNSVATCEntities.edmx</DependentUpon>
     </Compile>
+    <Compile Include="Models\RegisterViewModel.cs" />
     <Compile Include="Models\RUIRO.cs">
       <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
     </Compile>
@@ -329,12 +334,9 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
-<Content Include="Content\Images\mainbg.png" />
-<Content Include="Content\Footer.css" />
-<Content Include="Content\img\img1.jpg" />
-<Content Include="Content\img\img2.jpg" />
-<Content Include="Content\img\img3.jpg" />
-<Content Include="Content\Slider.css" />
+    <Content Include="Content\Images\mainbg.png" />
+    <Content Include="Content\CSS\Footer.css" />
+    <Content Include="Content\CSS\Slider.css" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
@@ -431,6 +433,8 @@
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Home\About.cshtml" />
     <Content Include="Views\Account\Login.cshtml" />
+    <Content Include="Views\Account\Register.cshtml" />
+    <Content Include="Views\Account\ForgotPassword.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

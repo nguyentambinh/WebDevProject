@@ -1,0 +1,250 @@
+﻿@model QLNSVATC.Models.RegisterViewModel
+@{
+    ViewBag.Title = "Đăng ký";
+    Layout = "~/Views/Shared/_LayoutGuest.cshtml";
+}
+
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    @@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap');
+
+    .login-wrapper {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .login-container {
+        width: 100%;
+        max-width: 500px;
+        padding: 120px 0;
+        display: flex;
+        justify-content: center;
+    }
+
+    .gold-box {
+        position: relative;
+        padding: 28px 32px;
+        border-radius: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: auto;
+        height: auto;
+    }
+
+        .gold-box::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            margin: 0;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #f9d976 0%, #f39f33 100%);
+            filter: blur(18px);
+            z-index: -2;
+            transition: 0.7s ease;
+        }
+
+        .gold-box::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            background: linear-gradient(135deg, #f3b625, #c27a12, #f6d56c, #6b4e18);
+            background-size: 300%;
+            border-radius: 20px;
+            z-index: -1;
+            animation: goldMove 4s linear infinite;
+        }
+
+    @@keyframes goldMove {
+        0% {
+            background-position: 0%;
+        }
+
+        100% {
+            background-position: 300%;
+        }
+    }
+
+    .gold-inner {
+        position: relative;
+        width: 100%;
+        background: linear-gradient(145deg, #1a1a1a, #0d0d0d);
+        border-radius: 15px;
+        padding: 26px 32px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        box-shadow: inset 0 0 15px rgba(255, 215, 0, 0.15), 0 0 25px rgba(255, 215, 0, 0.10);
+        color: #ffd26a;
+        transition: 0.6s;
+    }
+
+        .gold-inner:hover {
+            transform: translateY(-4px);
+            box-shadow: inset 0 0 18px rgba(255, 215, 0, 0.25), 0 0 30px rgba(255, 215, 0, 0.20);
+        }
+
+    .login-form {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+
+        .login-form h2 {
+            font-family: 'Roboto', sans-serif;
+            margin-bottom: 10px;
+        }
+
+    .gold-input {
+        width: 100%;
+        padding: 10px 18px;
+        border-radius: 12px;
+        background: rgba(255, 214, 94, 0.08);
+        border: 1px solid rgba(255, 214, 94, 0.3);
+        color: #ffdd8a;
+        outline: none;
+        transition: 0.3s;
+    }
+
+        .gold-input:focus {
+            border-color: #f4c056;
+            box-shadow: 0 0 12px rgba(255, 214, 94, 0.4);
+        }
+
+        .gold-input::placeholder {
+            color: rgba(255, 216, 121, 0.6);
+        }
+
+    .gold-btn {
+        width: 100%;
+        padding: 10px 0;
+        border-radius: 12px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        background: linear-gradient(135deg, #fceabb, #f8b500);
+        color: #1a1a1a;
+        transition: 0.35s;
+    }
+
+        .gold-btn:hover {
+            box-shadow: 0 0 20px rgba(255, 209, 80, 0.6);
+            transform: translateY(-2px);
+        }
+
+    .login-btns {
+        text-align: center;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+
+        .login-btns a {
+            color: #ffdd8a;
+            text-decoration: underline;
+        }
+
+    .validation-summary-errors {
+        color: #ffffff;
+        font-size: 14px;
+    }
+
+        .validation-summary-errors ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+        }
+
+    @@media (max-width: 480px) {
+        .gold-box {
+            padding: 20px 22px;
+        }
+
+        .gold-inner {
+            padding: 20px 22px;
+        }
+    }
+</style>
+
+<div class="login-wrapper">
+    <div class="login-container">
+        <div class="gold-box">
+            <div class="gold-inner">
+
+                @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "login-form" }))
+                {
+                    @Html.AntiForgeryToken()
+
+                    <h2>CREATE ACCOUNT</h2>
+
+                    @Html.ValidationSummary(true, "", new { @class = "validation-summary-errors" })
+
+                    @*if (Model.IsSuccess)
+                    {
+                        <div style="background:#0f0a;color:#90ee90;padding:15px;border-radius:10px;">
+                            <h3>Account created successfully!</h3>
+                            <p>You can now sign in.</p>
+                        </div>
+
+                        <div class="login-btns" style="margin-top:12px;">
+                            @Html.ActionLink("Go to Sign In", "Login", "Account")
+                        </div>
+                        return;
+                    }*@
+                    if (ViewBag.ShowOtp != true)
+                    {
+                        @Html.TextBoxFor(m => m.EmployeeCode,
+                            new { placeholder = "Employee Code", @class = "gold-input" })
+
+                        @Html.TextBoxFor(m => m.Email,
+                            new
+                                 {
+                                placeholder = "Email",
+                                @class = "gold-input",
+                                type = "email",
+                                pattern = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
+                                title = "Invalid email format"
+                            })
+
+                        @Html.TextBoxFor(m => m.USERNAME,
+                            new { placeholder = "Username", @class = "gold-input" })
+
+                        @Html.PasswordFor(m => m.PASS,
+                            new { placeholder = "Password", @class = "gold-input" })
+
+                        @Html.PasswordFor(m => m.ConfirmPassword,
+                            new { placeholder = "Confirm Password", @class = "gold-input" })
+
+                        <input type="submit" value="Send OTP" class="gold-btn" />
+                    }
+
+                    <!-- OTP SECTION -->
+                    if (ViewBag.ShowOtp == true)
+                    {
+                        <div style="margin-top:10px;">
+                            <h3>Enter OTP</h3>
+                            @Html.TextBoxFor(m => m.OtpCode,
+                                new { placeholder = "6-digit OTP", @class = "gold-input" })
+
+                            <button type="submit"
+                                    formaction="/Account/ConfirmOtp"
+                                    class="gold-btn"
+                                    style="margin-top:10px;">
+                                Verify OTP
+                            </button>
+                        </div>
+                    }
+
+                    <div class="login-btns">
+                        <span>
+                            Already have an account?
+                            @Html.ActionLink("Sign in", "Login", "Account")
+                        </span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

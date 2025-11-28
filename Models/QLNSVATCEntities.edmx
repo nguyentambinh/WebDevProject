@@ -83,6 +83,14 @@
           <Property Name="CACBC" Type="varchar" MaxLength="300" />
           <Property Name="CACNN" Type="varchar" MaxLength="300" />
         </EntityType>
+        <EntityType Name="DSHESO">
+          <Key>
+            <PropertyRef Name="MAHSO" />
+          </Key>
+          <Property Name="MAHSO" Type="varchar" MaxLength="4" Nullable="false" />
+          <Property Name="HESOTIEN" Type="float" />
+          <Property Name="LYDO" Type="nvarchar" MaxLength="255" />
+        </EntityType>
         <EntityType Name="DSKYNANG">
           <Key>
             <PropertyRef Name="MAKN" />
@@ -361,7 +369,7 @@
           <Property Name="SODT" Type="varchar" MaxLength="10" />
           <Property Name="DIACHI" Type="nvarchar" MaxLength="50" />
           <Property Name="FB" Type="varchar" MaxLength="15" />
-          <Property Name="GMAIL" Type="varchar" MaxLength="20" />
+          <Property Name="GMAIL" Type="varchar" MaxLength="255" />
           <Property Name="QUEQUAN" Type="tinyint" />
         </EntityType>
         <EntityType Name="THONGTINSUCKHOE">
@@ -1155,6 +1163,7 @@
           <EntitySet Name="CPDUAN" EntityType="Self.CPDUAN" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="DSBANGCAP" EntityType="Self.DSBANGCAP" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="DSCHUYENMON" EntityType="Self.DSCHUYENMON" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="DSHESO" EntityType="Self.DSHESO" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="DSKYNANG" EntityType="Self.DSKYNANG" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="DSNGAYLE" EntityType="Self.DSNGAYLE" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="DSNGONNGU" EntityType="Self.DSNGONNGU" Schema="dbo" store:Type="Tables" />
@@ -1853,7 +1862,7 @@
           <Property Name="FB" Type="String" MaxLength="15" FixedLength="false" Unicode="false" />
           <Property Name="QUEQUAN" Type="Byte" />
           <NavigationProperty Name="NHANVIEN" Relationship="Self.FK__THONGTINLI__MANV__5165187F" FromRole="THONGTINLIENHE" ToRole="NHANVIEN" />
-          <Property Name="GMAIL" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="GMAIL" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="THONGTINSUCKHOE">
           <Key>
@@ -2480,6 +2489,7 @@
             <Parameter Name="new_diagramname" Mode="In" Type="String" />
           </FunctionImport>
           <FunctionImport Name="sp_upgraddiagrams" />
+          <EntitySet Name="DSHESOes" EntityType="QLNSVATCModel.DSHESO" />
         </EntityContainer>
         <ComplexType Name="sp_helpdiagramdefinition_Result">
           <Property Type="Int32" Name="version" Nullable="true" />
@@ -2492,6 +2502,14 @@
           <Property Type="String" Name="Owner" Nullable="true" MaxLength="128" />
           <Property Type="Int32" Name="OwnerID" Nullable="false" />
         </ComplexType>
+        <EntityType Name="DSHESO">
+          <Key>
+            <PropertyRef Name="MAHSO" />
+          </Key>
+          <Property Name="MAHSO" Type="String" Nullable="false" MaxLength="4" FixedLength="false" Unicode="false" />
+          <Property Name="HESOTIEN" Type="Double" />
+          <Property Name="LYDO" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+        </EntityType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -2939,6 +2957,15 @@
                 <ScalarProperty Name="TENCV" ColumnName="TENCV" />
                 <ScalarProperty Name="MACM" ColumnName="MACM" />
                 <ScalarProperty Name="HESOLUONG" ColumnName="HESOLUONG" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DSHESOes">
+            <EntityTypeMapping TypeName="QLNSVATCModel.DSHESO">
+              <MappingFragment StoreEntitySet="DSHESO">
+                <ScalarProperty Name="LYDO" ColumnName="LYDO" />
+                <ScalarProperty Name="HESOTIEN" ColumnName="HESOTIEN" />
+                <ScalarProperty Name="MAHSO" ColumnName="MAHSO" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
