@@ -1,72 +1,249 @@
-﻿<!DOCTYPE html>
-<html>
-<head>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="~/Content/Footer.css">
-</head>
+﻿@{
+    string themeColor = ViewBag.ThemeColor as string ?? "#121212";
+    string fontFamily = ViewBag.FontFamily as string ?? "Inter";
+    int fontSize = ViewBag.FontSize != null ? (int)ViewBag.FontSize : 14;
+    string currentLang = ViewBag.CurrentLang as string ?? "vi_VN";
+    bool isDarkMode = ViewBag.DarkMode != null ? (bool)ViewBag.DarkMode : false;
 
-<body>
-    <!-- FULL WIDTH WRAPPER -->
-    <div class="footer-wrapper">
+    string bgFooter = isDarkMode ? "#0d1117" : "#f2f2f2";
+    string textColor = isDarkMode ? "#bfbfbf" : "#333";
+    string titleColor = isDarkMode ? "#ffffff" : "#000000";
+    string ctaBg = themeColor;
+    string ctaBtnBg = isDarkMode ? "#2d2f39" : "#ffffff";
+    string socialColor = isDarkMode ? "#ffffff" : "#000000";
 
-        <!-- CTA SECTION -->
-        <div class="cta-footer">
-            <div class="cta-text">
-                <h2>Sẵn sàng tối ưu nhân sự & tài chính?</h2>
-                <p>Hãy để hệ thống của chúng tôi giúp doanh nghiệp vận hành hiệu quả hơn.</p>
+    var langCtaTitle = new Dictionary<string, string>{
+        { "vi_VN", "Sẵn sàng tối ưu nhân sự & tài chính?" },
+        { "en_US", "Ready to optimize HR & Finance?" },
+        { "jp_JP", "人事と財務を最適化する準備はできていますか？" },
+        { "kr_KR", "인사 및 재무를 최적화할 준비가 되셨습니까?" },
+        { "cn_CN", "准备优化人事与财务吗？" }
+    };
+
+    var langCtaSub = new Dictionary<string, string>{
+        { "vi_VN", "Hệ thống giúp doanh nghiệp vận hành hiệu quả hơn." },
+        { "en_US", "Let our system help your business operate smarter." },
+        { "jp_JP", "当社のシステムが効率的な運営をサポートします。" },
+        { "kr_KR", "우리 시스템이 귀사의 효율적인 운영을 도와드립니다." },
+        { "cn_CN", "让我们的系统帮助企业更高效运作。" }
+    };
+
+    var langCtaBtn = new Dictionary<string, string>{
+        { "vi_VN", "Liên hệ ngay" },
+        { "en_US", "Contact now" },
+        { "jp_JP", "お問い合わせ" },
+        { "kr_KR", "문의하기" },
+        { "cn_CN", "立即联系" }
+    };
+
+    var textCtaTitle = langCtaTitle[currentLang];
+    var textCtaSub = langCtaSub[currentLang];
+    var textCtaBtn = langCtaBtn[currentLang];
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+    :root {
+        --theme-color: @themeColor;
+        --font: @fontFamily, sans-serif;
+        --fz: @(fontSize)px;
+        --footer-bg: @bgFooter;
+        --footer-text: @textColor;
+        --footer-title: @titleColor;
+        --cta-bg: @ctaBg;
+        --cta-btn-bg: @ctaBtnBg;
+        --social-color: @socialColor;
+
+        --footer-padding: 45px;      /* tổng thể gọn hơn */
+        --footer-gap: 35px;          /* khoảng cách giữa các cột */
+        --footer-muted: #8b93a1;     /* mô tả nhạt */
+    }
+
+    /* WRAPPER */
+    .footer-wrapper {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        font-family: var(--font);
+        font-size: var(--fz);
+        color: var(--footer-text);
+    }
+
+    /* CTA */
+    .cta-footer {
+        width: 100%;
+        background: var(--cta-bg);
+        padding: 30px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: 0;
+    }
+    .cta-footer h2 { color:#fff; margin:0; font-size:24px; }
+    .cta-footer p { color:#eee; margin-top:6px; font-size: 15px; }
+
+    .cta-btn {
+        background: var(--cta-btn-bg);
+        color: var(--footer-title);
+        padding: 10px 24px;
+        border-radius: 6px;
+        font-weight: 600;
+        text-decoration: none;
+        font-size: 15px;
+    }
+
+    /* MAIN FOOTER */
+    .main-footer {
+        background: var(--footer-bg);
+        padding: var(--footer-padding) 40px 30px;
+    }
+
+    .footer-container {
+        max-width: 1200px;
+        margin: auto;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--footer-gap);
+    }
+
+    /* TITLE */
+    .footer-col h3,
+    .footer-col h4 {
+        color: var(--footer-title);
+        margin-bottom: 10px;
+        font-size: 18px;
+        font-weight: 700;
+    }
+
+    .footer-col p,
+    .footer-col li {
+        color: var(--footer-muted);
+        margin-bottom: 6px;
+        font-size: 14px;
+    }
+
+    .footer-col p b {
+        color: var(--footer-title);
+        font-weight: 700;
+    }
+    
+    .footer-col ul {
+        list-style: none;
+        padding-left: 0;
+        margin: 0;
+    }
+
+    .social-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 30px);
+        gap: 16px 28px;
+        margin-top: 6px;
+        justify-items: center;
+    }
+
+    .social-grid i {
+        font-size: 24px;
+        color: var(--social-color);
+        transition: .3s;
+    }
+    .social-grid i:hover { opacity: .7; transform: scale(1.1); }
+
+    /* COPYRIGHT */
+    .footer-bottom {
+        text-align: center;
+        margin-top: 25px;
+        padding-top: 18px;
+        border-top: 1px solid rgba(255,255,255,0.08);
+        color: var(--footer-muted);
+        font-size: 13px;
+    }
+
+    /* RESPONSIVE */
+    @@media (max-width: 900px){
+        .footer-container {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+    @@media (max-width: 600px){
+        .cta-footer {
+            flex-direction: column;
+            text-align: center;
+            gap: 12px;
+        }
+        .footer-container {
+            grid-template-columns: 1fr;
+            text-align: center;
+        }
+        .social-grid {
+            margin: auto;
+        }
+    }
+</style>
+
+
+<div class="footer-wrapper">
+
+    <!-- CTA -->
+    <div class="cta-footer">
+        <div>
+            <h2>@textCtaTitle</h2>
+            <p>@textCtaSub</p>
+        </div>
+        <a href="/Contact" class="cta-btn">@textCtaBtn</a>
+    </div>
+
+    <!-- MAIN FOOTER -->
+    <footer class="main-footer">
+        <div class="footer-container">
+
+            <!-- COL 1 -->
+            <div class="footer-col">
+                <h3>TBT Center</h3>
+                <p>Hệ thống quản lý nhân sự & tài chính cho chuỗi doanh nghiệp.</p>
+                <p><b>Email:</b> httbworkstation@gmail.com</p>
+                <p><b>Phone 1:</b> +84 912 356 742</p>
+                <p><b>Phone 2:</b> +84 938 204 617</p>
             </div>
-            <a href="/Contact" class="cta-btn">Liên hệ ngay</a>
+
+            <!-- COL 2 -->
+            <div class="footer-col">
+                <h4>Quản lý</h4>
+                <ul>
+                    <li>Quản lý Nhân sự (HRM)</li>
+                    <li>Hệ thống Tài chính</li>
+                    <li>Lương – Phụ cấp</li>
+                    <li>Báo cáo doanh nghiệp</li>
+                </ul>
+            </div>
+
+            <!-- COL 3 -->
+            <div class="footer-col">
+                <h4>Có quan tâm?</h4>
+                <ul>
+                    <li>Về chúng tôi</li>
+                    <li>Tuyển dụng</li>
+                </ul>
+            </div>
+
+            <!-- COL 4 -->
+            <div class="footer-col">
+                <h4>Kết nối</h4>
+                <div class="social-grid">
+                    <a href="#"><i class="fa-brands fa-youtube"></i></a>
+                    <a href="#"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="#"><i class="fa-brands fa-telegram"></i></a>
+                    <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
+                    <a href="#"><i class="fa-brands fa-github"></i></a>
+                    <a href="mailto:httbworkstation@gmail.com"><i class="fa-solid fa-envelope"></i></a>
+                </div>
+            </div>
+
         </div>
 
-        <!-- MAIN FOOTER -->
-        <footer class="main-footer">
-            <div class="footer-container">
+        <div class="footer-bottom">
+            © 2025 TBT CENTER. All Rights Reserved.
+        </div>
+    </footer>
 
-                <div class="footer-col">
-                    <h3>HTTB WORKSTATION</h3>
-                    <p>Giải pháp quản lý nhân sự & tài chính cho chuỗi doanh nghiệp.</p>
-                    <p><b>Email:</b> httbworkstation@gmail.com</p>
-                    <p><b>Phone 1:</b> +84 912 356 742</p>
-                    <p><b>Phone 2:</b> +84 938 204 617</p>
-                </div>
-
-                <div class="footer-col">
-                    <h4>Giải pháp</h4>
-                    <ul>
-                        <li>Quản lý Nhân sự (HRM)</li>
-                        <li>Hệ thống Tài chính</li>
-                        <li>Lương – Phụ cấp</li>
-                        <li>Báo cáo doanh nghiệp</li>
-                    </ul>
-                </div>
-
-                <div class="footer-col">
-                    <h4>Công ty</h4>
-                    <ul>
-                        <li>Về chúng tôi</li>
-                        <li>Tuyển dụng</li>
-                        <li>Liên hệ</li>
-                    </ul>
-                </div>
-
-                <div class="footer-col">
-                    <h4>Kết nối</h4>
-                    <div class="social-icons">
-                        <a href="#"><i class="fa-brands fa-youtube"></i></a>
-                        <a href="#"><i class="fa-brands fa-facebook"></i></a>
-                        <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
-                        <a href="#"><i class="fa-brands fa-github"></i></a>
-                        <a href="#"><i class="fa-brands fa-telegram"></i></a>
-                        <a href="mailto:httbworkstation@gmail.com"><i class="fa-solid fa-envelope"></i></a>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="footer-bottom">
-                © 2025 HTTB Workstation. All Rights Reserved.
-            </div>
-        </footer>
-    </div>
-</body>
-</html>
+</div>
