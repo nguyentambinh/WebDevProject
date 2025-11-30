@@ -381,6 +381,3 @@ appsettings.Development.json
 *.sqlite
 *.xlsx
 *.docx
-/Web.config
-/Web.Debug.config
-/Web.Release.config
