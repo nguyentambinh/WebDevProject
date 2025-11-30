@@ -10,9 +10,12 @@ namespace QLNSVATC.Controllers
     public class JobSeekerController : Controller
     {
         private readonly QLNSVATCEntities db = new QLNSVATCEntities();
+
         // GET: JobSeeker
         public ActionResult SubmitCV()
         {
+            var model = SettingsHelper.BuildViewBagData(db, null); // null => dùng GUEST
+            ViewBag.Settings = model;
             return View();
         }
 

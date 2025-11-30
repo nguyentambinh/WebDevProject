@@ -1,94 +1,163 @@
 ﻿@model QLNSVATC.Models.HOSOVIECLAM
 
 @{
-    ViewBag.Title = "Nộp hồ sơ ứng tuyển";
     Layout = "~/Views/Shared/_LayoutGuest.cshtml";
 }
 
-<h2>View</h2>
-
 <style>
-    .form-wrapper {
-        max-width: 600px;
-        margin: 40px auto;
-        padding: 25px;
-        border-radius: 12px;
-        background: #f9f9f9;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        font-family: 'Inter';
+    :root {
+        --bg: #000;
+        --card: #0b1220;
+        --text: #e5e7eb;
+        --border: #eab30855;
+        --accent: #38bdf8;
+        --accent2: #3b82f6;
+        --radius: 18px;
+        --shadow: 0 0 25px rgba(56,189,248,0.25);
+        --input-bg: #111827;
     }
 
-        .form-wrapper h2 {
-            margin-bottom: 25px;
-            text-align: center;
-            font-weight: 600;
+    body {
+        background: var(--bg);
+        font-family: Inter, sans-serif;
+    }
+
+    .cv-wrapper {
+        max-width: 680px;
+        margin: 70px auto;
+        padding: 24px;
+    }
+
+    .cv-card {
+        background: var(--card);
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        padding: 32px 30px 36px;
+        box-shadow: 0 0 40px rgba(0,0,0,0.6);
+        position: relative;
+        overflow: hidden;
+    }
+
+        /* soft glow overlay giống header */
+        .cv-card::before {
+            content: "";
+            position: absolute;
+            inset: -80px -80px auto auto;
+            width: 260px;
+            height: 260px;
+            background: radial-gradient(circle, rgba(56,189,248,0.25), transparent 70%);
+            filter: blur(40px);
+            pointer-events: none;
         }
 
+    .cv-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 26px;
+        text-align: left;
+        letter-spacing: 0.5px;
+    }
+
     .form-group {
-        margin-bottom: 18px;
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
     }
 
     label {
-        font-weight: 600;
-        margin-bottom: 6px;
-        display: block;
-    }
-
-    .file-label {
-        margin-top: 5px;
-        font-size: 14px;
-        color: #007bff;
+        font-size: 15px;
+        color: var(--text);
+        opacity: 0.9;
+        font-weight: 500;
     }
 
     input[type="text"], input[type="file"] {
         width: 100%;
-        padding: 10px 12px;
-        border-radius: 6px;
-        border: 1px solid #ccc;
+        padding: 12px 14px;
+        background: var(--input-bg);
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.12);
+        color: var(--text);
+        font-size: 15px;
+        outline: none;
+        transition: 0.25s;
     }
+
+        input[type="text"]:focus,
+        input[type="file"]:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(56,189,248,0.25);
+        }
 
     .btn-submit {
         width: 100%;
-        padding: 12px 18px;
-        background: #007bff;
-        color: #fff;
+        padding: 13px 18px;
         border: none;
-        border-radius: 8px;
+        outline: none;
+        border-radius: 999px;
         font-size: 16px;
-        margin-top: 10px;
+        font-weight: 600;
         cursor: pointer;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        color: #000814;
+        letter-spacing: .3px;
+        transition: 0.22s;
+        box-shadow: 0 10px 28px rgba(56,189,248,0.35);
     }
 
         .btn-submit:hover {
-            background: #006ae0;
+            transform: translateY(-1px);
+            filter: brightness(1.07);
         }
+
+        .btn-submit:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+
+    .note {
+        text-align: center;
+        font-size: 12px;
+        opacity: 0.6;
+        margin-top: 12px;
+        color: var(--text);
+    }
 </style>
 
-<div class="form-wrapper">
-    <h2>Nộp hồ sơ ứng viên</h2>
+<div class="cv-wrapper">
+    <div class="cv-card">
 
-    @using (Html.BeginForm("SubmitCV", "JobSeeker", FormMethod.Post, new { enctype = "multipart/form-data" }))
-    {
-        <div class="form-group">
-            <label>Họ và tên ứng viên</label>
-            @Html.TextBoxFor(m => m.TENUNGVIEN, new { @class = "form-control", placeholder = "Nhập họ tên" })
-        </div>
+        <div class="cv-title">Nộp hồ sơ ứng tuyển</div>
 
-        <div class="form-group">
-            <label>File thông tin cá nhân (PDF/Doc/Ảnh)</label>
-            <input type="file" name="fileThongTin" />
-        </div>
+        @using (Html.BeginForm("Create", "JobSeeker", FormMethod.Post,
+            new { enctype = "multipart/form-data" }))
+        {
+            <div class="form-group">
+                <label>Họ và tên ứng viên *</label>
+                @Html.TextBoxFor(m => m.TENUNGVIEN, new { placeholder = "Nhập họ tên" })
+            </div>
 
-        <div class="form-group">
-            <label>File bằng cấp</label>
-            <input type="file" name="fileBangCap" />
-        </div>
+            <div class="form-group">
+                <label>File thông tin cá nhân *</label>
+                <input type="file" name="fileThongTin" />
+            </div>
 
-        <div class="form-group">
-            <label>File khác (CV, portfolio...)</label>
-            <input type="file" name="fileKhac" />
-        </div>
+            <div class="form-group">
+                <label>File bằng cấp</label>
+                <input type="file" name="fileBangCap" />
+            </div>
 
-        <button class="btn-submit">Gửi hồ sơ</button>
-    }
+            <div class="form-group">
+                <label>File khác (CV, portfolio...)</label>
+                <input type="file" name="fileKhac" />
+            </div>
+
+            <button class="btn-submit">Gửi hồ sơ</button>
+
+            <div class="note">Thông tin ứng viên được bảo mật tuyệt đối.</div>
+        }
+
+    </div>
 </div>
