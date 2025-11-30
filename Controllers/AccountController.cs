@@ -65,7 +65,17 @@ namespace QLNSVATC.Controllers
                 Session["UserId"] = nv.MANV;
                 Session["FullName"] = nv.TENNV;
                 Session["Role"] = auth;
+                var st = db.USER_SETTINGS.FirstOrDefault(x => x.UserId == nv.MANV);
 
+                if (st != null)
+                {
+                    Session["ThemeCode"] = st.ThemeCode;
+                    Session["DarkMode"] = st.DarkMode;
+                    Session["LanguageCode"] = st.LanguageCode;
+                    Session["FontCode"] = st.FontCode;
+                    Session["FontSize"] = st.FontSize;
+                    Session["LayoutCode"] = st.LayoutCode;
+                }
                 LogHelper.WriteLog(
                     db,
                     "Login",
@@ -83,7 +93,7 @@ namespace QLNSVATC.Controllers
                 case "EM": return RedirectToAction("Index", "Home", new { area = "Employee", id = codeBus });
             }
 
-            ModelState.AddModelError("", "Invalid role.");
+            ModelState.AddModelError("", "Invalid role.");   
             return View(new USER { USERNAME = username });
         }
 

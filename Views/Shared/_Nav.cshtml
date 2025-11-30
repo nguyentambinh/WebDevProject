@@ -74,7 +74,7 @@
     :root {
     --text-color: @textColor;
     --theme-color: @themeColor;
-    --theme-rgba: @themeRgbaColor; /* Đảm bảo có dấu ':' ở đây */
+    --theme-rgba: @themeRgbaColor;
     --font: @fontFamily, sans-serif;
     --fz: @(fontSize)px;
     --g1: @gradient1;
@@ -93,7 +93,6 @@
         padding: 12px 0;
         box-shadow: 0 6px 18px rgba(0,0,0,.25);
         background-color: var(--theme-rgba); 
-
         backdrop-filter: blur(14px);
         -webkit-backdrop-filter: blur(14px);
         border-bottom: 1px solid rgba(255, 255, 255, 0.12);
@@ -267,7 +266,7 @@
         .dropdown-menu {
             position: relative;
             display: none;
-            top: 0;
+            top: 5px;
             left: 0;
             background: var(--theme-color);
             color: var(--text-color);
@@ -332,6 +331,7 @@
         transform: translate(-50%, -50%) scale(.9);
         width: 330px;
         max-width: 95%;
+        height: 550px;
         background: #11141f;
         border-radius: 18px;
         padding: 24px 26px;
@@ -342,12 +342,11 @@
         color: #f5f5ff;
     }
 
-    .settings-panel.show {
-        display: block;
-        transform: translate(-50%, -50%) scale(1);
-    }
+        .settings-panel.show {
+            display: block;
+            transform: scale(1);
+        }
 
-    /* SETTINGS FORM */
     .settings-panel form {
         display: flex;
         flex-direction: column;
@@ -454,7 +453,6 @@
     <div id="msgPopup" class="msg-popup"></div>
 
     <div class="nav-inner">
-
         <a class="navbar-brand" href="/">
             <img id="logo" src="~/Content/Images/mainbg.png"
                  style="margin-right:8px;vertical-align:middle;" />

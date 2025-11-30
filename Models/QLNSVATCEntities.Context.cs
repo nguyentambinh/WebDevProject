@@ -70,7 +70,6 @@ namespace QLNSVATC.Models
         public virtual DbSet<USER> USERS { get; set; }
         public virtual DbSet<VANCHUYENNVL> VANCHUYENNVLs { get; set; }
         public virtual DbSet<VITRICONGVIEC> VITRICONGVIECs { get; set; }
-        public virtual DbSet<DSHESO> DSHESOes { get; set; }
     
         public virtual int sp_alterdiagram(string diagramname, Nullable<int> owner_id, Nullable<int> version, byte[] definition)
         {

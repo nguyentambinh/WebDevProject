@@ -4,18 +4,17 @@
     string currentLang = ViewBag.CurrentLang as string ?? "vi_VN";
     bool isDarkMode = ViewBag.DarkMode != null ? (bool)ViewBag.DarkMode : false;
 
-    string bgFooter = isDarkMode ? "#0d1117" : "#f2f2f2";
+    string bgFooter = isDarkMode ? "rgba(0,0,0,0.25)" : "rgba(255,255,255,0.08)";
     string textColor = isDarkMode ? "#bfbfbf" : "#333";
     string titleColor = isDarkMode ? "#ffffff" : "#000000";
     string ctaBg = themeColor;
     string ctaBtnBg = isDarkMode ? "#2d2f39" : "#ffffff";
-    string socialColor = isDarkMode ? "#ffffff" : "#000000";
 
     var langCtaTitle = new Dictionary<string, string>{
         { "vi_VN", "Sẵn sàng tối ưu hệ thống QLNS&TC của bạn chưa?" },
         { "en_US", "Ready to optimize HR & Finance?" },
         { "jp_JP", "人事と財務を最適化する準備はできていますか？" },
-        { "kr_KR", "イン사 및 재무를 최적화할 준비가 되셨습니까?" },
+        { "kr_KR", "인사 및 재무를 최적화할 준비가 되셨습니까?" },
         { "cn_CN", "准备优化人事与财务吗？" }
     };
 
@@ -35,141 +34,210 @@
         { "cn_CN", "立即联系" }
     };
 
+    var langFooterAbout = new Dictionary<string, string>{
+        { "vi_VN", "Giải pháp quản lý nhân sự và tài chính cho doanh nghiệp đa chi nhánh." },
+        { "en_US", "HR & Finance management solutions for multi-branch enterprises." },
+        { "jp_JP", "複数拠点向けの人事・財務管理ソリューション。" },
+        { "kr_KR", "다지점 기업을 위한 인사 및 재무 관리 솔루션。" },
+        { "cn_CN", "为多分支企业提供人事与财务管理解决方案。" }
+    };
+
+    var langFooterManagement = new Dictionary<string, string>{
+        { "vi_VN", "Hệ thống quản lý" },
+        { "en_US", "Management" },
+        { "jp_JP", "管理" },
+        { "kr_KR", "관리" },
+        { "cn_CN", "管理" }
+    };
+
+    var langFooterInterested = new Dictionary<string, string>{
+        { "vi_VN", "Quan tâm?" },
+        { "en_US", "Interested?" },
+        { "jp_JP", "興味がありますか？" },
+        { "kr_KR", "관심 있으신가요?" },
+        { "cn_CN", "感兴趣吗？" }
+    };
+
+    var langFooterConnect = new Dictionary<string, string>{
+        { "vi_VN", "Kết nối" },
+        { "en_US", "Connect" },
+        { "jp_JP", "つながる" },
+        { "kr_KR", "연결" },
+        { "cn_CN", "联系" }
+    };
+
+    var langFooterCopyright = new Dictionary<string, string>{
+        { "vi_VN", "© 2025 TBT CENTER. Bảo lưu mọi quyền." },
+        { "en_US", "© 2025 TBT CENTER. All Rights Reserved." },
+        { "jp_JP", "© 2025 TBT CENTER. All rights reserved." },
+        { "kr_KR", "© 2025 TBT CENTER. 모든 권리 보유." },
+        { "cn_CN", "© 2025 TBT CENTER. 版权所有。" }
+    };
+
+    var langItemHRM = new Dictionary<string, string>{
+        { "vi_VN", "Quản lý nhân sự" },
+        { "en_US", "Human Resource Management" },
+        { "jp_JP", "人事管理" },
+        { "kr_KR", "인사 관리" },
+        { "cn_CN", "人力资源管理" }
+    };
+
+    var langItemFinance = new Dictionary<string, string>{
+        { "vi_VN", "Hệ thống tài chính" },
+        { "en_US", "Finance System" },
+        { "jp_JP", "財務システム" },
+        { "kr_KR", "재무 시스템" },
+        { "cn_CN", "财务系统" }
+    };
+
+    var langItemPayroll = new Dictionary<string, string>{
+        { "vi_VN", "Bảng lương" },
+        { "en_US", "Payroll" },
+        { "jp_JP", "給与管理" },
+        { "kr_KR", "급여 관리" },
+        { "cn_CN", "工资管理" }
+    };
+
+    var langItemReports = new Dictionary<string, string>{
+        { "vi_VN", "Báo cáo" },
+        { "en_US", "Reports" },
+        { "jp_JP", "レポート" },
+        { "kr_KR", "보고서" },
+        { "cn_CN", "报表" }
+    };
+
+    var langItemAbout = new Dictionary<string, string>{
+        { "vi_VN", "Về chúng tôi" },
+        { "en_US", "About Us" },
+        { "jp_JP", "私たちについて" },
+        { "kr_KR", "회사 소개" },
+        { "cn_CN", "关于我们" }
+    };
+
+    var langItemCareers = new Dictionary<string, string>{
+        { "vi_VN", "Tuyển dụng" },
+        { "en_US", "Careers" },
+        { "jp_JP", "採用情報" },
+        { "kr_KR", "채용" },
+        { "cn_CN", "招聘" }
+    };
+
     var textCtaTitle = langCtaTitle[currentLang];
     var textCtaSub = langCtaSub[currentLang];
     var textCtaBtn = langCtaBtn[currentLang];
+
+    var textFooterAbout = langFooterAbout[currentLang];
+    var textFooterManagement = langFooterManagement[currentLang];
+    var textFooterInterested = langFooterInterested[currentLang];
+    var textFooterConnect = langFooterConnect[currentLang];
+    var textFooterCopyright = langFooterCopyright[currentLang];
+
+    var textHRM = langItemHRM[currentLang];
+    var textFinance = langItemFinance[currentLang];
+    var textPayroll = langItemPayroll[currentLang];
+    var textReports = langItemReports[currentLang];
+    var textAbout = langItemAbout[currentLang];
+    var textCareers = langItemCareers[currentLang];
 }
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-    :root {
-        --theme-color: @themeColor;
-        --font: 'Roboto', sans-serif;
-        --fz: @(fontSize)px;
-        --footer-bg: @bgFooter;
-        --footer-text: @textColor;
-        --footer-title: @titleColor;
-        --cta-bg: @ctaBg;
-        --cta-btn-bg: @ctaBtnBg;
-        --social-color: @socialColor;
-
-        --footer-padding: 45px;
-        --footer-gap: 35px;
-        --footer-muted: #8b93a1;
-    }
-
     .footer-wrapper {
+        font-family: 'Roboto', sans-serif;
+        font-size: @(fontSize)px;
+        color: @textColor;
         width: 100%;
-        margin: 0;
-        padding: 0;
-        font-family: var(--font);
-        font-size: var(--fz);
-        color: var(--footer-text);
     }
 
-    /* CTA block */
     .cta-footer {
         width: 100%;
-        background: var(--cta-bg);
+        background: @ctaBg;
     }
 
     .cta-footer-inner {
         max-width: 1164px;
-        margin: 0 auto;
+        margin: auto;
         padding: 30px 40px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        column-gap: 32px;
-    }
-
-    .cta-footer-inner h2 {
-        margin: 0;
-        font-size: 24px;
-        color: #fff;
-    }
-
-    .cta-footer-inner p {
-        margin-top: 4px;
-        color: #eee;
+        gap: 32px;
     }
 
     .cta-btn {
-        background: var(--cta-btn-bg);
+        background: @ctaBtnBg;
         padding: 10px 24px;
         border-radius: 6px;
         text-decoration: none;
         font-weight: 600;
-        color: var(--footer-title);
-        white-space: nowrap;
+        color: @titleColor;
+        transition: 0.25s;
     }
 
-    /* Main footer */
+    .cta-btn:hover {
+        color: @titleColor;
+        box-shadow: 0 0 10px rgba(255,255,255,0.45);
+        transform: translateY(-2px);
+    }
+
     .main-footer {
-        background: var(--footer-bg);
+        background: @bgFooter;
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
         padding: 50px 40px 30px;
+        border-top: 1px solid rgba(255,255,255,0.15);
     }
 
     .footer-container {
         max-width: 1164px;
-        margin: 0 auto;
+        margin: auto;
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(4, 1fr);
         gap: 40px;
     }
 
     .footer-col h3,
-    .footer-col .accordion-header span {
+    .footer-col span {
+        color: @titleColor;
         font-size: 18px;
-        font-weight: 700;
         margin-bottom: 10px;
-        color: var(--footer-title);
-    }
-
-    .footer-col p,
-    .footer-col ul li {
-        font-size: 14px;
-        margin-bottom: 6px;
-        color: var(--footer-text);
-    }
-
-    .footer-col p b {
-        color: var(--footer-title);
         font-weight: 700;
+    }
+
+    .footer-col h3 {
+        margin-top: 0 !important;
     }
 
     .footer-col ul {
         list-style: none;
         margin: 0;
-        padding-left: 0;
-    }
-
-    .accordion-header {
-        display: block;
         padding: 0;
-        border: none;
-        cursor: default;
     }
 
-    .accordion-header i {
-        display: none;
+    .footer-col ul li {
+        margin-bottom: 6px;
+        transition: 0.25s;
+        cursor: pointer;
     }
 
-    .acc-content {
-        display: block;
+    .footer-col ul li:hover {
+        color: @titleColor;
+        text-shadow: 0 0 8px rgba(255,255,255,0.55);
+        transform: translateX(3px);
     }
 
-    .connect-col .social-icons {
-        display: grid;
-        grid-template-columns: repeat(3, 40px);
-        gap: 14px;
-        margin-top: 12px;
-    }
-
-    .connect-col .social-icons i {
+    .social-icons i {
         font-size: 22px;
+        transition: 0.25s;
+        cursor: pointer;
+    }
+
+    .social-icons i:hover {
+        color: @titleColor;
+        text-shadow: 0 0 10px rgba(255,255,255,0.7);
+        transform: scale(1.18);
     }
 
     .footer-bottom {
@@ -178,102 +246,30 @@
         border-top: 1px solid rgba(255,255,255,0.12);
         text-align: center;
         font-size: 13px;
-        color: var(--footer-text);
+        color: @textColor;
     }
 
     @@media (max-width: 600px) {
-
-        .main-footer {
-            padding: 35px 20px 25px;
+        .cta-footer-inner {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 24px 20px;
         }
 
         .footer-container {
             grid-template-columns: 1fr;
             gap: 24px;
         }
-
-        .cta-footer-inner {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 10px;
-            padding: 24px 20px;
-        }
-
-        .accordion-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 4px;
-            border-bottom: 1px solid rgba(255,255,255,0.12);
-            cursor: pointer;
-        }
-
-        .accordion-header span {
-            margin-bottom: 0;
-        }
-
-        .accordion-header i {
-            display: inline-block;
-            font-size: 13px;
-            margin-left: 10px;
-            transition: transform .25s;
-        }
-
-        .accordion-col .acc-content {
-            display: none;
-            margin-top: 8px;
-            padding-left: 4px;
-        }
-
-        .accordion-col.open .acc-content {
-            display: block;
-        }
-
-        .accordion-col.open .accordion-header i {
-            transform: rotate(180deg);
-        }
-
-        .connect-col .social-icons {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            justify-items: center;
-            gap: 18px;
-            margin-top: 16px;
-        }
-
-        .connect-col .social-icons i {
-            font-size: 24px;
-        }
     }
-    .footer-col ul li:hover {
-        color: var(--footer-title);
-        text-shadow: 0 0 6px rgba(255, 255, 255, 0.45);
-        cursor: pointer;
-        transition: 0.25s;
-    }
-    .connect-col .social-icons i:hover {
-        color: var(--footer-title);
-        text-shadow: 0 0 8px rgba(255,255,255,0.6);
-        transform: scale(1.15);
-        transition: 0.25s ease;
-    }
-    .cta-btn:hover {
-        color: var(--footer-title);
-        box-shadow: 0 0 10px rgba(255,255,255,0.4);
-        transform: translateY(-2px);
-        transition: 0.25s ease;
-    }
-
-
 </style>
 
 <div class="footer-wrapper">
-
     <div class="cta-footer">
         <div class="cta-footer-inner">
             <div>
-                <h2>@textCtaTitle</h2>
-                <p>@textCtaSub</p>
+                <h2 style="color:white">@textCtaTitle</h2>
+                <p style="color:#eee">@textCtaSub</p>
             </div>
             <a href="/Contact" class="cta-btn">@textCtaBtn</a>
         </div>
@@ -281,43 +277,35 @@
 
     <footer class="main-footer">
         <div class="footer-container">
-
-            <div class="footer-col basic-col">
+            <div class="footer-col">
                 <h3>TBT Center</h3>
-                <p>HR & finance management solutions for multi-branch enterprises.</p>
+                <p>@textFooterAbout</p>
                 <p><b>Email:</b> httbworkstation@gmail.com</p>
                 <p><b>Phone 1:</b> +84 912 356 742</p>
                 <p><b>Phone 2:</b> +84 938 204 617</p>
             </div>
 
-            <div class="footer-col accordion-col">
-                <div class="accordion-header">
-                    <span>Management</span>
-                    <i class="fa-solid fa-chevron-down"></i>
-                </div>
-                <ul class="acc-content">
-                    <li>Human Resource Management (HRM)</li>
-                    <li>Financial System</li>
-                    <li>Salary & Allowances</li>
-                    <li>Business Reports</li>
+            <div class="footer-col">
+                <span>@textFooterManagement</span>
+                <ul>
+                    <li>@textHRM</li>
+                    <li>@textFinance</li>
+                    <li>@textPayroll</li>
+                    <li>@textReports</li>
                 </ul>
             </div>
 
-            <div class="footer-col accordion-col">
-                <div class="accordion-header">
-                    <span>Interested?</span>
-                    <i class="fa-solid fa-chevron-down"></i>
-                </div>
-                <ul class="acc-content">
-                    <li>About Us</li>
-                    <li>Careers</li>
+            <div class="footer-col">
+                <span>@textFooterInterested</span>
+                <ul>
+                    <li>@textAbout</li>
+                    <li>@textCareers</li>
                 </ul>
             </div>
 
-            <div class="footer-col connect-col">
-                <span><b>Connect</b></span>
-
-                <div class="social-icons">
+            <div class="footer-col">
+                <span>@textFooterConnect</span>
+                <div class="social-icons" style="margin-top:12px;display:flex;gap:16px;">
                     <i class="fa-brands fa-youtube"></i>
                     <i class="fa-brands fa-facebook"></i>
                     <i class="fa-brands fa-telegram"></i>
@@ -326,20 +314,8 @@
                     <i class="fa-solid fa-envelope"></i>
                 </div>
             </div>
-
         </div>
 
-        <div class="footer-bottom">© 2025 TBT CENTER. All Rights Reserved.</div>
+        <div class="footer-bottom">@textFooterCopyright</div>
     </footer>
-
 </div>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        document.querySelectorAll(".accordion-header").forEach(function (header) {
-            header.addEventListener("click", function () {
-                header.parentElement.classList.toggle("open");
-            });
-        });
-    });
-</script>

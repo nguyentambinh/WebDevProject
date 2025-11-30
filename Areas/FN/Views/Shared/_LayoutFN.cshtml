@@ -12,22 +12,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/png" href="~/Content/Images/mainbg.png" />
     <title>@title</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
 
-    <link rel="stylesheet" href="~/Content/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/Content/site.css" />
+    <style>
+        html, body {
+            font-family: 'Roboto', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+    </style>
+
     @RenderSection("Styles", required: false)
 </head>
 
-<body style="background:@backgroundColor; z-index: 1; ">
-    @Html.Action("_Header", "Shared", new { userId = userId, area = "FN" })
-    @Html.Action("_Nav", "Shared", new { code = userId, area = "FN" })
+
+<body style="background:@backgroundColor;z-index:1;margin:0;padding-top:90px;
+             font-family:'Roboto',system-ui,-apple-system,BlinkMacSystemFont,sans-serif;">
+    @Html.Action("_Header", "Shared", new { userId = userId, area = "" })
+    @Html.Action("_Nav", "Shared", new { code = userId, role = "fn", area = "" })
     @Html.Partial("_Slider")
 
-    <main class="container mt-4">
+    <main class="" style="max-width: 1200px; margin: 0 auto;">
         @RenderBody()
     </main>
 
-    @Html.Action("_Footer", "Shared", new { userId = userId, area = "FN" })
+    @Html.Action("_Footer", "Shared", new { userId = userId, area = "" })
 
     <script src="~/Scripts/jquery-3.7.0.min.js"></script>
     <script src="~/Scripts/bootstrap.bundle.min.js"></script>

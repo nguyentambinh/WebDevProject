@@ -1,4 +1,4 @@
-<link rel="stylesheet"
+﻿<link rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
       integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
       crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -186,6 +186,34 @@
             opacity: 0;
         }
     }
+    .slider-content button {
+        padding: 10px 20px;
+        border: none;
+        cursor: pointer;
+        background: #ffffff;
+        color: #000;
+        border-radius: 6px;
+        opacity: 0;
+        animation: animate 1s ease 0.6s forwards;
+        box-shadow: 0 6px 14px rgba(0,0,0,0.35);
+        transform-origin: center;
+        transition: background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease, border 0.25s ease;
+    }
+        .slider-content button:hover {
+            background: rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            color: #fff;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 10px 24px rgba(0,0,0,0.5);
+        }
+
+        .slider-content button:active {
+            transform: translateY(1px) scale(0.96);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+        }
+
 
 </style>
 

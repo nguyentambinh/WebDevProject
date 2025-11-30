@@ -79,7 +79,6 @@
         <AssociationConnector Association="QLNSVATCModel.FK__THONGTINLI__MANV__5165187F" ManuallyRouted="false" />
         <AssociationConnector Association="QLNSVATCModel.FK__THONGTINSU__MANV__5441852A" ManuallyRouted="false" />
         <AssociationConnector Association="QLNSVATCModel.FK_TRGPHG" ManuallyRouted="false" />
-        <EntityTypeShape EntityType="QLNSVATCModel.DSHESO" Width="1.5" PointX="10.375" PointY="6.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

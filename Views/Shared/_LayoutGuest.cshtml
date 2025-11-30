@@ -29,7 +29,7 @@
 <body style="background:@backgroundColor;z-index:1;margin:0;padding-top:90px;
              font-family:'Roboto',system-ui,-apple-system,BlinkMacSystemFont,sans-serif;">
     @Html.Action("_Header", "Shared", new { userId = userId, area = "" })
-    @Html.Action("_Nav", "Shared", new { code = userId, area = "" })
+    @Html.Action("_Nav", "Shared", new { code = userId, role = "user", area = "" })
     @Html.Partial("_Slider")
 
     <main class="" style="max-width: 1200px; margin: 0 auto;">

@@ -11,23 +11,15 @@ namespace QLNSVATC.Areas.HR.Controllers
     public class HomeController : Controller
     {
         // GET: HR/Home
-        QLNSVATCEntities db = new QLNSVATCEntities();
-
         public ActionResult Index()
         {
- 
-            var duAn = db.DUANs?.ToList() ?? new List<DUAN>();
-            var hopDong = db.HOPDONGs?.ToList() ?? new List<HOPDONG>();
-            var nhanVien = db.NHANVIENs?.Take(18).ToList() ?? new List<NHANVIEN>();
-
-            var vm = new HomeViewModel
+            if (!CheckAccess.Role("HR"))
             {
-                DuAn = duAn,
-                HopDong = hopDong,
-                NhanVien = nhanVien
-            };
+                Session.Clear();
+                return RedirectToAction("Login", "Account", new { area = "" });
+            }
 
-            return View(vm);
+            return View();
         }
 
     }

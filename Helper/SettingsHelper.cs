@@ -23,7 +23,7 @@ namespace QLNSVATC.Helpers
                     UserId = userId ?? "GUEST",
                     ThemeCode = "black",
                     DarkMode = true,
-                    LanguageCode = "vi_VN",
+                    LanguageCode = "en_US",
                     FontCode = "inter",
                     FontSize = 18,
                     LayoutCode = "default"
@@ -57,7 +57,7 @@ namespace QLNSVATC.Helpers
 
             // Lấy ngôn ngữ
             string lang = st.LanguageCode ?? "vi-VN";
-            string langCol = lang.Replace("-", "_");     // vi-VN -> vi_VN
+            string langCol = lang.Replace("-", "_");    
 
             var trans = db.PHIENDICHes.ToList();
             var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);

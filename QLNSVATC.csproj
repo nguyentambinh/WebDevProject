@@ -131,17 +131,12 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Areas\Admin\AdminAreaRegistration.cs" />
     <Compile Include="Areas\Admin\Controllers\HomeController.cs" />
-    <Compile Include="Areas\Admin\Controllers\SharedController.cs" />
     <Compile Include="Areas\Employee\Controllers\HomeController.cs" />
-    <Compile Include="Areas\Employee\Controllers\SharedController.cs" />
     <Compile Include="Areas\Employee\EmployeeAreaRegistration.cs" />
     <Compile Include="Areas\FN\Controllers\HomeController.cs" />
-    <Compile Include="Areas\FN\Controllers\SharedController.cs" />
     <Compile Include="Areas\FN\FNAreaRegistration.cs" />
     <Compile Include="Areas\HR\Controllers\HomeController.cs" />
-    <Compile Include="Areas\HR\Controllers\SharedController.cs" />
     <Compile Include="Areas\OF\Controllers\HomeController.cs" />
-    <Compile Include="Areas\OF\Controllers\SharedController.cs" />
     <Compile Include="Areas\OF\OFAreaRegistration.cs" />
     <Compile Include="Areas\HR\HRAreaRegistration.cs" />
     <Compile Include="Controllers\AccountController.cs" />
@@ -184,9 +179,6 @@
       <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\DSCHUYENMON.cs">
-      <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\DSHESO.cs">
       <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\DSKYNANG.cs">
@@ -578,29 +570,9 @@
     <Content Include="Areas\HR\Views\Shared\_LayoutHR.cshtml" />
     <Content Include="Areas\OF\Views\Shared\_LayoutOF.cshtml" />
     <Content Include="Areas\Admin\Views\Shared\Error.cshtml" />
-    <Content Include="Areas\Admin\Views\Shared\_Footer.cshtml" />
-    <Content Include="Areas\Admin\Views\Shared\_Header.cshtml" />
-    <Content Include="Areas\Admin\Views\Shared\_Nav.cshtml" />
-    <Content Include="Areas\Admin\Views\Shared\_Slider.cshtml" />
     <Content Include="Areas\Employee\Views\Shared\Error.cshtml" />
-    <Content Include="Areas\Employee\Views\Shared\_Footer.cshtml" />
-    <Content Include="Areas\Employee\Views\Shared\_Header.cshtml" />
-    <Content Include="Areas\Employee\Views\Shared\_Nav.cshtml" />
-    <Content Include="Areas\Employee\Views\Shared\_Slider.cshtml" />
-    <Content Include="Areas\FN\Views\Shared\_Footer.cshtml" />
-    <Content Include="Areas\FN\Views\Shared\_Header.cshtml" />
-    <Content Include="Areas\FN\Views\Shared\_Nav.cshtml" />
-    <Content Include="Areas\FN\Views\Shared\_Slider.cshtml" />
     <Content Include="Areas\FN\Views\Shared\Error.cshtml" />
-    <Content Include="Areas\OF\Views\Shared\_Footer.cshtml" />
-    <Content Include="Areas\OF\Views\Shared\_Header.cshtml" />
-    <Content Include="Areas\OF\Views\Shared\_Nav.cshtml" />
-    <Content Include="Areas\OF\Views\Shared\_Slider.cshtml" />
     <Content Include="Areas\OF\Views\Shared\Error.cshtml" />
-    <Content Include="Areas\HR\Views\Shared\_Footer.cshtml" />
-    <Content Include="Areas\HR\Views\Shared\_Header.cshtml" />
-    <Content Include="Areas\HR\Views\Shared\_Nav.cshtml" />
-    <Content Include="Areas\HR\Views\Shared\_Slider.cshtml" />
     <Content Include="Areas\HR\Views\Shared\Error.cshtml" />
     <Content Include="packages\Antlr.3.5.0.2\.signature.p7s" />
     <Content Include="packages\Antlr.3.5.0.2\Antlr.3.5.0.2.nupkg" />

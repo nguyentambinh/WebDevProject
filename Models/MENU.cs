@@ -20,5 +20,6 @@ namespace QLNSVATC.Models
         public Nullable<int> ParentId { get; set; }
         public Nullable<int> OrderNumber { get; set; }
         public string TranslateKey { get; set; }
+        public string Role { get; set; }
     }
 }

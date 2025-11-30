@@ -12,10 +12,11 @@ namespace QLNSVATC.Controllers
     {
         private QLNSVATCEntities db = new QLNSVATCEntities();
 
-        //Load Personalized Navigation Menu
+        // Load Personalized Navigation Menu
         [ChildActionOnly]
-        public ActionResult _Nav(string code)
+        public ActionResult _Nav(string code, string role = null)
         {
+            // code = UserId
             var vb = SettingsHelper.BuildViewBagData(db, code);
 
             ViewBag.TranslateDict = vb.TranslateDict;
@@ -25,10 +26,17 @@ namespace QLNSVATC.Controllers
             ViewBag.FontFamily = vb.FontFamily;
             ViewBag.FontSize = vb.FontSize;
             ViewBag.LayoutCode = vb.LayoutCode;
+            IQueryable<MENU> query = db.MENUs;
 
-            var menus = db.MENUs.ToList();
+            if (!string.IsNullOrEmpty(role))
+            {
+                query = query.Where(m => m.Role == role);
+            }
+
+            var menus = query.ToList();
 
             Debug.WriteLine($"UserId      = {code}");
+            Debug.WriteLine($"Role        = {role}");
             Debug.WriteLine($"Lang        = {vb.Lang}");
             Debug.WriteLine($"ThemeCode   = {vb.Theme}");
             Debug.WriteLine($"ThemeHex    = {vb.ThemeHex}");
@@ -42,20 +50,32 @@ namespace QLNSVATC.Controllers
             {
                 foreach (var m in menus)
                 {
-                    if (!string.IsNullOrEmpty(m.TranslateKey)
-                        && vb.TranslateDict.TryGetValue(m.TranslateKey, out var text)
-                        && !string.IsNullOrWhiteSpace(text))
+                    if (!string.IsNullOrEmpty(m.TranslateKey))
                     {
-                        m.MenuName = text;
+                        string translatedText;
+                        if (vb.TranslateDict.TryGetValue(m.TranslateKey, out translatedText))
+                        {
+                            if (!string.IsNullOrWhiteSpace(translatedText))
+                            {
+                                m.MenuName = translatedText;
+                            }
+                            else
+                            {
+                                Debug.WriteLine($"WARNING: Found TranslateKey '{m.TranslateKey}' but translation is empty/whitespace. Original MenuName: {m.MenuName}");
+                            }
+                        }
+                        else
+                        {
+                            Debug.WriteLine($"WARNING: Missing translation for key '{m.TranslateKey}' in TranslateDict. Original MenuName: {m.MenuName}");
+                        }
                     }
                 }
             }
 
             return PartialView("_Nav", menus);
         }
-        
 
-        //Load Personalized Footer
+
         [ChildActionOnly]
         public ActionResult _Footer(string userId)
         {
@@ -76,7 +96,6 @@ namespace QLNSVATC.Controllers
             ViewBag.UserId = userId;
             return PartialView("_Header");
         }
-        //Saving User Settings
         [HttpPost]
         public ActionResult SaveSettings(string ThemeColor, string DarkMode,
                                      string LanguageCode, string FontCode,
@@ -131,7 +150,7 @@ namespace QLNSVATC.Controllers
             Session["FontSize"] = FontSize;
             db.SaveChanges();
 
-            Debug.WriteLine("-> SaveChanges() xong OK");
+            Debug.WriteLine("-> SaveChanges()");
             TempData["DebugSettings"] += " | Save OK";
 
             return Redirect("/?status=success");
