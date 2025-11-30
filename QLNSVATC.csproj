@@ -146,6 +146,7 @@
     <Compile Include="Areas\HR\HRAreaRegistration.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\JobSeekerController.cs" />
     <Compile Include="Controllers\SharedController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -329,7 +330,6 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
-    <Content Include="Content\CSS\Slider.css" />
     <Content Include="Content\Images\slider1.jpg" />
     <Content Include="Content\Images\slider3.jpg" />
     <Content Include="Content\Images\slider2.jpg" />
@@ -760,6 +760,7 @@
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Home\About.cshtml" />
     <Content Include="Views\Account\Login.cshtml" />
+    <Content Include="Views\JobSeeker\SubmitCV.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -768,6 +769,7 @@
     <Folder Include="Areas\FN\Data\" />
     <Folder Include="Areas\HR\Data\" />
     <Folder Include="Areas\OF\Data\" />
+    <Folder Include="Content\CSS\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />

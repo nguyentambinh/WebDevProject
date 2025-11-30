@@ -1,0 +1,94 @@
+﻿@model QLNSVATC.Models.HOSOVIECLAM
+
+@{
+    ViewBag.Title = "Nộp hồ sơ ứng tuyển";
+    Layout = "~/Views/Shared/_LayoutGuest.cshtml";
+}
+
+<h2>View</h2>
+
+<style>
+    .form-wrapper {
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 25px;
+        border-radius: 12px;
+        background: #f9f9f9;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        font-family: 'Inter';
+    }
+
+        .form-wrapper h2 {
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+    .form-group {
+        margin-bottom: 18px;
+    }
+
+    label {
+        font-weight: 600;
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    .file-label {
+        margin-top: 5px;
+        font-size: 14px;
+        color: #007bff;
+    }
+
+    input[type="text"], input[type="file"] {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+    }
+
+    .btn-submit {
+        width: 100%;
+        padding: 12px 18px;
+        background: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        margin-top: 10px;
+        cursor: pointer;
+    }
+
+        .btn-submit:hover {
+            background: #006ae0;
+        }
+</style>
+
+<div class="form-wrapper">
+    <h2>Nộp hồ sơ ứng viên</h2>
+
+    @using (Html.BeginForm("SubmitCV", "JobSeeker", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        <div class="form-group">
+            <label>Họ và tên ứng viên</label>
+            @Html.TextBoxFor(m => m.TENUNGVIEN, new { @class = "form-control", placeholder = "Nhập họ tên" })
+        </div>
+
+        <div class="form-group">
+            <label>File thông tin cá nhân (PDF/Doc/Ảnh)</label>
+            <input type="file" name="fileThongTin" />
+        </div>
+
+        <div class="form-group">
+            <label>File bằng cấp</label>
+            <input type="file" name="fileBangCap" />
+        </div>
+
+        <div class="form-group">
+            <label>File khác (CV, portfolio...)</label>
+            <input type="file" name="fileKhac" />
+        </div>
+
+        <button class="btn-submit">Gửi hồ sơ</button>
+    }
+</div>
