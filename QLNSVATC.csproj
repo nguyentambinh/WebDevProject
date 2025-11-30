@@ -767,7 +767,6 @@
     <Content Include="Views\Shared\View.cshtml" />
     <Content Include="Views\Shared\_Header.cshtml" />
     <Content Include="Views\Shared\_Nav.cshtml" />
-    <Content Include="Views\Shared\_Footer.cshtml" />
     <Content Include="Views\Shared\_Slider.cshtml" />
     <Content Include="Views\Shared\_LayoutGuest.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
@@ -776,6 +775,7 @@
     <Content Include="Views\Account\Register.cshtml" />
     <Content Include="Views\Account\ForgotPassword.cshtml" />
     <Content Include="Views\JobSeeker\SubmitCV.cshtml" />
+    <Content Include="Views\Shared\_Footer.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -784,7 +784,6 @@
     <Folder Include="Areas\FN\Data\" />
     <Folder Include="Areas\HR\Data\" />
     <Folder Include="Areas\OF\Data\" />
-    <Folder Include="Content\CSS\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />

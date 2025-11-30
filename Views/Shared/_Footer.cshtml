@@ -1,4 +1,4 @@
-@{
+﻿@{
     string themeColor = ViewBag.ThemeColor as string ?? "#121212";
     int fontSize = ViewBag.FontSize != null ? (int)ViewBag.FontSize : 14;
     string currentLang = ViewBag.CurrentLang as string ?? "vi_VN";
@@ -12,7 +12,7 @@
     string socialColor = isDarkMode ? "#ffffff" : "#000000";
 
     var langCtaTitle = new Dictionary<string, string>{
-        { "vi_VN", "Ready to optimize HR & Finance?" },
+        { "vi_VN", "Sẵn sàng tối ưu hệ thống QLNS&TC của bạn chưa?" },
         { "en_US", "Ready to optimize HR & Finance?" },
         { "jp_JP", "人事と財務を最適化する準備はできていますか？" },
         { "kr_KR", "イン사 및 재무를 최적화할 준비가 되셨습니까?" },
@@ -20,7 +20,7 @@
     };
 
     var langCtaSub = new Dictionary<string, string>{
-        { "vi_VN", "Let our system help your business operate smarter." },
+        { "vi_VN", "Hãy để hệ thống của chúng tôi giúp bạn vận hành" },
         { "en_US", "Let our system help your business operate smarter." },
         { "jp_JP", "当社のシステムが効率的な運営をサポートします。" },
         { "kr_KR", "우리 시스템이 귀사의 효율적인 운영을 도와드립니다." },
@@ -28,7 +28,7 @@
     };
 
     var langCtaBtn = new Dictionary<string, string>{
-        { "vi_VN", "Contact now" },
+        { "vi_VN", "Liên hệ" },
         { "en_US", "Contact now" },
         { "jp_JP", "お問い合わせ" },
         { "kr_KR", "문의하기" },
@@ -263,7 +263,7 @@
         transform: translateY(-2px);
         transition: 0.25s ease;
     }
-    
+
 
 </style>
 

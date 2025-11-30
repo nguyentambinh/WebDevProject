@@ -30,8 +30,6 @@ namespace QLNSVATC.Controllers
                     ModelState.AddModelError("", "Ứng viên vui lòng nhập tên.");
                     return View(model);
                 }
-
-                // Folder gốc lưu hồ sơ
                 string rootFolder = Server.MapPath("~/Uploads/HoSoUngVien/");
                 if (!Directory.Exists(rootFolder))
                     Directory.CreateDirectory(rootFolder);
@@ -42,8 +40,6 @@ namespace QLNSVATC.Controllers
 
                 if (!Directory.Exists(fullFolderPath))
                     Directory.CreateDirectory(fullFolderPath);
-
-                // Lưu file THÔNG TIN CÁ NHÂN
                 if (fileThongTin != null && fileThongTin.ContentLength > 0)
                 {
                     string fileName = Path.GetFileName(fileThongTin.FileName);
@@ -52,7 +48,6 @@ namespace QLNSVATC.Controllers
                     model.FILETHONGTIN = $"/Uploads/HoSoUngVien/{folderName}/{fileName}";
                 }
 
-                // Lưu file BẰNG CẤP
                 if (fileBangCap != null && fileBangCap.ContentLength > 0)
                 {
                     string fileName = Path.GetFileName(fileBangCap.FileName);
@@ -61,18 +56,15 @@ namespace QLNSVATC.Controllers
                     model.FILEBANGCAP = $"/Uploads/HoSoUngVien/{folderName}/{fileName}";
                 }
 
-                // Lưu file KHÁC (CV, Portfolio…)
                 if (fileKhac != null && fileKhac.ContentLength > 0)
                 {
                     string fileName = Path.GetFileName(fileKhac.FileName);
                     string savePath = Path.Combine(fullFolderPath, fileName);
                     fileKhac.SaveAs(savePath);
 
-                    // CHANGED: đường dẫn tương đối để lưu DB
                     model.FILEKHAC = $"/Uploads/HoSoUngVien/{folderName}/{fileName}";
                 }
 
-                // Lưu record hồ sơ vào DB
                 db.HOSOVIECLAMs.Add(model);
                 db.SaveChanges();
 

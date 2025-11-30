@@ -25,13 +25,19 @@ namespace QLNSVATC
                 defaults: new { controller = "Home", action = "About" },
                 namespaces: new[] { "QLNSVATC.Controllers" }
             );
-
+            routes.MapRoute(
+                name: "Ung tuyen",
+                url: "ung-tuyen",
+                defaults: new { controller = "JobSeeker", action = "SubmitCV", id = UrlParameter.Optional },
+                namespaces: new[] { "QLNSVATC.Controllers" }
+            );
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",
                 defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional },
                 namespaces: new[] { "QLNSVATC.Controllers" }
             );
+            
         }
     }
 
