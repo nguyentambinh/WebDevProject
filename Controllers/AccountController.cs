@@ -4,7 +4,7 @@ using System.Net.Mail;
 using System.Net;
 using System.Web.Mvc;
 using QLNSVATC.Models;
-using QLNSVATC.Helpers;   // <-- IMPORT SecurityHelper
+using QLNSVATC.Helpers;   
 
 namespace QLNSVATC.Controllers
 {
@@ -12,7 +12,7 @@ namespace QLNSVATC.Controllers
     {
         private QLNSVATCEntities db = new QLNSVATCEntities();
 
-        // ========================= LOGIN =========================
+        //LOGIN
 
         [HttpGet]
         public ActionResult Login(string username)
@@ -65,6 +65,13 @@ namespace QLNSVATC.Controllers
                 Session["UserId"] = nv.MANV;
                 Session["FullName"] = nv.TENNV;
                 Session["Role"] = auth;
+
+                LogHelper.WriteLog(
+                    db,
+                    "Login",
+                    username,
+                    $"Nhân viên có mã {nv.MANV} đã đăng nhập hệ thống."
+                );
             }
 
             switch (prefix)
@@ -79,7 +86,6 @@ namespace QLNSVATC.Controllers
             ModelState.AddModelError("", "Invalid role.");
             return View(new USER { USERNAME = username });
         }
-
 
         //REGISTER
 
@@ -150,7 +156,6 @@ namespace QLNSVATC.Controllers
             return View(model);
         }
 
-
         //CONFIRM OTP REGISTER
 
         [HttpPost]
@@ -194,7 +199,7 @@ namespace QLNSVATC.Controllers
             USER u = new USER
             {
                 USERNAME = data.USERNAME,
-                PASS = data.PASS.HashPassword(),  
+                PASS = data.PASS.HashPassword(),
                 AUTH = auth
             };
             db.USERS.Add(u);
@@ -208,7 +213,8 @@ namespace QLNSVATC.Controllers
             });
 
             var tt = db.THONGTINLIENHEs.FirstOrDefault(x => x.MANV == nv.MANV);
-            if (tt != null) tt.GMAIL = data.Email;
+            if (tt != null)
+                tt.GMAIL = data.Email;
             else
             {
                 db.THONGTINLIENHEs.Add(new THONGTINLIENHE
@@ -223,6 +229,12 @@ namespace QLNSVATC.Controllers
             }
 
             db.SaveChanges();
+            LogHelper.WriteLog(
+                db,
+                "CreateAccount",
+                data.USERNAME,
+                $"Nhân viên có mã {nv.MANV} đã tạo tài khoản mới."
+            );
 
             Session.Remove("OTP");
             Session.Remove("RegData");
@@ -231,9 +243,8 @@ namespace QLNSVATC.Controllers
                 new { username = data.USERNAME });
         }
 
-
-
         //SEND EMAIL OTP REGISTER
+
         private void SendOtpRegister(string email, string otp, string fullName)
         {
             var from = "httbworkstation@gmail.com";
@@ -313,7 +324,6 @@ namespace QLNSVATC.Controllers
             }.Send(mail);
         }
 
-
         //FORGOT PASSWORD
 
         [HttpGet]
@@ -358,7 +368,6 @@ namespace QLNSVATC.Controllers
             model.ShowOtp = true;
             return View(model);
         }
-
 
         //SEND EMAIL OTP FORGOT
 
@@ -467,8 +476,6 @@ namespace QLNSVATC.Controllers
             return View("ForgotPassword", model);
         }
 
-
-
         //RESET PASSWORD
 
         [HttpPost]
@@ -497,9 +504,18 @@ namespace QLNSVATC.Controllers
             }
 
             var user = db.USERS.FirstOrDefault(x => x.USERNAME == username);
-            user.PASS = model.NewPass.HashPassword();  
-
+            user.PASS = model.NewPass.HashPassword();
             db.SaveChanges();
+
+            var cf = db.CONFIRMAUTHs.FirstOrDefault(x => x.AUTH == user.AUTH);
+            string manv = cf != null ? cf.CODE : "UNKNOWN";
+
+            LogHelper.WriteLog(
+                db,
+                "ChangePassword",
+                username,
+                $"Nhân viên có mã {manv} đã đổi mật khẩu thành công."
+            );
 
             Session.Remove("FP_OTP");
             Session.Remove("FP_Username");
@@ -510,7 +526,8 @@ namespace QLNSVATC.Controllers
             return View("ForgotPassword", model);
         }
 
-        //LOGOUT
+        //LOGOUT 
+
         public ActionResult Logout()
         {
             Session.Clear();

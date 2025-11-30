@@ -151,9 +151,11 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Helper\CheckAccess.cs" />
+    <Compile Include="Helper\ColorHelper.cs" />
     <Compile Include="Helper\DateTimeVNHelper.cs" />
     <Compile Include="Helper\FileHelper.cs" />
     <Compile Include="Helper\HashPassword.cs" />
+    <Compile Include="Helper\Loghelper.cs" />
     <Compile Include="Helper\NumberHelper.cs" />
     <Compile Include="Helper\SettingsHelper.cs" />
     <Compile Include="Helper\SlugHelper.cs" />
@@ -220,6 +222,7 @@
       <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\ForgotPasswordViewModel.cs" />
+    <Compile Include="Models\HomeViewModel.cs" />
     <Compile Include="Models\HOPDONG.cs">
       <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
     </Compile>
@@ -334,6 +337,8 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
+    <Content Include="Content\Images\Home\DuAn\default.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\default.jpg" />
     <Content Include="Content\Images\mainbg.png" />
     <Content Include="Content\CSS\Footer.css" />
     <Content Include="Content\CSS\Slider.css" />

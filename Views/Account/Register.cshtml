@@ -91,6 +91,7 @@
         flex-direction: column;
         gap: 15px;
         text-align: center;
+        align-items: center;
     }
 
         .login-form h2 {
@@ -164,6 +165,50 @@
 
         .gold-inner {
             padding: 20px 22px;
+        }
+    }
+    @@media (min-width: 992px) {
+
+        .login-container {
+            max-width: 780px;         
+            padding: 150px 0;
+        }
+
+        .gold-box {
+            padding: 42px 50px;       
+            transform: scale(1.08);    
+        }
+
+        .gold-box::before {
+            filter: blur(28px);     
+        }
+
+        .gold-inner {
+            padding: 40px 55px;       
+            border-radius: 18px;
+        }
+
+        .gold-inner h2 {
+            font-size: 28px;
+            margin-bottom: 18px;
+            letter-spacing: 1px;
+        }
+
+        .gold-input,
+        .gold-btn {
+            max-width: 330px;        
+            font-size: 16px;
+            padding: 12px 20px;
+            border-radius: 13px;
+        }
+
+        .gold-btn {
+            font-weight: 700;
+        }
+
+        .login-btns {
+            font-size: 15px;
+            margin-top: 8px;
         }
     }
 </style>

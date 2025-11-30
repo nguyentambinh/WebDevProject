@@ -4,21 +4,31 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using QLNSVATC.Helper;
+using QLNSVATC.Models;
 
 namespace QLNSVATC.Areas.HR.Controllers
 {
     public class HomeController : Controller
     {
         // GET: HR/Home
+        QLNSVATCEntities db = new QLNSVATCEntities();
+
         public ActionResult Index()
         {
-            if (!CheckAccess.Role("HR"))
-            {
-                Session.Clear();
-                return RedirectToAction("Login", "Account", new { area = "" });
-            }
+ 
+            var duAn = db.DUANs?.ToList() ?? new List<DUAN>();
+            var hopDong = db.HOPDONGs?.ToList() ?? new List<HOPDONG>();
+            var nhanVien = db.NHANVIENs?.Take(18).ToList() ?? new List<NHANVIEN>();
 
-            return View();
+            var vm = new HomeViewModel
+            {
+                DuAn = duAn,
+                HopDong = hopDong,
+                NhanVien = nhanVien
+            };
+
+            return View(vm);
         }
+
     }
 }

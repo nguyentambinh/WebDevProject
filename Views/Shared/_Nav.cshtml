@@ -67,29 +67,39 @@
     string registerLabel = langRegister[currentLang];
     string profileLabel = langProfile[currentLang];
     string logoutLabel = langLogout[currentLang];
+    string themeRgbaColor = QLNSVATC.Helpers.ColorHelper.HexToRgba(themeColor, 0.95);
 }
 
 <style>
     :root {
     --text-color: @textColor;
     --theme-color: @themeColor;
+    --theme-rgba: @themeRgbaColor; /* Đảm bảo có dấu ':' ở đây */
     --font: @fontFamily, sans-serif;
     --fz: @(fontSize)px;
     --g1: @gradient1;
     --g2: @gradient2;
     --gd: @gradientDirection;
-    }
+}
 
     /* NAVBAR */
     nav {
-/*        overflow-x: hidden;*/
-/*        overflow-y: hidden;*/
-        background: var(--theme-color);
-        padding: 12px 0;
-        box-shadow: 0 6px 18px rgba(0,0,0,.12);
-        position: relative;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
         z-index: 9999;
+        padding: 12px 0;
+        box-shadow: 0 6px 18px rgba(0,0,0,.25);
+        background-color: var(--theme-rgba); 
+
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
     }
+
+
 
     .nav-inner {
 /*        max-width: 1200px;*/
@@ -445,7 +455,7 @@
         <a class="navbar-brand" href="/">
             <img id="logo" src="~/Content/Images/mainbg.png"
                  style="margin-right:8px;vertical-align:middle;" />
-            MySite
+            TBT CENTER
         </a>
 
 
