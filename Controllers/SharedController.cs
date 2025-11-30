@@ -12,6 +12,7 @@ namespace QLNSVATC.Controllers
     {
         private QLNSVATCEntities db = new QLNSVATCEntities();
 
+        //Load Personalized Navigation Menu
         [ChildActionOnly]
         public ActionResult _Nav(string code)
         {
@@ -52,17 +53,30 @@ namespace QLNSVATC.Controllers
 
             return PartialView("_Nav", menus);
         }
+        
+
+        //Load Personalized Footer
+        [ChildActionOnly]
+        public ActionResult _Footer(string userId)
+        {
+            ViewBag.UserId = userId;
+            var vb = SettingsHelper.BuildViewBagData(db, userId);
+
+            ViewBag.CurrentLang = vb.Lang;
+            ViewBag.ThemeColor = vb.ThemeHex;
+            ViewBag.DarkMode = vb.DarkMode;
+            ViewBag.FontFamily = vb.FontFamily;
+            ViewBag.FontSize = vb.FontSize;
+            ViewBag.LayoutCode = vb.LayoutCode;
+
+            return PartialView("_Footer");
+        }
         public ActionResult _Header(string userId)
         {
             ViewBag.UserId = userId;
             return PartialView("_Header");
         }
-
-        public ActionResult _Footer(string userId)
-        {
-            ViewBag.UserId = userId;
-            return PartialView("_Footer");
-        }
+        //Saving User Settings
         [HttpPost]
         public ActionResult SaveSettings(string ThemeColor, string DarkMode,
                                      string LanguageCode, string FontCode,

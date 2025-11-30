@@ -365,7 +365,6 @@ FodyWeavers.xsd
 # Bỏ qua thư mục build, binary
 bin/
 obj/
-packages/
 *.exe
 *.dll
 

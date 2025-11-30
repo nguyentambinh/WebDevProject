@@ -1,1 +1,345 @@
-﻿
+@{
+    string themeColor = ViewBag.ThemeColor as string ?? "#121212";
+    int fontSize = ViewBag.FontSize != null ? (int)ViewBag.FontSize : 14;
+    string currentLang = ViewBag.CurrentLang as string ?? "vi_VN";
+    bool isDarkMode = ViewBag.DarkMode != null ? (bool)ViewBag.DarkMode : false;
+
+    string bgFooter = isDarkMode ? "#0d1117" : "#f2f2f2";
+    string textColor = isDarkMode ? "#bfbfbf" : "#333";
+    string titleColor = isDarkMode ? "#ffffff" : "#000000";
+    string ctaBg = themeColor;
+    string ctaBtnBg = isDarkMode ? "#2d2f39" : "#ffffff";
+    string socialColor = isDarkMode ? "#ffffff" : "#000000";
+
+    var langCtaTitle = new Dictionary<string, string>{
+        { "vi_VN", "Ready to optimize HR & Finance?" },
+        { "en_US", "Ready to optimize HR & Finance?" },
+        { "jp_JP", "人事と財務を最適化する準備はできていますか？" },
+        { "kr_KR", "イン사 및 재무를 최적화할 준비가 되셨습니까?" },
+        { "cn_CN", "准备优化人事与财务吗？" }
+    };
+
+    var langCtaSub = new Dictionary<string, string>{
+        { "vi_VN", "Let our system help your business operate smarter." },
+        { "en_US", "Let our system help your business operate smarter." },
+        { "jp_JP", "当社のシステムが効率的な運営をサポートします。" },
+        { "kr_KR", "우리 시스템이 귀사의 효율적인 운영을 도와드립니다." },
+        { "cn_CN", "让我们的系统帮助企业更高效运作。" }
+    };
+
+    var langCtaBtn = new Dictionary<string, string>{
+        { "vi_VN", "Contact now" },
+        { "en_US", "Contact now" },
+        { "jp_JP", "お問い合わせ" },
+        { "kr_KR", "문의하기" },
+        { "cn_CN", "立即联系" }
+    };
+
+    var textCtaTitle = langCtaTitle[currentLang];
+    var textCtaSub = langCtaSub[currentLang];
+    var textCtaBtn = langCtaBtn[currentLang];
+}
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+    :root {
+        --theme-color: @themeColor;
+        --font: 'Roboto', sans-serif;
+        --fz: @(fontSize)px;
+        --footer-bg: @bgFooter;
+        --footer-text: @textColor;
+        --footer-title: @titleColor;
+        --cta-bg: @ctaBg;
+        --cta-btn-bg: @ctaBtnBg;
+        --social-color: @socialColor;
+
+        --footer-padding: 45px;
+        --footer-gap: 35px;
+        --footer-muted: #8b93a1;
+    }
+
+    .footer-wrapper {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        font-family: var(--font);
+        font-size: var(--fz);
+        color: var(--footer-text);
+    }
+
+    /* CTA block */
+    .cta-footer {
+        width: 100%;
+        background: var(--cta-bg);
+    }
+
+    .cta-footer-inner {
+        max-width: 1164px;
+        margin: 0 auto;
+        padding: 30px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        column-gap: 32px;
+    }
+
+    .cta-footer-inner h2 {
+        margin: 0;
+        font-size: 24px;
+        color: #fff;
+    }
+
+    .cta-footer-inner p {
+        margin-top: 4px;
+        color: #eee;
+    }
+
+    .cta-btn {
+        background: var(--cta-btn-bg);
+        padding: 10px 24px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        color: var(--footer-title);
+        white-space: nowrap;
+    }
+
+    /* Main footer */
+    .main-footer {
+        background: var(--footer-bg);
+        padding: 50px 40px 30px;
+    }
+
+    .footer-container {
+        max-width: 1164px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 40px;
+    }
+
+    .footer-col h3,
+    .footer-col .accordion-header span {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        color: var(--footer-title);
+    }
+
+    .footer-col p,
+    .footer-col ul li {
+        font-size: 14px;
+        margin-bottom: 6px;
+        color: var(--footer-text);
+    }
+
+    .footer-col p b {
+        color: var(--footer-title);
+        font-weight: 700;
+    }
+
+    .footer-col ul {
+        list-style: none;
+        margin: 0;
+        padding-left: 0;
+    }
+
+    .accordion-header {
+        display: block;
+        padding: 0;
+        border: none;
+        cursor: default;
+    }
+
+    .accordion-header i {
+        display: none;
+    }
+
+    .acc-content {
+        display: block;
+    }
+
+    .connect-col .social-icons {
+        display: grid;
+        grid-template-columns: repeat(3, 40px);
+        gap: 14px;
+        margin-top: 12px;
+    }
+
+    .connect-col .social-icons i {
+        font-size: 22px;
+    }
+
+    .footer-bottom {
+        margin-top: 35px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255,255,255,0.12);
+        text-align: center;
+        font-size: 13px;
+        color: var(--footer-text);
+    }
+
+    @@media (max-width: 600px) {
+
+        .main-footer {
+            padding: 35px 20px 25px;
+        }
+
+        .footer-container {
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        .cta-footer-inner {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 24px 20px;
+        }
+
+        .accordion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 4px;
+            border-bottom: 1px solid rgba(255,255,255,0.12);
+            cursor: pointer;
+        }
+
+        .accordion-header span {
+            margin-bottom: 0;
+        }
+
+        .accordion-header i {
+            display: inline-block;
+            font-size: 13px;
+            margin-left: 10px;
+            transition: transform .25s;
+        }
+
+        .accordion-col .acc-content {
+            display: none;
+            margin-top: 8px;
+            padding-left: 4px;
+        }
+
+        .accordion-col.open .acc-content {
+            display: block;
+        }
+
+        .accordion-col.open .accordion-header i {
+            transform: rotate(180deg);
+        }
+
+        .connect-col .social-icons {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            justify-items: center;
+            gap: 18px;
+            margin-top: 16px;
+        }
+
+        .connect-col .social-icons i {
+            font-size: 24px;
+        }
+    }
+    .footer-col ul li:hover {
+        color: var(--footer-title);
+        text-shadow: 0 0 6px rgba(255, 255, 255, 0.45);
+        cursor: pointer;
+        transition: 0.25s;
+    }
+    .connect-col .social-icons i:hover {
+        color: var(--footer-title);
+        text-shadow: 0 0 8px rgba(255,255,255,0.6);
+        transform: scale(1.15);
+        transition: 0.25s ease;
+    }
+    .cta-btn:hover {
+        color: var(--footer-title);
+        box-shadow: 0 0 10px rgba(255,255,255,0.4);
+        transform: translateY(-2px);
+        transition: 0.25s ease;
+    }
+    
+
+</style>
+
+<div class="footer-wrapper">
+
+    <div class="cta-footer">
+        <div class="cta-footer-inner">
+            <div>
+                <h2>@textCtaTitle</h2>
+                <p>@textCtaSub</p>
+            </div>
+            <a href="/Contact" class="cta-btn">@textCtaBtn</a>
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <div class="footer-container">
+
+            <div class="footer-col basic-col">
+                <h3>TBT Center</h3>
+                <p>HR & finance management solutions for multi-branch enterprises.</p>
+                <p><b>Email:</b> httbworkstation@gmail.com</p>
+                <p><b>Phone 1:</b> +84 912 356 742</p>
+                <p><b>Phone 2:</b> +84 938 204 617</p>
+            </div>
+
+            <div class="footer-col accordion-col">
+                <div class="accordion-header">
+                    <span>Management</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+                <ul class="acc-content">
+                    <li>Human Resource Management (HRM)</li>
+                    <li>Financial System</li>
+                    <li>Salary & Allowances</li>
+                    <li>Business Reports</li>
+                </ul>
+            </div>
+
+            <div class="footer-col accordion-col">
+                <div class="accordion-header">
+                    <span>Interested?</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+                <ul class="acc-content">
+                    <li>About Us</li>
+                    <li>Careers</li>
+                </ul>
+            </div>
+
+            <div class="footer-col connect-col">
+                <span><b>Connect</b></span>
+
+                <div class="social-icons">
+                    <i class="fa-brands fa-youtube"></i>
+                    <i class="fa-brands fa-facebook"></i>
+                    <i class="fa-brands fa-telegram"></i>
+                    <i class="fa-brands fa-x-twitter"></i>
+                    <i class="fa-brands fa-github"></i>
+                    <i class="fa-solid fa-envelope"></i>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="footer-bottom">© 2025 TBT CENTER. All Rights Reserved.</div>
+    </footer>
+
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".accordion-header").forEach(function (header) {
+            header.addEventListener("click", function () {
+                header.parentElement.classList.toggle("open");
+            });
+        });
+    });
+</script>

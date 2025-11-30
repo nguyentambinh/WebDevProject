@@ -105,12 +105,13 @@
         }
 
     .gold-input {
+        width: 85%;
         background: rgba(255, 214, 94, 0.08);
         border: 1px solid rgba(255, 214, 94, 0.3);
         color: #ffdd8a;
         outline: none;
         transition: 0.3s;
-        max-width:240px;
+        max-width: 240px;
     }
 
         .gold-input:focus {
@@ -135,6 +136,7 @@
             box-shadow: 0 0 20px rgba(255, 209, 80, 0.6);
             transform: translateY(-2px);
         }
+
     .gold-input,
     .gold-btn {
         width: 100%;
@@ -159,39 +161,40 @@
         color: #ff7777;
         font-size: 13px;
     }
+
     @@media (min-width: 992px) {
 
-    .gold-box {
-        width: 460px;
-        height: 520px;
-    }
+        .gold-box {
+            width: 460px;
+            height: 520px;
+        }
 
-    .gold-box::before {
-        width: 480px;
-        height: 540px;
-    }
+            .gold-box::before {
+                width: 480px;
+                height: 540px;
+            }
 
-    .gold-inner {
-        inset: 40px;
-        padding: 30px 45px;
-    }
+        .gold-inner {
+            inset: 40px;
+            padding: 30px 45px;
+        }
 
-    .gold-input,
-    .gold-btn {
-        max-width: 300px; 
-        font-size: 16px;
-        padding: 12px 18px;
-    }
+        .gold-input,
+        .gold-btn {
+            max-width: 300px;
+            font-size: 16px;
+            padding: 12px 18px;
+        }
 
-    .login-form h2 {
-        font-size: 50px;
-        margin-bottom: 15px;
-    }
+        .login-form h2 {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
 
-    .login-btns {
-        font-size: 15px;
+        .login-btns {
+            font-size: 15px;
+        }
     }
-}
 
     @@media (max-width: 768px) {
 
@@ -265,8 +268,8 @@
         .login-btns {
             font-size: 12px;
         }
-
     }
+
     .validation-summary-errors {
         color: #ffffff;
         font-size: 14px;
@@ -279,7 +282,7 @@
         }
 </style>
 
-<div class="login-wrapper">
+<div class="login-wrapper" id="loginSection">
     <div class="login-container">
         <div class="gold-box">
             <div class="gold-inner">
@@ -309,4 +312,18 @@
 
     </div>
 </div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const loginSection = document.getElementById("loginSection");
+        if (loginSection) {
+            loginSection.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+        }
+    });
+    setTimeout(() => {
+        document.querySelector(".gold-input")?.focus();
+    }, 400);
+</script>
 
