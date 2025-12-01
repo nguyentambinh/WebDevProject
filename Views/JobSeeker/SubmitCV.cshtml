@@ -1,6 +1,6 @@
 ﻿@model QLNSVATC.Models.HOSOVIECLAM
-
 @{
+    ViewBag.Title = "Nộp hồ sơ ứng tuyển";
     Layout = "~/Views/Shared/_LayoutGuest.cshtml";
 }
 
@@ -13,7 +13,6 @@
         --accent: #38bdf8;
         --accent2: #3b82f6;
         --radius: 18px;
-        --shadow: 0 0 25px rgba(56,189,248,0.25);
         --input-bg: #111827;
     }
 
@@ -24,140 +23,466 @@
 
     .cv-wrapper {
         max-width: 680px;
-        margin: 70px auto;
-        padding: 24px;
+        margin: 80px auto;
+        padding: 0 20px;
     }
 
     .cv-card {
         background: var(--card);
         border-radius: var(--radius);
         border: 1px solid var(--border);
-        padding: 32px 30px 36px;
-        box-shadow: 0 0 40px rgba(0,0,0,0.6);
+        padding: 32px;
         position: relative;
         overflow: hidden;
+        box-shadow: 0 0 40px rgba(0,0,0,0.6);
     }
 
-        /* soft glow overlay giống header */
         .cv-card::before {
             content: "";
             position: absolute;
-            inset: -80px -80px auto auto;
             width: 260px;
             height: 260px;
-            background: radial-gradient(circle, rgba(56,189,248,0.25), transparent 70%);
-            filter: blur(40px);
-            pointer-events: none;
+            right: -120px;
+            top: -120px;
+            background: radial-gradient(circle, rgba(56,189,248,0.30), transparent 70%);
+            filter: blur(50px);
         }
 
     .cv-title {
+        color: var(--text);
         font-size: 24px;
         font-weight: 600;
-        color: var(--text);
         margin-bottom: 26px;
-        text-align: left;
-        letter-spacing: 0.5px;
     }
 
     .form-group {
         margin-bottom: 20px;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
     }
 
     label {
-        font-size: 15px;
         color: var(--text);
-        opacity: 0.9;
-        font-weight: 500;
+        opacity: .9;
+        font-size: 15px;
+        margin-bottom: 6px;
+        display: block;
     }
 
-    input[type="text"], input[type="file"] {
+    input[type="text"] {
         width: 100%;
         padding: 12px 14px;
-        background: var(--input-bg);
         border-radius: 12px;
-        border: 1px solid rgba(255,255,255,0.12);
+        background: var(--input-bg);
         color: var(--text);
-        font-size: 15px;
+        border: 1px solid rgba(255,255,255,0.12);
         outline: none;
-        transition: 0.25s;
+        transition: .25s;
     }
 
-        input[type="text"]:focus,
-        input[type="file"]:focus {
+        input[type="text"]:focus {
             border-color: var(--accent);
             box-shadow: 0 0 0 2px rgba(56,189,248,0.25);
         }
 
-    .btn-submit {
-        width: 100%;
-        padding: 13px 18px;
-        border: none;
-        outline: none;
-        border-radius: 999px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        background: linear-gradient(135deg, var(--accent), var(--accent2));
-        color: #000814;
-        letter-spacing: .3px;
-        transition: 0.22s;
-        box-shadow: 0 10px 28px rgba(56,189,248,0.35);
+    .file-box {
+        display: flex;
+        align-items: center;
+        gap: 12px;
     }
 
-        .btn-submit:hover {
-            transform: translateY(-1px);
+    .file-input-hidden {
+        display: none;
+    }
+
+    .file-btn {
+        padding: 9px 16px;
+        border-radius: 10px;
+        background: var(--input-bg);
+        border: 1px solid rgba(255,255,255,0.15);
+        color: var(--text);
+        cursor: pointer;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: .22s;
+    }
+
+        .file-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+    .file-name {
+        color: var(--text);
+        font-size: 13px;
+        opacity: .7;
+        max-width: 360px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .error-msg {
+        color: #f87171;
+        font-size: 13px;
+        margin-top: 4px;
+        display: none;
+    }
+
+    .btn-submit {
+        width: 100%;
+        padding: 14px 18px;
+        border: none;
+        border-radius: 999px;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        font-size: 16px;
+        font-weight: 600;
+        color: #000;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+        .btn-submit[disabled] {
+            opacity: .35;
+            cursor: not-allowed;
+            filter: none !important;
+        }
+
+        .btn-submit:hover:not([disabled]) {
             filter: brightness(1.07);
         }
 
-        .btn-submit:active {
-            transform: translateY(0);
-            box-shadow: none;
+    .note {
+        color: var(--text);
+        opacity: .6;
+        margin-top: 10px;
+        font-size: 12px;
+        text-align: center;
+    }
+
+    /* Validation summary styles */
+    .validation-summary {
+        color: #f87171;
+        background: #7f1d1d22;
+        border: 1px solid #f87171;
+        padding: 14px 18px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+
+        .validation-summary ul {
+            margin: 0;
+            padding-left: 20px;
         }
 
-    .note {
-        text-align: center;
-        font-size: 12px;
-        opacity: 0.6;
-        margin-top: 12px;
-        color: var(--text);
+        .validation-summary li {
+            margin: 4px 0;
+        }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-8px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 </style>
 
 <div class="cv-wrapper">
+    @* Success Message từ TempData *@
+    @if (TempData["SuccessMsg"] != null)
+    {
+        <div id="popupSuccess" style="
+        position:fixed;
+        top:20px;
+        left:50%;
+        transform:translateX(-50%);
+        background:#0f172acc;
+        border:1px solid #22c55e;
+        padding:18px 24px;
+        color:#bbf7d0;
+        font-size:16px;
+        border-radius:12px;
+        z-index:99999;
+        backdrop-filter:blur(6px);
+        animation: fadeIn .3s ease;
+        width:300px;
+        text-align:center;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.4);">
+
+            <div>@TempData["SuccessMsg"]</div>
+
+            <button id="okBtn" style="
+            width:100%;
+            margin-top:12px;
+            padding:8px;
+            border-radius:8px;
+            background:#22c55e22;
+            border:1px solid #22c55e;
+            color:#bbf7d0;
+            cursor:pointer;
+            transition: .2s;">
+                OK
+            </button>
+        </div>
+
+        <script>
+            document.getElementById("okBtn").onclick = () => {
+                window.location.href = "@Url.Action("SubmitCV", "JobSeeker")";
+            };
+        </script>
+    }
+
     <div class="cv-card">
 
-        <div class="cv-title">Nộp hồ sơ ứng tuyển</div>
+        <div class="cv-title">Submit application</div>
 
-        @using (Html.BeginForm("Create", "JobSeeker", FormMethod.Post,
-            new { enctype = "multipart/form-data" }))
+        @* Hiển thị validation errors từ ModelState *@
+        @if (!ViewData.ModelState.IsValid)
         {
-            <div class="form-group">
-                <label>Họ và tên ứng viên *</label>
-                @Html.TextBoxFor(m => m.TENUNGVIEN, new { placeholder = "Nhập họ tên" })
+            <div class="validation-summary">
+                @Html.ValidationSummary(false, "", new { })
             </div>
-
-            <div class="form-group">
-                <label>File thông tin cá nhân *</label>
-                <input type="file" name="fileThongTin" />
-            </div>
-
-            <div class="form-group">
-                <label>File bằng cấp</label>
-                <input type="file" name="fileBangCap" />
-            </div>
-
-            <div class="form-group">
-                <label>File khác (CV, portfolio...)</label>
-                <input type="file" name="fileKhac" />
-            </div>
-
-            <button class="btn-submit">Gửi hồ sơ</button>
-
-            <div class="note">Thông tin ứng viên được bảo mật tuyệt đối.</div>
         }
+
+        @using (Html.BeginForm("SubmitCV", "JobSeeker",
+            FormMethod.Post, new { enctype = "multipart/form-data", id = "cvForm" }))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-group">
+                <label>Full name *</label>
+                @Html.TextBoxFor(m => m.TENUNGVIEN, new { maxlength = "100" })
+                <div class="error-msg" id="nameErr">
+                    @* Lỗi client-side validation *@
+                </div>
+            </div>
+
+
+            <!-- Thông tin cá nhân -->
+            <div class="form-group">
+                <label>Personal Information *</label>
+
+                <div class="file-box">
+                    <label class="file-btn">
+                        Choose File
+                        <input type="file" name="fileThongTin"
+                               class="file-input-hidden"
+                               data-accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                               data-target="#f1name" />
+                    </label>
+
+                    <div class="file-name" id="f1name">PDF, DOC, JPG, PNG...</div>
+                </div>
+
+                <div class="error-msg" id="f1err">
+                    @* Lỗi client-side validation *@
+                </div>
+            </div>
+
+
+            <!-- Bằng cấp -->
+            <div class="form-group">
+                <label>Degree's Files</label>
+
+                <div class="file-box">
+                    <label class="file-btn">
+                        Choose File
+                        <input type="file" name="fileBangCap"
+                               class="file-input-hidden"
+                               data-accept=".pdf,.jpg,.jpeg,.png"
+                               data-target="#f2name"
+                               data-error="#f2err" />
+                    </label>
+
+                    <div class="file-name" id="f2name">PDF, JPG, PNG...</div>
+                </div>
+
+                <div class="error-msg" id="f2err">Invalid file type!</div>
+            </div>
+
+            <!-- File khác -->
+            <div class="form-group">
+                <label>Others (CV, portfolio...)</label>
+
+                <div class="file-box">
+                    <label class="file-btn">
+                        Choose File
+                        <input type="file" name="fileKhac"
+                               class="file-input-hidden"
+                               data-accept=".pdf,.doc,.docx,.zip"
+                               data-target="#f3name"
+                               data-error="#f3err" />
+                    </label>
+
+                    <div class="file-name" id="f3name">PDF, DOC, ZIP...</div>
+                </div>
+
+                <div class="error-msg" id="f3err">Invalid file type!</div>
+            </div>
+
+            <button type="submit" id="btnSubmit" class="btn-submit" disabled>
+                Submit your file
+            </button>
+        }
+
+        <div class="note">All candidate's information are secured.</div>
 
     </div>
 </div>
+
+<script>
+    const nameInput = document.querySelector("input[name='TENUNGVIEN']");
+    const nameErr = document.getElementById("nameErr");
+    const btnSubmit = document.getElementById("btnSubmit");
+
+    let fileValid = false;
+    let degreeValid = false; 
+    let nameValid = false;
+
+    // Kiểm tra trạng thái nút submit
+    function updateSubmitState() {
+        if (nameValid && fileValid && degreeValid) {
+            btnSubmit.disabled = false;
+        } else {
+            btnSubmit.disabled = true;
+        }
+    }
+
+    // Validate tên
+    nameInput.addEventListener("input", () => {
+        const val = nameInput.value.trim();
+
+        if (val.length === 0) {
+            nameErr.textContent = "Please fill in your name";
+            nameErr.style.display = "block";
+            nameValid = false;
+        } else if (val.length > 100) {
+            nameErr.textContent = "Do not exceed 100 characters";
+            nameErr.style.display = "block";
+            nameValid = false;
+        } else {
+            nameErr.style.display = "none";
+            nameValid = true;
+        }
+
+        updateSubmitState();
+    });
+
+    // Validate file thông tin cá nhân
+    document.querySelector("input[name='fileThongTin']")
+        .addEventListener("change", function () {
+
+            const allowed = [".pdf", ".doc", ".docx", ".jpg", ".jpeg", ".png"];
+            const file = this.files[0];
+            const fileName = document.getElementById("f1name");
+            const fileErr = document.getElementById("f1err");
+
+            if (!file) {
+                fileValid = false;
+                fileErr.textContent = "Please upload your personal information file";
+                fileErr.style.display = "block";
+                fileName.style.color = "#f87171";
+                fileName.textContent = "Please choose a file";
+                updateSubmitState();
+                return;
+            }
+
+            const ext = "." + file.name.split(".").pop().toLowerCase();
+
+            if (!allowed.includes(ext)) {
+                fileValid = false;
+                fileErr.textContent = "Invalid file type! Only PDF, DOC, DOCX, JPG, JPEG, PNG allowed";
+                fileErr.style.display = "block";
+                fileName.style.color = "#f87171";
+                fileName.textContent = file.name;
+                this.value = "";
+                updateSubmitState();
+                return;
+            }
+
+            // Hợp lệ
+            fileValid = true;
+            fileErr.style.display = "none";
+            fileName.style.color = "var(--text)";
+            fileName.textContent = file.name;
+
+            updateSubmitState();
+        });
+
+    // Validate các file optional (bằng cấp, file khác)
+    document.querySelectorAll("input[name='fileBangCap'], input[name='fileKhac']")
+        .forEach(input => {
+            input.addEventListener("change", function () {
+                const targetId = this.getAttribute("data-target");
+                const errorId = this.getAttribute("data-error");
+                const acceptAttr = this.getAttribute("data-accept");
+
+                const fileName = document.querySelector(targetId);
+                const fileErr = document.querySelector(errorId);
+                const file = this.files[0];
+
+                const allowed = acceptAttr.split(",");
+                const isDegree = this.name === "fileBangCap";   // <– phân biệt bằng cấp vs file khác
+
+                if (!file) {
+                    if (isDegree) {
+                        // BẰNG CẤP BẮT BUỘC
+                        degreeValid = false;
+                        fileErr.textContent = "Please upload your degree file";
+                        fileErr.style.display = "block";
+                        fileName.style.color = "#f87171";
+                        fileName.textContent = "Please choose a file";
+                        updateSubmitState();
+                    } else {
+                        // FILE KHÁC: vẫn optional
+                        fileName.textContent = acceptAttr.replace(/\./g, "").toUpperCase() + "...";
+                        fileName.style.color = "var(--text)";
+                        fileErr.style.display = "none";
+                    }
+                    return;
+                }
+
+                const ext = "." + file.name.split(".").pop().toLowerCase();
+
+                if (!allowed.includes(ext)) {
+                    fileErr.textContent = "Invalid file type!";
+                    fileErr.style.display = "block";
+                    fileName.style.color = "#f87171";
+                    fileName.textContent = file.name;
+                    this.value = "";
+
+                    if (isDegree) {
+                        degreeValid = false;
+                        updateSubmitState();
+                    }
+                    return;
+                }
+
+                // Hợp lệ
+                fileErr.style.display = "none";
+                fileName.style.color = "var(--text)";
+                fileName.textContent = file.name;
+
+                if (isDegree) {
+                    degreeValid = true;
+                    updateSubmitState();
+                }
+            });
+        });
+
+    // Khi load trang, check xem có giá trị cũ không (khi validation fail từ server)
+    window.addEventListener("DOMContentLoaded", () => {
+        if (nameInput.value.trim().length > 0) {
+            nameValid = true;
+        }
+
+        // Không thể check file từ server vì security, user phải chọn lại
+        updateSubmitState();
+    });
+</script>

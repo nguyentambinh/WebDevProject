@@ -25,7 +25,7 @@
         <EntityTypeShape EntityType="QLNSVATCModel.DUANTHEOHOPDONG" Width="1.5" PointX="6" PointY="25.25" IsExpanded="true" />
         <EntityTypeShape EntityType="QLNSVATCModel.FONT" Width="1.5" PointX="5.75" PointY="0.75" IsExpanded="true" />
         <EntityTypeShape EntityType="QLNSVATCModel.HOPDONG" Width="1.5" PointX="3.75" PointY="27" IsExpanded="true" />
-        <EntityTypeShape EntityType="QLNSVATCModel.HOSOVIECLAM" Width="1.5" PointX="3.75" PointY="6.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.HOSOVIECLAM" Width="1.5" PointX="4.5" PointY="6.875" IsExpanded="true" />
         <EntityTypeShape EntityType="QLNSVATCModel.KHACHHANG" Width="1.5" PointX="1.5" PointY="23.75" IsExpanded="true" />
         <EntityTypeShape EntityType="QLNSVATCModel.LANGUAGE" Width="1.5" PointX="7.75" PointY="0.75" IsExpanded="true" />
         <EntityTypeShape EntityType="QLNSVATCModel.LAYOUT_MODE" Width="1.5" PointX="9.75" PointY="0.75" IsExpanded="true" />
