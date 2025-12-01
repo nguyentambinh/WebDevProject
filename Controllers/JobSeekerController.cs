@@ -114,28 +114,49 @@ namespace QLNSVATC.Controllers
                 // Lưu file thông tin
                 if (fileThongTin != null && fileThongTin.ContentLength > 0)
                 {
-                    string fileName = Path.GetFileName(fileThongTin.FileName);
-                    string savePath = Path.Combine(fullFolderPath, fileName);
+                    string ext = Path.GetExtension(fileThongTin.FileName);
+                    string newFileName = FileHelper.BuildNormalizedFileName(
+                        model.TENUNGVIEN,
+                        "fileThongTin",
+                        now,
+                        ext
+                    );
+
+                    string savePath = Path.Combine(fullFolderPath, newFileName);
                     fileThongTin.SaveAs(savePath);
-                    model.FILETHONGTIN = fileName;
+                    model.FILETHONGTIN = newFileName;
                 }
 
                 // Lưu file bằng cấp
                 if (fileBangCap != null && fileBangCap.ContentLength > 0)
                 {
-                    string fileName = Path.GetFileName(fileBangCap.FileName);
-                    string savePath = Path.Combine(fullFolderPath, fileName);
+                    string ext = Path.GetExtension(fileBangCap.FileName);
+                    string newFileName = FileHelper.BuildNormalizedFileName(
+                        model.TENUNGVIEN,
+                        "fileBangCap",
+                        now,
+                        ext
+                    );
+
+                    string savePath = Path.Combine(fullFolderPath, newFileName);
                     fileBangCap.SaveAs(savePath);
-                    model.FILEBANGCAP = fileName;
+                    model.FILEBANGCAP = newFileName;
                 }
 
                 // Lưu file khác
                 if (fileKhac != null && fileKhac.ContentLength > 0)
                 {
-                    string fileName = Path.GetFileName(fileKhac.FileName);
-                    string savePath = Path.Combine(fullFolderPath, fileName);
+                    string ext = Path.GetExtension(fileKhac.FileName);
+                    string newFileName = FileHelper.BuildNormalizedFileName(
+                        model.TENUNGVIEN,
+                        "fileKhac",
+                        now,
+                        ext
+                    );
+
+                    string savePath = Path.Combine(fullFolderPath, newFileName);
                     fileKhac.SaveAs(savePath);
-                    model.FILEKHAC = fileName;
+                    model.FILEKHAC = newFileName;
                 }
 
                 // Lưu vào DB

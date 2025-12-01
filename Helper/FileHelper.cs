@@ -43,6 +43,37 @@ namespace QLNSVATC.Helpers
             return sb.ToString().Normalize(NormalizationForm.FormC);
         }
 
+
+        public static string NormalizeSimpleName(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return "unknown";
+
+            // Bỏ dấu trước
+            string noDiacritics = RemoveDiacritics(text);
+
+            // Chỉ giữ ký tự chữ + số
+            var sb = new StringBuilder();
+            foreach (char c in noDiacritics)
+            {
+                if (char.IsLetterOrDigit(c))
+                    sb.Append(c);
+            }
+
+            return sb.ToString();
+        }
+
+        public static string BuildNormalizedFileName(string fullName, string fileType, DateTime time, string extension)
+        {
+            string cleanName = NormalizeSimpleName(fullName);
+            string timestamp = time.ToString("yyyyMMddHHmmss");
+
+            // extension phải bao gồm dấu .
+            if (!extension.StartsWith("."))
+                extension = "." + extension;
+
+            return $"{cleanName}_{fileType}_{timestamp}{extension}".ToLower();
+        }
         public static string ToSafeName(this string raw)
         {
             if (string.IsNullOrWhiteSpace(raw))
