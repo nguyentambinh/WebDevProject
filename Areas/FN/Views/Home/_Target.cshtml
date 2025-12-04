@@ -1,0 +1,96 @@
+﻿<div class="fn-target">
+    <div class="box">
+        <h3 class="title">Target</h3>
+
+        <div class="tg-row">
+            <span class="dot dot-blue"></span>
+            <div class="tg-text">
+                <div>Sale Of Goods</div>
+                <small>1 month later</small>
+            </div>
+        </div>
+
+        <div class="tg-row">
+            <span class="dot dot-green"></span>
+            <div class="tg-text">
+                <div>Property Rental</div>
+                <small>3 month later</small>
+            </div>
+        </div>
+
+        <div class="tg-row">
+            <span class="dot dot-purple"></span>
+            <div class="tg-text">
+                <div>Design Services</div>
+                <small>4 month later</small>
+            </div>
+        </div>
+
+        <div class="tg-row">
+            <span class="dot dot-orange"></span>
+            <div class="tg-text">
+                <div>Service</div>
+                <small>1 year later</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .fn-target .box {
+        background: var(--card);
+        color: var(--text);
+        border-radius: 18px;
+        padding: 18px 20px;
+        border: 1px solid var(--border);
+        color: var(--text);
+    }
+
+    .fn-target .title {
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+
+    .tg-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 0;
+        border-bottom: 1px solid rgba(148,163,184,0.25);
+    }
+
+        .tg-row:last-child {
+            border-bottom: none;
+        }
+
+    .tg-text > div {
+        font-size: 13px;
+    }
+
+    .tg-text small {
+        font-size: 11px;
+        opacity: .75;
+    }
+
+    .dot {
+        width: 16px;
+        height: 16px;
+        border-radius: 999px;
+    }
+
+    .dot-blue {
+        background: #22c55e;
+    }
+
+    .dot-green {
+        background: #0ea5e9;
+    }
+
+    .dot-purple {
+        background: #a855f7;
+    }
+
+    .dot-orange {
+        background: #f97316;
+    }
+</style>

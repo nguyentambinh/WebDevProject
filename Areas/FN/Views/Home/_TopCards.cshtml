@@ -1,0 +1,30 @@
+﻿@model QLNSVATC.Models.FNDashboardViewModel
+
+<div class="fn-top-cards">
+
+    <div class="fn-card highlight">
+        <p class="label">Total Earning</p>
+        <h3 class="value">@Model.TotalEarning.ToString("N0")</h3>
+        <span class="sub">From projects &amp; services</span>
+    </div>
+
+    <div class="fn-card">
+        <p class="label">From Projects</p>
+        <h3 class="value">@Model.RevenueFromProjects.ToString("N0")</h3>
+        <span class="sub">Project revenue</span>
+    </div>
+
+    <div class="fn-card">
+        <p class="label">From Services</p>
+        <h3 class="value">@Model.RevenueFromServices.ToString("N0")</h3>
+        <span class="sub">@Model.RevenueInvoiceCount.ToString("N0") transactions</span>
+    </div>
+
+    <div class="fn-card">
+        <p class="label">Total Spending</p>
+        <h3 class="value">@Model.TotalSpending.ToString("N0")</h3>
+        <span class="sub">Balance: @Model.Balance.ToString("N0")</span>
+    </div>
+</div>
+
+<link href="~/Content/CSS/FNManager/_TopCards.css" rel="stylesheet" />

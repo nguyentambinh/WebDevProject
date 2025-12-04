@@ -30,9 +30,8 @@
              font-family:'Roboto',system-ui,-apple-system,BlinkMacSystemFont,sans-serif;">
     @Html.Action("_Header", "Shared", new { userId = userId, area = "" })
     @Html.Action("_Nav", "Shared", new { code = userId, role = "fn", area = "" })
-    @Html.Partial("_Slider")
 
-    <main class="" style="max-width: 1200px; margin: 0 auto;">
+    <main>
         @RenderBody()
     </main>
 

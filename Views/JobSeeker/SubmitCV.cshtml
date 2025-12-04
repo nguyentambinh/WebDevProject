@@ -204,35 +204,35 @@
     @if (TempData["SuccessMsg"] != null)
     {
         <div id="popupSuccess" style="
-        position:fixed;
-        top:20px;
-        left:50%;
-        transform:translateX(-50%);
-        background:#0f172acc;
-        border:1px solid #22c55e;
-        padding:18px 24px;
-        color:#bbf7d0;
-        font-size:16px;
-        border-radius:12px;
-        z-index:99999;
-        backdrop-filter:blur(6px);
-        animation: fadeIn .3s ease;
-        width:300px;
-        text-align:center;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.4);">
+            position:fixed;
+            top:50%;
+            left:50%;
+            transform:translate(-50%, -50%);
+            background:#0f172acc;
+            border:1px solid #22c55e;
+            padding:18px 24px;
+            color:#bbf7d0;
+            font-size:16px;
+            border-radius:12px;
+            z-index:99999;
+            backdrop-filter:blur(6px);
+            animation: fadeIn .3s ease;
+            width:300px;
+            text-align:center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);">
 
             <div>@TempData["SuccessMsg"]</div>
 
             <button id="okBtn" style="
-            width:100%;
-            margin-top:12px;
-            padding:8px;
-            border-radius:8px;
-            background:#22c55e22;
-            border:1px solid #22c55e;
-            color:#bbf7d0;
-            cursor:pointer;
-            transition: .2s;">
+                width:100%;
+                margin-top:12px;
+                padding:8px;
+                border-radius:8px;
+                background:#22c55e22;
+                border:1px solid #22c55e;
+                color:#bbf7d0;
+                cursor:pointer;
+                transition: .2s;">
                 OK
             </button>
         </div>

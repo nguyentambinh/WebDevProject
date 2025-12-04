@@ -1,0 +1,37 @@
+﻿.fn-top-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 22px;
+    margin-bottom: 24px;
+}
+
+.fn-card {
+    background: var(--card);
+    color: var(--text);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    padding: 18px 20px;
+    color: var(--text);
+}
+
+    .fn-card.highlight {
+        background: var(--accent);
+        color: #ffffff;
+    }
+
+    .fn-card .label {
+        font-size: 13px;
+        opacity: .9;
+        margin-bottom: 6px;
+    }
+
+    .fn-card .value {
+        font-size: 22px;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .fn-card .sub {
+        font-size: 11px;
+        opacity: .85;
+    }

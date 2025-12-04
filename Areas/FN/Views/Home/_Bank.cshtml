@@ -1,0 +1,29 @@
+﻿@model QLNSVATC.Models.FNDashboardViewModel
+
+<div class="fn-bank">
+    <div class="box">
+        <h3 class="title">My Account Bank</h3>
+
+        <div class="bank-card">
+            <div class="bank-top">
+                <span class="bank-name">Chase</span>
+                <span class="badge">Credit</span>
+            </div>
+
+            <div class="bank-bottom">
+                <div>
+                    <p>Transactions</p>
+                    <h4>@Model.TransactionCount</h4>
+                </div>
+                <div>
+                    <p>Total Balance</p>
+                    <h4>@Model.Balance.ToString("N0")</h4>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-add">+ Add New Card</button>
+    </div>
+</div>
+
+<link href="~/Content/CSS/FNManager/_Bank.css" rel="stylesheet" />
