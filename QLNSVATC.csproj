@@ -440,12 +440,10 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
-<<<<<<< HEAD
     <Content Include="Content\CSS\FNManager\Highlight.css" />
     <Content Include="Content\CSS\FNManager\Index.css" />
     <Content Include="Content\CSS\FNManager\_Bank.css" />
     <Content Include="Content\CSS\FNManager\_TopCards.css" />
-=======
     <Content Include="Content\CSS\Slider.css" />
     <Content Include="Content\CSS\Footer.css" />
     <Content Include="Content\Images\Home\DuAn\1XNN01.jpg" />
@@ -488,7 +486,6 @@
     <Content Include="Content\Images\Home\DuAn\4XCP32.jpg" />
     <Content Include="Content\Images\Home\DuAn\4XCP36.jpg" />
     <Content Include="Content\Images\Home\DuAn\4XCP40.jpg" />
->>>>>>> 61e8d04ac879fd07885b99c0c942e22b1b6aa78e
     <Content Include="Content\Images\Home\DuAn\default.jpg" />
     <Content Include="Content\Images\Home\NhanVien\ANH85012PT.jpg" />
     <Content Include="Content\Images\Home\NhanVien\Anh871502.jpg" />
@@ -687,16 +684,13 @@
     <Content Include="packages\EntityFramework.6.5.1\tools\net45\win-x86\ef6.pdb" />
     <Content Include="packages\EntityFramework.6.5.1\tools\net6.0\any\ef6.dll" />
     <Content Include="packages\EntityFramework.6.5.1\tools\net6.0\any\ef6.pdb" />
-<<<<<<< HEAD
     <Content Include="Areas\FN\Views\Home\_Activity.cshtml" />
     <Content Include="Areas\FN\Views\Home\_Bank.cshtml" />
     <Content Include="Areas\FN\Views\Home\_Highlight.cshtml" />
     <Content Include="Areas\FN\Views\Home\_Sidebar.cshtml" />
     <Content Include="Areas\FN\Views\Home\_Target.cshtml" />
     <Content Include="Areas\FN\Views\Home\_TopCards.cshtml" />
-=======
     <Content Include="Content\CSS\app.config" />
->>>>>>> 61e8d04ac879fd07885b99c0c942e22b1b6aa78e
     <None Include="packages\jQuery.3.7.0\Content\Scripts\jquery-3.7.0-vsdoc.js" />
     <Content Include="packages\jQuery.3.7.0\Content\Scripts\jquery-3.7.0.js" />
     <Content Include="packages\jQuery.3.7.0\Content\Scripts\jquery-3.7.0.min.js" />
