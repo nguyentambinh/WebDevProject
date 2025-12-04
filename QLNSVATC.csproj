@@ -245,7 +245,10 @@
     <Compile Include="Areas\FN\Controllers\ExpenseController.cs" />
     <Compile Include="Areas\FN\Controllers\RevenueController.cs" />
     <Compile Include="Areas\FN\FNAreaRegistration.cs" />
+    <Compile Include="Areas\HR\Controllers\DepartmentController.cs" />
+    <Compile Include="Areas\HR\Controllers\EmployeeController.cs" />
     <Compile Include="Areas\HR\Controllers\HomeController.cs" />
+    <Compile Include="Areas\HR\Controllers\ProjectController.cs" />
     <Compile Include="Areas\OF\Controllers\HomeController.cs" />
     <Compile Include="Areas\OF\OFAreaRegistration.cs" />
     <Compile Include="Areas\HR\HRAreaRegistration.cs" />
@@ -338,6 +341,7 @@
       <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\HRDashboardViewModel.cs" />
+    <Compile Include="Models\HREmployeeInformationViewModel.cs" />
     <Compile Include="Models\KHACHHANG.cs">
       <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
     </Compile>
@@ -709,6 +713,9 @@
     <Content Include="Areas\FN\Views\Expense\RawMaterialPurchase.cshtml" />
     <Content Include="Areas\FN\Views\Expense\_MaterialApprovalsTable.cshtml" />
     <Content Include="Areas\FN\Views\Expense\Project.cshtml" />
+    <Content Include="Areas\HR\Views\Employee\information.cshtml" />
+    <Content Include="Areas\HR\Views\Employee\Profile.cshtml" />
+    <Content Include="Areas\Employee\Views\Home\Information.cshtml" />
     <None Include="packages\jQuery.3.7.0\Content\Scripts\jquery-3.7.0-vsdoc.js" />
     <Content Include="packages\jQuery.3.7.0\Content\Scripts\jquery-3.7.0.js" />
     <Content Include="packages\jQuery.3.7.0\Content\Scripts\jquery-3.7.0.min.js" />
@@ -1007,6 +1014,22 @@
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
+    <Content Include="Uploads\HoSoUngVien\2025120116_1234cfrfcrcfr\z7279096394342_3cf1075f9429fa3ca961898334721e66.jpg" />
+    <Content Include="Uploads\HoSoUngVien\2025120116_1234cfrfcrcfr\z7279114463625_f449a2205acfa1d86d18b0ab0fd077ea.jpg" />
+    <Content Include="Uploads\HoSoUngVien\2025120116_beo\Untitled Diagram-Đăng ký.drawio.png" />
+    <Content Include="Uploads\HoSoUngVien\2025120116_beo\z7279105512234_df8136f358f605ddd9a46d97861d6acf.jpg" />
+    <Content Include="Uploads\HoSoUngVien\2025120116_con_me_gpt_ngu_vcl\Untitled Diagram-Đăng ký.drawio.png" />
+    <Content Include="Uploads\HoSoUngVien\2025120116_con_me_gpt_ngu_vcl\z7279096394342_3cf1075f9429fa3ca961898334721e66.jpg" />
+    <Content Include="Uploads\HoSoUngVien\2025120121_thien_hoang\thienhoang_filebangcap_20251201212450.png" />
+    <Content Include="Uploads\HoSoUngVien\2025120121_thien_hoang\thienhoang_filethongtin_20251201212450.png" />
+    <Content Include="Uploads\HoSoUngVien\2025120121_toi_yeu_Claude\toiyeuclaude_filebangcap_20251201212629.jpg" />
+    <Content Include="Uploads\HoSoUngVien\2025120121_toi_yeu_Claude\toiyeuclaude_filethongtin_20251201212629.jpg" />
+    <Content Include="Uploads\HoSoUngVien\2025120408_NGUYEN_TAN_SANG\nguyentansang_filebangcap_20251204081612.jpg" />
+    <Content Include="Uploads\HoSoUngVien\2025120408_NGUYEN_TAN_SANG\nguyentansang_filethongtin_20251204081612.jpg" />
+    <Content Include="Uploads\HoSoUngVien\2025120409_NGUYEN_TAN_LOC\nguyentanloc_filebangcap_20251204092208.jpg" />
+    <Content Include="Uploads\HoSoUngVien\2025120409_NGUYEN_TAN_LOC\nguyentanloc_filethongtin_20251204092208.jpg" />
+    <Content Include="Uploads\HoSoUngVien\2025120409_NGUYEN_TAN_SANG\nguyentansang_filebangcap_20251204091433.jpg" />
+    <Content Include="Uploads\HoSoUngVien\2025120409_NGUYEN_TAN_SANG\nguyentansang_filethongtin_20251204091433.jpg" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -1028,6 +1051,9 @@
     <Content Include="Views\Account\ForgotPassword.cshtml" />
     <Content Include="Views\JobSeeker\SubmitCV.cshtml" />
     <Content Include="Views\Shared\_Footer.cshtml" />
+    <Content Include="Uploads\HoSoUngVien\2025120408_NGUYEN_TAN_SANG\nguyentansang_filekhac_20251204081612.docx" />
+    <Content Include="Uploads\HoSoUngVien\2025120409_NGUYEN_TAN_LOC\nguyentanloc_filekhac_20251204092208.docx" />
+    <Content Include="Uploads\HoSoUngVien\2025120409_NGUYEN_TAN_SANG\nguyentansang_filekhac_20251204091433.docx" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -1035,6 +1061,8 @@
     <Folder Include="Areas\Employee\Data\" />
     <Folder Include="Areas\FN\Data\" />
     <Folder Include="Areas\HR\Data\" />
+    <Folder Include="Areas\HR\Views\Department\" />
+    <Folder Include="Areas\HR\Views\Project\" />
     <Folder Include="Areas\OF\Data\" />
   </ItemGroup>
   <ItemGroup>
