@@ -18,7 +18,12 @@ namespace QLNSVATC
                 defaults: new { controller = "Home", action = "Index" },
                 namespaces: new[] { "QLNSVATC.Controllers" }
             );
-
+            routes.MapRoute(
+                name: "Trang chu2",
+                url: "",
+                defaults: new { controller = "Home", action = "Index" },
+                namespaces: new[] { "QLNSVATC.Controllers" }
+            );
             routes.MapRoute(
                 name: "Gioi thieu",
                 url: "gioi-thieu",
@@ -29,6 +34,18 @@ namespace QLNSVATC
                 name: "Ung tuyen",
                 url: "ung-tuyen",
                 defaults: new { controller = "JobSeeker", action = "SubmitCV", id = UrlParameter.Optional },
+                namespaces: new[] { "QLNSVATC.Controllers" }
+            );
+            routes.MapRoute(
+                name: "Dang nhap",
+                url: "dang-nhap",
+                defaults: new { controller = "Account", action = "Login", id = UrlParameter.Optional },
+                namespaces: new[] { "QLNSVATC.Controllers" }
+            );
+            routes.MapRoute(
+                name: "Dang ky",
+                url: "dang-ky",
+                defaults: new { controller = "Account", action = "Register", id = UrlParameter.Optional },
                 namespaces: new[] { "QLNSVATC.Controllers" }
             );
             routes.MapRoute(

@@ -1,5 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <SSDTUnitTestPath Condition="'$(SSDTUnitTestPath)' == ''">$(VsInstallRoot)\Common7\IDE\Extensions\Microsoft\SQLDB</SSDTUnitTestPath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SSDTPath Condition="'$(SSDTPath)' == ''">$(VsInstallRoot)\Common7\IDE\Extensions\Microsoft\SQLDB\DAC</SSDTPath>
+  </PropertyGroup>
   <Import Project="packages\EntityFramework.6.5.1\build\EntityFramework.props" Condition="Exists('packages\EntityFramework.6.5.1\build\EntityFramework.props')" />
   <Import Project="packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -15,7 +21,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>QLNSVATC</RootNamespace>
     <AssemblyName>QLNSVATC</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>true</UseIISExpress>
     <Use64BitIISExpress />
@@ -46,24 +52,126 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Azure.Core, Version=1.38.0.0, Culture=neutral, PublicKeyToken=92742159e12e44c8, processorArchitecture=MSIL">
+      <HintPath>packages\Azure.Core.1.38.0\lib\net472\Azure.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Azure.Identity, Version=1.11.4.0, Culture=neutral, PublicKeyToken=92742159e12e44c8, processorArchitecture=MSIL">
+      <HintPath>packages\Azure.Identity.1.11.4\lib\netstandard2.0\Azure.Identity.dll</HintPath>
+    </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>packages\EntityFramework.6.5.1\lib\net45\EntityFramework.dll</HintPath>
     </Reference>
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>packages\EntityFramework.6.5.1\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Bcl.AsyncInterfaces.1.1.1\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.Data.SqlClient, Version=5.0.0.0, Culture=neutral, PublicKeyToken=23ec7fc2d6eaa4a5, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Data.SqlClient.5.1.6\lib\net462\Microsoft.Data.SqlClient.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Identity.Client, Version=4.61.3.0, Culture=neutral, PublicKeyToken=0a613f4dd989e8ae, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Identity.Client.4.61.3\lib\net462\Microsoft.Identity.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Identity.Client.Extensions.Msal, Version=4.61.3.0, Culture=neutral, PublicKeyToken=0a613f4dd989e8ae, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Identity.Client.Extensions.Msal.4.61.3\lib\netstandard2.0\Microsoft.Identity.Client.Extensions.Msal.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.Abstractions, Version=6.35.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.IdentityModel.Abstractions.6.35.0\lib\net472\Microsoft.IdentityModel.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.JsonWebTokens, Version=6.35.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.IdentityModel.JsonWebTokens.6.35.0\lib\net472\Microsoft.IdentityModel.JsonWebTokens.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.Logging, Version=6.35.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.IdentityModel.Logging.6.35.0\lib\net472\Microsoft.IdentityModel.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.Protocols, Version=6.35.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.IdentityModel.Protocols.6.35.0\lib\net472\Microsoft.IdentityModel.Protocols.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect, Version=6.35.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.IdentityModel.Protocols.OpenIdConnect.6.35.0\lib\net472\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.Tokens, Version=6.35.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.IdentityModel.Tokens.6.35.0\lib\net472\Microsoft.IdentityModel.Tokens.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ClientModel, Version=1.0.0.0, Culture=neutral, PublicKeyToken=92742159e12e44c8, processorArchitecture=MSIL">
+      <HintPath>packages\System.ClientModel.1.0.0\lib\netstandard2.0\System.ClientModel.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Configuration.ConfigurationManager, Version=6.0.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Configuration.ConfigurationManager.6.0.1\lib\net461\System.Configuration.ConfigurationManager.dll</HintPath>
+    </Reference>
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.OracleClient" />
+    <Reference Include="System.Diagnostics.DiagnosticSource, Version=6.0.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Diagnostics.DiagnosticSource.6.0.1\lib\net461\System.Diagnostics.DiagnosticSource.dll</HintPath>
+    </Reference>
     <Reference Include="System.Drawing" />
+    <Reference Include="System.IdentityModel" />
+    <Reference Include="System.IdentityModel.Tokens.Jwt, Version=6.35.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\System.IdentityModel.Tokens.Jwt.6.35.0\lib\net472\System.IdentityModel.Tokens.Jwt.dll</HintPath>
+    </Reference>
+    <Reference Include="System.IO.FileSystem.AccessControl, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.IO.FileSystem.AccessControl.5.0.0\lib\net461\System.IO.FileSystem.AccessControl.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Memory.Data, Version=1.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Memory.Data.1.0.2\lib\net461\System.Memory.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.InteropServices.RuntimeInformation, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Runtime.InteropServices.RuntimeInformation.4.3.0\lib\net45\System.Runtime.InteropServices.RuntimeInformation.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security" />
+    <Reference Include="System.Security.AccessControl, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Security.AccessControl.6.0.0\lib\net461\System.Security.AccessControl.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.ProtectedData, Version=4.0.5.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Security.Cryptography.ProtectedData.4.7.0\lib\net461\System.Security.Cryptography.ProtectedData.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security.Permissions, Version=6.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Security.Permissions.6.0.0\lib\net461\System.Security.Permissions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security.Principal.Windows, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Security.Principal.Windows.5.0.0\lib\net461\System.Security.Principal.Windows.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ServiceProcess" />
+    <Reference Include="System.Text.Encodings.Web, Version=6.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Text.Encodings.Web.6.0.0\lib\net461\System.Text.Encodings.Web.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Text.Json, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Text.Json.4.7.2\lib\net461\System.Text.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.ApplicationServices" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
@@ -119,6 +227,7 @@
       <Private>True</Private>
       <HintPath>packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
     </Reference>
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform">
@@ -330,15 +439,157 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
-    <Content Include="Content\CSS\Footer.css" />
     <Content Include="Content\CSS\Slider.css" />
+    <Content Include="Content\CSS\Footer.css" />
+    <Content Include="Content\Images\Home\DuAn\1XNN01.jpg" />
+    <Content Include="Content\Images\Home\DuAn\1XNN05.jpg" />
+    <Content Include="Content\Images\Home\DuAn\1XNN09.jpg" />
+    <Content Include="Content\Images\Home\DuAn\1XNN13.jpg" />
+    <Content Include="Content\Images\Home\DuAn\1XNN17.jpg" />
+    <Content Include="Content\Images\Home\DuAn\1XNN21.jpg" />
+    <Content Include="Content\Images\Home\DuAn\1XNN25.jpg" />
+    <Content Include="Content\Images\Home\DuAn\1XNN29.jpg" />
+    <Content Include="Content\Images\Home\DuAn\1XNN33.jpg" />
+    <Content Include="Content\Images\Home\DuAn\1XNN37.jpg" />
+    <Content Include="Content\Images\Home\DuAn\2XNB02.jpg" />
+    <Content Include="Content\Images\Home\DuAn\2XNB06.jpg" />
+    <Content Include="Content\Images\Home\DuAn\2XNB10.jpg" />
+    <Content Include="Content\Images\Home\DuAn\2XNB14.jpg" />
+    <Content Include="Content\Images\Home\DuAn\2XNB18.jpg" />
+    <Content Include="Content\Images\Home\DuAn\2XNB22.jpg" />
+    <Content Include="Content\Images\Home\DuAn\2XNB26.jpg" />
+    <Content Include="Content\Images\Home\DuAn\2XNB30.jpg" />
+    <Content Include="Content\Images\Home\DuAn\2XNB34.jpg" />
+    <Content Include="Content\Images\Home\DuAn\2XNB38.jpg" />
+    <Content Include="Content\Images\Home\DuAn\3XCC03.jpg" />
+    <Content Include="Content\Images\Home\DuAn\3XCC07.jpg" />
+    <Content Include="Content\Images\Home\DuAn\3XCC11.jpg" />
+    <Content Include="Content\Images\Home\DuAn\3XCC15.jpg" />
+    <Content Include="Content\Images\Home\DuAn\3XCC19.jpg" />
+    <Content Include="Content\Images\Home\DuAn\3XCC23.jpg" />
+    <Content Include="Content\Images\Home\DuAn\3XCC27.jpg" />
+    <Content Include="Content\Images\Home\DuAn\3XCC31.jpg" />
+    <Content Include="Content\Images\Home\DuAn\3XCC35.jpg" />
+    <Content Include="Content\Images\Home\DuAn\3XCC39.jpg" />
+    <Content Include="Content\Images\Home\DuAn\4XCP04.jpg" />
+    <Content Include="Content\Images\Home\DuAn\4XCP08.jpg" />
+    <Content Include="Content\Images\Home\DuAn\4XCP12.jpg" />
+    <Content Include="Content\Images\Home\DuAn\4XCP16.jpg" />
+    <Content Include="Content\Images\Home\DuAn\4XCP20.jpg" />
+    <Content Include="Content\Images\Home\DuAn\4XCP24.jpg" />
+    <Content Include="Content\Images\Home\DuAn\4XCP28.jpg" />
+    <Content Include="Content\Images\Home\DuAn\4XCP32.jpg" />
+    <Content Include="Content\Images\Home\DuAn\4XCP36.jpg" />
+    <Content Include="Content\Images\Home\DuAn\4XCP40.jpg" />
     <Content Include="Content\Images\Home\DuAn\default.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\ANH85012PT.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\Anh871502.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\Anh8715OP.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\ANH98191KH.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\BAO11022CF.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\BAO11031CF.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\BAO11044CF.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\Binh2657Y.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\BIS05143HN.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\BUI05123HJ.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\CHI90056BD.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\DAN00184SG.jpg" />
     <Content Include="Content\Images\Home\NhanVien\default.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\DUC00123SG.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\DUC75039MH.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\DUC85112LM.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\DUC87021KT.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\DUC87030KT.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\DUC87043KT.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\DUC98166QT.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\Giang4450.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\HAI11077MN.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\HAI64127LP.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\HAI64129QP.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\HAI64130QP.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\HAI90012PD.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\HAN11032CF.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\HAN90084BG.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\HIE05188HN.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\HIE87014MT.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\HIE87056MN.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\HIE87058NC.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\HIE98151KT.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\HUU11045JW.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\HUU11058CF.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\HUU85177KT.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\HUU87067PT.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\HUU92126QT.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\KHA11069FH.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\KHA64101FP.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\KIM00162JL.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\KIM05145HN.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\KIM92123PQ.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\LAM05123HN.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\LAM98110KT.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\LAM98111KT.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\LAM98112KT.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\LAN92122DL.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\LAN92184PQ.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\Long5203XE.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\MIN00129JK.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\MIN00130GH.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\MIN00149TB.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\MIN05178HN.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\MOT90052BD.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\Ngoc4851NV.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\Nguyen3434.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\NHU00192SG.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\NHU05145DN.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\NHU05199DN.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\Nuyen9827.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\PHH98134BT.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\PHU11015JW.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\PHU11016JW.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\PHU85149PT.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\PHU90004BG.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\PHU90029BG.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\QUY85167TC.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\QUY92111QT.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\SON64122TP.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\SON64140JG.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\SON64145TP.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\SON64185ZR.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\SON64195BL.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\SON64198TP.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\TAM85134PT.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\TAM98188HG.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\TAN98154QT.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\TCA_0113-683x1024.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\THA05112TN.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\THA98110HG.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\THA98130HG.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\THA98192QT.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\THH75049XY.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\THH90078DA.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\THI75018MN.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\THI87056MN.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\THI90045QT.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\THO05130TN.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\THO92114PH.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\THU05199HN.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\THU75011DC.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\THU75087YN.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\THU75092PK.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\THU75097YN.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\THU85144PT.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\THU87012MN.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\TON64138TP.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\TRI90027BG.jpg" />
+    <Content Include="Content\Images\Home\NhanVien\VAN92166PH.jpg" />
     <Content Include="Content\Images\mainbg.png" />
-    <Content Include="Content\Images\slider1.jpg" />
-    <Content Include="Content\Images\slider3.jpg" />
-    <Content Include="Content\Images\slider2.jpg" />
     <Content Include="Content\Images\mainbg.png" />
+    <Content Include="Content\Images\Slider\Slider2.png" />
+    <Content Include="Content\Images\Slider\Slider3.png" />
+    <Content Include="Content\Images\Slider\Slider6.png" />
+    <Content Include="Content\Images\Slider\Slider4.png" />
+    <Content Include="Content\Images\Slider\Slider1.png" />
+    <Content Include="Content\Images\Slider\Slider5.png" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
@@ -428,6 +679,7 @@
     <Content Include="packages\EntityFramework.6.5.1\tools\net45\win-x86\ef6.pdb" />
     <Content Include="packages\EntityFramework.6.5.1\tools\net6.0\any\ef6.dll" />
     <Content Include="packages\EntityFramework.6.5.1\tools\net6.0\any\ef6.pdb" />
+    <Content Include="Content\CSS\app.config" />
     <None Include="packages\jQuery.3.7.0\Content\Scripts\jquery-3.7.0-vsdoc.js" />
     <Content Include="packages\jQuery.3.7.0\Content\Scripts\jquery-3.7.0.js" />
     <Content Include="packages\jQuery.3.7.0\Content\Scripts\jquery-3.7.0.min.js" />
@@ -787,6 +1039,21 @@
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
+  <ItemGroup />
+  <ItemGroup Condition="$(VisualStudioVersion) == '17.0'">
+    <Reference Include="Microsoft.Data.Tools.Schema.Sql, Version=16.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>$(SSDTPath)\Microsoft.Data.Tools.Schema.Sql.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Data.Tools.Schema.Sql.UnitTesting, Version=17.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>$(SSDTUnitTestPath)\Microsoft.Data.Tools.Schema.Sql.UnitTesting.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Data.Tools.Schema.Sql.UnitTestingAdapter, Version=17.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>$(SSDTUnitTestPath)\Microsoft.Data.Tools.Schema.Sql.UnitTestingAdapter.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
@@ -822,8 +1089,15 @@
     <Error Condition="!Exists('packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
     <Error Condition="!Exists('packages\EntityFramework.6.5.1\build\EntityFramework.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\EntityFramework.6.5.1\build\EntityFramework.props'))" />
     <Error Condition="!Exists('packages\EntityFramework.6.5.1\build\EntityFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\EntityFramework.6.5.1\build\EntityFramework.targets'))" />
+    <Error Condition="!Exists('packages\Microsoft.Data.SqlClient.SNI.5.1.1\build\net462\Microsoft.Data.SqlClient.SNI.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Data.SqlClient.SNI.5.1.1\build\net462\Microsoft.Data.SqlClient.SNI.targets'))" />
   </Target>
   <Import Project="packages\EntityFramework.6.5.1\build\EntityFramework.targets" Condition="Exists('packages\EntityFramework.6.5.1\build\EntityFramework.targets')" />
+  <PropertyGroup>
+    <SsdtUnitTestVersion>3.1</SsdtUnitTestVersion>
+  </PropertyGroup>
+  <Import Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.Sql.UnitTesting.targets" Condition="$(VisualStudioVersion) != '15.0' And '$(SQLDBExtensionsRefPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.Sql.UnitTesting.targets" Condition="$(VisualStudioVersion) != '15.0' And '$(SQLDBExtensionsRefPath)' == ''" />
+  <Import Project="packages\Microsoft.Data.SqlClient.SNI.5.1.1\build\net462\Microsoft.Data.SqlClient.SNI.targets" Condition="Exists('packages\Microsoft.Data.SqlClient.SNI.5.1.1\build\net462\Microsoft.Data.SqlClient.SNI.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

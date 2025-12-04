@@ -98,8 +98,8 @@ namespace QLNSVATC.Controllers
         }
         [HttpPost]
         public ActionResult SaveSettings(string ThemeColor, string DarkMode,
-                                     string LanguageCode, string FontCode,
-                                     int FontSize)
+                             string LanguageCode, string FontCode,
+                             int FontSize)
         {
             string userId = Convert.ToString(Session["UserId"]);
             Debug.WriteLine("SaveSetting");
@@ -116,7 +116,12 @@ namespace QLNSVATC.Controllers
             if (string.IsNullOrEmpty(userId))
             {
                 TempData["DebugSettings"] += " | userId NULL -> chưa login";
-                return Redirect("/?status=error");
+
+                var backUrlError = Request.UrlReferrer != null
+                    ? Request.UrlReferrer.ToString()
+                    : "/";
+
+                return Redirect(backUrlError);
             }
 
             var st = db.USER_SETTINGS.FirstOrDefault(x => x.UserId == userId);
@@ -143,18 +148,25 @@ namespace QLNSVATC.Controllers
             st.FontCode = FontCode;
             st.FontSize = FontSize;
             st.UpdatedAt = DateTime.Now;
+
             Session["DarkMode"] = dark;
             Session["ThemeColor"] = ThemeColor;
             Session["LanguageCode"] = LanguageCode;
             Session["FontCode"] = FontCode;
             Session["FontSize"] = FontSize;
+
             db.SaveChanges();
 
             Debug.WriteLine("-> SaveChanges()");
             TempData["DebugSettings"] += " | Save OK";
 
-            return Redirect("/?status=success");
+            var backUrl = Request.UrlReferrer != null
+                ? Request.UrlReferrer.ToString()
+                : "/";
+
+            return Redirect(backUrl);
         }
+
     }
 }
 
