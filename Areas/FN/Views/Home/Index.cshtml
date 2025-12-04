@@ -1,8 +1,59 @@
-﻿
+﻿@using QLNSVATC.Models
+@model QLNSVATC.Models.FNDashboardViewModel
 @{
-    ViewBag.Title = "Index";
     Layout = "~/Areas/FN/Views/Shared/_LayoutFN.cshtml";
+
+    var st = ViewBag.Settings as UserViewBagModel;
+
+    string theme = st?.ThemeHex ?? "#38bdf8";
+    bool dark = st?.DarkMode ?? true;
+
+    string bg = dark ? "#0d0f14" : "#f6f7fb";
+    string cardBg = dark ? "#11141c" : "#ffffff";
+    string cardBg2 = dark ? "#1b1f29" : "#f4f6fb";
+    string textColor = dark ? "#e5e7eb" : "#000000";
+    string border = dark ? "#2b303b" : "#d8dce3";
+
+    string font = st?.FontFamily ?? "Inter";
+    int fsize = (st?.FontSize ?? 16);
+
+    Func<string, string> T = key =>
+st.TranslateDict.ContainsKey(key) ? st.TranslateDict[key] : key;
 }
 
-<h2>Index</h2>
+<div class="fn-dashboard">
+    <!-- SIDEBAR -->
+    @Html.Partial("_Sidebar")
 
+    <!-- CONTENT -->
+    <div class="fn-main">
+        <div class="fn-header-row">
+            <h2 class="fn-title">@T("DASHBOARD")</h2>
+        </div>
+
+        @Html.Partial("_TopCards", Model)
+        @Html.Partial("_Highlight", Model)
+
+
+        <div class="fn-bottom">
+            @Html.Partial("_Bank", Model)
+            @Html.Partial("_Target")
+
+        </div>
+        @Html.Partial("_Activity")
+    </div>
+</div>
+
+<link href="~/Content/CSS/FNManager/Index.css" rel="stylesheet" />
+<style>
+    :root {
+    --bg: @bg;
+    --card: @cardBg;
+    --card2: @cardBg2;
+    --text: @textColor;
+    --accent: @theme;
+    --border: @border;
+    --font: @font;
+    --fz: @fsize;
+}
+</style>

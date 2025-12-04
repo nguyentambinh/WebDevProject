@@ -1,0 +1,122 @@
+﻿@model QLNSVATC.Models.FNDashboardViewModel
+
+<div class="fn-analytics">
+    <div class="an-header">
+        <span class="an-title">Project Highlights</span>
+
+        <select id="analyticsFilter" class="an-filter">
+            <option value="revenue">Highest revenue projects</option>
+            <option value="profit">Highest profit (%) projects</option>
+            <option value="employee">Most staffed projects</option>
+        </select>
+    </div>
+
+    <!-- LIST: DOANH THU CAO NHẤT -->
+    <div class="an-list an-revenue active">
+        @if (Model.TopRevenueProjects.Any())
+        {
+            foreach (var p in Model.TopRevenueProjects)
+            {
+                <div class="an-row">
+                    <div class="an-left">
+                        <div class="an-circle revenue"></div>
+                        <div>
+                            <div class="an-name">@p.ProjectName</div>
+                            <div class="an-sub">Code: @p.MaDa</div>
+                        </div>
+                    </div>
+                    <div class="an-right">
+                        <div class="an-main">@p.Revenue.ToString("N0")</div>
+                        <div class="an-meta">Cost: @p.Cost.ToString("N0")</div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="an-empty">No project revenue data.</div>
+        }
+    </div>
+
+    <!-- LIST: LỢI NHUẬN CAO NHẤT -->
+    <div class="an-list an-profit">
+        @if (Model.TopProfitProjects.Any())
+        {
+            foreach (var p in Model.TopProfitProjects)
+            {
+                <div class="an-row">
+                    <div class="an-left">
+                        <div class="an-circle profit"></div>
+                        <div>
+                            <div class="an-name">@p.ProjectName</div>
+                            <div class="an-sub">Code: @p.MaDa</div>
+                        </div>
+                    </div>
+                    <div class="an-right">
+                        <div class="an-main">
+                            @(p.ProfitPercent.HasValue ? p.ProfitPercent.Value.ToString("N2") + "%" : "N/A")
+                        </div>
+                        <div class="an-meta">
+                            Rev: @p.Revenue.ToString("N0") · Cost: @p.Cost.ToString("N0")
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="an-empty">No profit data.</div>
+        }
+    </div>
+
+    <!-- LIST: NHIỀU NHÂN VIÊN NHẤT -->
+    <div class="an-list an-employee">
+        @if (Model.TopEmployeeProjects.Any())
+        {
+            foreach (var p in Model.TopEmployeeProjects)
+            {
+                <div class="an-row">
+                    <div class="an-left">
+                        <div class="an-circle employee"></div>
+                        <div>
+                            <div class="an-name">@p.ProjectName</div>
+                            <div class="an-sub">Code: @p.MaDa</div>
+                        </div>
+                    </div>
+                    <div class="an-right">
+                        <div class="an-main">@p.EmployeeCount</div>
+                        <div class="an-meta">employees joined</div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="an-empty">No project assignment data.</div>
+        }
+    </div>
+</div>
+
+<link href="~/Content/CSS/FNManager/Highlight.css" rel="stylesheet" />
+
+<script>
+(function () {
+    const sel = document.getElementById("analyticsFilter");
+    if (!sel) return;
+
+    const blocks = {
+        revenue: document.querySelector(".an-revenue"),
+        profit: document.querySelector(".an-profit"),
+        employee: document.querySelector(".an-employee")
+    };
+
+    sel.addEventListener("change", function () {
+        const val = this.value;
+        Object.keys(blocks).forEach(k => {
+            if (blocks[k]) {
+                blocks[k].classList.toggle("active", k === val);
+            }
+        });
+    });
+})();
+</script>

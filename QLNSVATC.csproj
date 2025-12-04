@@ -133,13 +133,13 @@
     <Compile Include="Areas\Admin\Controllers\HomeController.cs" />
     <Compile Include="Areas\Employee\Controllers\HomeController.cs" />
     <Compile Include="Areas\Employee\EmployeeAreaRegistration.cs" />
-    <Compile Include="Areas\FN\Controllers\HomeController.cs" />
     <Compile Include="Areas\FN\FNAreaRegistration.cs" />
     <Compile Include="Areas\HR\Controllers\HomeController.cs" />
     <Compile Include="Areas\OF\Controllers\HomeController.cs" />
     <Compile Include="Areas\OF\OFAreaRegistration.cs" />
     <Compile Include="Areas\HR\HRAreaRegistration.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Areas\FN\Controllers\HomeController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\JobSeekerController.cs" />
     <Compile Include="Controllers\SharedController.cs" />
@@ -211,6 +211,7 @@
     <Compile Include="Models\DUANTHEOHOPDONG.cs">
       <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\FNDashboardViewModel.cs" />
     <Compile Include="Models\FONT.cs">
       <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
     </Compile>
@@ -330,8 +331,10 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
-    <Content Include="Content\CSS\Footer.css" />
-    <Content Include="Content\CSS\Slider.css" />
+    <Content Include="Content\CSS\FNManager\Highlight.css" />
+    <Content Include="Content\CSS\FNManager\Index.css" />
+    <Content Include="Content\CSS\FNManager\_Bank.css" />
+    <Content Include="Content\CSS\FNManager\_TopCards.css" />
     <Content Include="Content\Images\Home\DuAn\default.jpg" />
     <Content Include="Content\Images\Home\NhanVien\default.jpg" />
     <Content Include="Content\Images\mainbg.png" />
@@ -428,6 +431,12 @@
     <Content Include="packages\EntityFramework.6.5.1\tools\net45\win-x86\ef6.pdb" />
     <Content Include="packages\EntityFramework.6.5.1\tools\net6.0\any\ef6.dll" />
     <Content Include="packages\EntityFramework.6.5.1\tools\net6.0\any\ef6.pdb" />
+    <Content Include="Areas\FN\Views\Home\_Activity.cshtml" />
+    <Content Include="Areas\FN\Views\Home\_Bank.cshtml" />
+    <Content Include="Areas\FN\Views\Home\_Highlight.cshtml" />
+    <Content Include="Areas\FN\Views\Home\_Sidebar.cshtml" />
+    <Content Include="Areas\FN\Views\Home\_Target.cshtml" />
+    <Content Include="Areas\FN\Views\Home\_TopCards.cshtml" />
     <None Include="packages\jQuery.3.7.0\Content\Scripts\jquery-3.7.0-vsdoc.js" />
     <Content Include="packages\jQuery.3.7.0\Content\Scripts\jquery-3.7.0.js" />
     <Content Include="packages\jQuery.3.7.0\Content\Scripts\jquery-3.7.0.min.js" />
@@ -736,7 +745,6 @@
     <Content Include="Views\Web.config" />
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
-    <Content Include="Views\Shared\View.cshtml" />
     <Content Include="Views\Shared\_Header.cshtml" />
     <Content Include="Views\Shared\_Nav.cshtml" />
     <Content Include="Views\Shared\_Slider.cshtml" />

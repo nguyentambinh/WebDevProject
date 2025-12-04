@@ -1,0 +1,238 @@
+﻿@* Views/FNManager/_Activity.cshtml *@
+<div class="fn-activity">
+    <div class="as-header">
+        <div class="as-title">Activity Summary</div>
+        <a href="#" class="as-more">View more →</a>
+    </div>
+
+    <div class="as-tabs">
+        <button type="button" class="as-tab active" data-tab="history">History</button>
+        <button type="button" class="as-tab" data-tab="upcoming">Upcoming</button>
+    </div>
+
+    <div class="as-body">
+        <!-- HISTORY (completed / past) -->
+        <div class="as-panel as-history active">
+            <div class="as-row">
+                <div class="as-left">
+                    <span class="as-dot done"></span>
+                    <div class="as-text">
+                        <div class="as-name">Completed formwork level 10 – Tower A</div>
+                        <div class="as-meta">Site: Riverside Residence · 28/11/2025</div>
+                    </div>
+                </div>
+                <div class="as-right">On schedule</div>
+            </div>
+
+            <div class="as-row">
+                <div class="as-left">
+                    <span class="as-dot done"></span>
+                    <div class="as-text">
+                        <div class="as-name">Finished basement slab – Parking zone</div>
+                        <div class="as-meta">Site: City Center Mall · 25/11/2025</div>
+                    </div>
+                </div>
+                <div class="as-right">QA approved</div>
+            </div>
+
+            <div class="as-row">
+                <div class="as-left">
+                    <span class="as-dot done"></span>
+                    <div class="as-text">
+                        <div class="as-name">Handover mockup apartment – Block B</div>
+                        <div class="as-meta">Site: GreenView Complex · 20/11/2025</div>
+                    </div>
+                </div>
+                <div class="as-right">Client signed</div>
+            </div>
+        </div>
+
+        <!-- UPCOMING (in progress / planned) -->
+        <div class="as-panel as-upcoming">
+            <div class="as-row">
+                <div class="as-left">
+                    <span class="as-dot progress"></span>
+                    <div class="as-text">
+                        <div class="as-name">Steel structure installation – Tower B</div>
+                        <div class="as-meta">Planned: 05–18/12/2025 · Riverside Residence</div>
+                    </div>
+                </div>
+                <div class="as-right warn">75% completed</div>
+            </div>
+
+            <div class="as-row">
+                <div class="as-left">
+                    <span class="as-dot progress"></span>
+                    <div class="as-text">
+                        <div class="as-name">MEP rough-in – Shopping podium</div>
+                        <div class="as-meta">Planned finish: 22/12/2025 · City Center Mall</div>
+                    </div>
+                </div>
+                <div class="as-right">On track</div>
+            </div>
+
+            <div class="as-row">
+                <div class="as-left">
+                    <span class="as-dot progress"></span>
+                    <div class="as-text">
+                        <div class="as-name">Facade glass installation – Office block</div>
+                        <div class="as-meta">Planned finish: 10/01/2026 · TechPark Campus</div>
+                    </div>
+                </div>
+                <div class="as-right warn">Risk: material delay</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .fn-activity {
+        margin-top: 24px;
+        background: var(--card);
+        border-radius: 18px;
+        border: 1px solid var(--border);
+        padding: 18px 22px 14px 22px;
+        color: var(--text);
+    }
+
+    /* header + view more */
+    .as-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .as-title {
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .as-more {
+        font-size: 12px;
+        text-decoration: none;
+        color: var(--accent);
+        opacity: .9;
+    }
+
+    /* tabs giống ảnh: gạch dưới tab active */
+    .as-tabs {
+        display: flex;
+        gap: 18px;
+        border-bottom: 1px solid rgba(148,163,184,0.35);
+        margin-bottom: 6px;
+    }
+
+    .as-tab {
+        border: none;
+        background: transparent;
+        padding: 8px 0;
+        font-size: 12px;
+        color: var(--text);
+        opacity: .7;
+        cursor: pointer;
+        position: relative;
+    }
+
+        .as-tab.active {
+            opacity: 1;
+        }
+
+            .as-tab.active::after {
+                content: "";
+                position: absolute;
+                left: 0;
+                right: 0;
+                bottom: -1px;
+                height: 2px;
+                border-radius: 999px;
+                background: var(--accent);
+            }
+
+    /* list */
+    .as-body {
+        margin-top: 6px;
+    }
+
+    .as-panel {
+        display: none;
+    }
+
+        .as-panel.active {
+            display: block;
+        }
+
+    .as-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(148,163,184,0.25);
+        font-size: 13px;
+    }
+
+        .as-row:last-child {
+            border-bottom: none;
+        }
+
+    .as-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        max-width: 70%;
+    }
+
+    .as-dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 999px;
+    }
+
+        .as-dot.done {
+            background: #22c55e;
+        }
+        /* completed */
+        .as-dot.progress {
+            background: #eab308;
+        }
+    /* in progress */
+
+    .as-text .as-name {
+        font-size: 13px;
+    }
+
+    .as-text .as-meta {
+        font-size: 11px;
+        opacity: .75;
+    }
+
+    .as-right {
+        font-size: 12px;
+        opacity: .9;
+        white-space: nowrap;
+    }
+
+        .as-right.warn {
+            color: #facc15;
+        }
+</style>
+
+<script>
+    (function () {
+        const tabs = document.querySelectorAll(".as-tab");
+        const historyPanel = document.querySelector(".as-history");
+        const upcomingPanel = document.querySelector(".as-upcoming");
+        if (!tabs.length || !historyPanel || !upcomingPanel) return;
+
+        tabs.forEach(tab => {
+            tab.addEventListener("click", function () {
+                tabs.forEach(t => t.classList.remove("active"));
+                this.classList.add("active");
+
+                const target = this.getAttribute("data-tab");
+                historyPanel.classList.toggle("active", target === "history");
+                upcomingPanel.classList.toggle("active", target === "upcoming");
+            });
+        });
+    })();
+</script>
