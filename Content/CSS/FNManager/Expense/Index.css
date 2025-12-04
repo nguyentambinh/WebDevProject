@@ -1,0 +1,368 @@
+﻿/* ====== layout chung ====== */
+
+.expdash-root {
+    color: var(--exp-text);
+    font-family: var(--exp-font);
+    font-size: var(--exp-fz);
+    min-height: calc(100vh - 80px);
+}
+
+.expdash-main {
+    max-width: 1180px;
+    margin: 24px auto 40px;
+    padding: 0 16px 40px;
+}
+
+/* header */
+
+.expdash-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.expdash-title {
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.expdash-sub {
+    margin-top: 4px;
+    font-size: 13px;
+    color: var(--exp-text-soft);
+}
+
+
+
+/* row & card */
+
+.expdash-row {
+    margin-bottom: 16px;
+}
+
+.expdash-row-top {
+    display: grid;
+    grid-template-columns: minmax(0,1.05fr) minmax(0,1.5fr);
+    gap: 16px;
+}
+
+.expdash-card {
+    background: var(--exp-accent);
+    border-radius: 14px;
+    padding: 14px 16px;
+    font-size: var(--exp-fz);
+    border: 1px solid var(--exp-border);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.55);
+}
+
+.expdash-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
+}
+
+.expdash-card-title {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--exp-text-soft);
+}
+
+/* ====== pending tasks ====== */
+
+.expdash-pending-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.expdash-pending-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 8px;
+    border-radius: 10px;
+    background: rgba(15,23,42,0.9);
+    border: 1px solid rgba(31,41,55,0.9);
+}
+
+    .expdash-pending-item:nth-child(odd) {
+        background: rgba(15,23,42,0.8);
+    }
+
+.expdash-pending-last {
+    margin-top: 2px;
+}
+
+.expdash-pending-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+}
+
+.expdash-icon-circle {
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #020617;
+    border: 1px solid rgba(148,163,184,0.6);
+    color: var(--exp-accent);
+    font-size: 12px;
+}
+
+.expdash-pending-value {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* ====== recent expenses ====== */
+
+.expdash-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+    .expdash-table thead th {
+        text-align: left;
+        padding: 6px 6px;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: var(--exp-text-soft);
+        border-bottom: 1px solid rgba(148,163,184,0.6);
+    }
+
+    .expdash-table .right {
+        text-align: right;
+    }
+
+    .expdash-table tbody td {
+        padding: 7px 6px;
+        border-bottom: 1px solid rgba(31,41,55,0.8);
+    }
+
+    .expdash-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+.expdash-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.expdash-chip-project {
+    background: rgba(34,197,94,0.16);
+    color: #bbf7d0;
+}
+
+.expdash-chip-material {
+    background: rgba(59,130,246,0.2);
+    color: #bfdbfe;
+}
+
+.expdash-chip-transport {
+    background: rgba(192,132,252,0.25);
+    color: #e9d5ff;
+}
+
+.expdash-chip-other {
+    background: rgba(248,113,113,0.22);
+    color: #fecaca;
+}
+
+/* ====== quick access ====== */
+
+.expdash-quick-grid {
+    display: grid;
+    grid-template-columns: repeat(4,minmax(0,1fr));
+    gap: 14px;
+    margin-top: 4px;
+}
+
+.expdash-quick-btn {
+    border-radius: 14px;
+    border: 1px solid rgba(148,163,184,0.5);
+    background: rgba(15,23,42,0.96);
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    color: var(--exp-text);
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+
+    .expdash-quick-btn:hover {
+        transform: translateY(-2px);
+        border-color: var(--exp-accent);
+        box-shadow: 0 14px 30px rgba(0,0,0,0.85);
+    }
+
+    .expdash-quick-btn .icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 14px;
+    }
+
+.icon-green {
+    background: radial-gradient(circle, #22c55e, #15803d);
+}
+
+.icon-purple {
+    background: radial-gradient(circle, #a855f7, #6d28d9);
+}
+
+.icon-teal {
+    background: radial-gradient(circle, #06b6d4, #0f766e);
+}
+
+.icon-pink {
+    background: radial-gradient(circle, #ec4899, #9d174d);
+}
+
+.expdash-quick-btn .label {
+    font-size: 13px;
+}
+
+/* ====== monthly report ====== */
+
+.expdash-monthly-grid {
+    display: grid;
+    grid-template-columns: minmax(0,1.2fr) minmax(0,1fr);
+    gap: 16px;
+    margin-top: 4px;
+}
+
+.expdash-chart-card {
+    background: rgba(15,23,42,0.96);
+    border-radius: 12px;
+    padding: 10px 12px 12px;
+    border: 1px solid rgba(31,41,55,0.9);
+    overflow: hidden;
+}
+
+.chart-header {
+    font-size: 12px;
+    margin-bottom: 10px;
+    color: var(--exp-text-soft);
+}
+
+.chart-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    height: 160px;
+    padding: 0 4px 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+    .chart-bars::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    .chart-bars::-webkit-scrollbar-thumb {
+        background: rgba(148,163,184,0.7);
+        border-radius: 999px;
+    }
+
+    .chart-bars::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .chart-bars .bar {
+        flex: 0 0 64px; /* hơi hẹp lại 1 chút */
+        max-width: 70px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 6px;
+    }
+
+.bar-inner {
+    width: 100%;
+    border-radius: 10px 10px 4px 4px;
+    background: linear-gradient(to top, var(--exp-accent), rgba(56,189,248,0.7));
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+/* hover nhẹ cho vui mắt */
+.chart-bars .bar:hover .bar-inner {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.45);
+}
+
+/* khu vực text dưới mỗi cột */
+.bar-text {
+    width: 100%;
+    text-align: center;
+}
+
+/* tên team / category */
+.bar-label {
+    font-size: 10px;
+    line-height: 1.2;
+    color: var(--exp-text-soft);
+    max-height: 24px; /* khóa 2 dòng */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+/* số tiền */
+.bar-amount {
+    font-size: 10px;
+    margin-top: 2px;
+    color: var(--exp-text);
+}
+
+/* ====== responsive ====== */
+
+@media (max-width: 1024px) {
+    .expdash-row-top {
+        grid-template-columns: minmax(0,1fr);
+    }
+
+    .expdash-monthly-grid {
+        grid-template-columns: minmax(0,1fr);
+    }
+
+    .expdash-quick-grid {
+        grid-template-columns: repeat(2,minmax(0,1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .expdash-main {
+        padding-inline: 10px;
+    }
+
+    .expdash-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .expdash-quick-grid {
+        grid-template-columns: minmax(0,1fr);
+    }
+}

@@ -1,13 +1,123 @@
-﻿@model QLNSVATC.Models.FNDashboardViewModel
+﻿@using System.Collections.Generic
+@using System.Globalization
+@using QLNSVATC.Helpers
+@model QLNSVATC.Models.FNDashboardViewModel
+
+@{
+    string currentLang = ViewBag.CurrentLang as string ?? "vi_VN";
+
+    Func<Dictionary<string, string>, string> L = dict =>
+    {
+        if (dict.ContainsKey(currentLang)) return dict[currentLang];
+        if (dict.ContainsKey("en_US")) return dict["en_US"];
+        return dict.Values.First();
+    };
+
+    var txtTitle = L(new Dictionary<string, string> {
+        { "vi_VN", "Dự án nổi bật" },
+        { "en_US", "Project Highlights" },
+        { "jp_JP", "注目プロジェクト" },
+        { "kr_KR", "주요 프로젝트" },
+        { "cn_CN", "重点项目" }
+    });
+
+    var txtOptRevenue = L(new Dictionary<string, string> {
+        { "vi_VN", "Dự án doanh thu cao nhất" },
+        { "en_US", "Highest revenue projects" },
+        { "jp_JP", "売上が最も高いプロジェクト" },
+        { "kr_KR", "매출이 가장 높은 프로젝트" },
+        { "cn_CN", "收入最高的项目" }
+    });
+
+    var txtOptProfit = L(new Dictionary<string, string> {
+        { "vi_VN", "Dự án lợi nhuận (%) cao nhất" },
+        { "en_US", "Highest profit (%) projects" },
+        { "jp_JP", "利益率が最も高いプロジェクト" },
+        { "kr_KR", "이익률(%)이 가장 높은 프로젝트" },
+        { "cn_CN", "利润率最高的项目" }
+    });
+
+    var txtOptEmployee = L(new Dictionary<string, string> {
+        { "vi_VN", "Dự án nhiều nhân sự nhất" },
+        { "en_US", "Most staffed projects" },
+        { "jp_JP", "担当者が最も多いプロジェクト" },
+        { "kr_KR", "인력이 가장 많은 프로젝트" },
+        { "cn_CN", "参与人员最多的项目" }
+    });
+
+    var txtCode = L(new Dictionary<string, string> {
+        { "vi_VN", "Mã" },
+        { "en_US", "Code" },
+        { "jp_JP", "コード" },
+        { "kr_KR", "코드" },
+        { "cn_CN", "代码" }
+    });
+
+    var txtCost = L(new Dictionary<string, string> {
+        { "vi_VN", "Chi phí" },
+        { "en_US", "Cost" },
+        { "jp_JP", "コスト" },
+        { "kr_KR", "비용" },
+        { "cn_CN", "成本" }
+    });
+
+    var txtRevShort = L(new Dictionary<string, string> {
+        { "vi_VN", "Doanh thu" },
+        { "en_US", "Rev" },
+        { "jp_JP", "売上" },
+        { "kr_KR", "매출" },
+        { "cn_CN", "收入" }
+    });
+
+    var txtEmployeesJoined = L(new Dictionary<string, string> {
+        { "vi_VN", "nhân sự tham gia" },
+        { "en_US", "employees joined" },
+        { "jp_JP", "名参加" },
+        { "kr_KR", "명 참여" },
+        { "cn_CN", "人参与" }
+    });
+
+    var txtNoRevenue = L(new Dictionary<string, string> {
+        { "vi_VN", "Chưa có dữ liệu doanh thu dự án." },
+        { "en_US", "No project revenue data." },
+        { "jp_JP", "プロジェクト売上データがありません。" },
+        { "kr_KR", "프로젝트 매출 데이터가 없습니다." },
+        { "cn_CN", "暂无项目收入数据。" }
+    });
+
+    var txtNoProfit = L(new Dictionary<string, string> {
+        { "vi_VN", "Chưa có dữ liệu lợi nhuận." },
+        { "en_US", "No profit data." },
+        { "jp_JP", "利益データがありません。" },
+        { "kr_KR", "이익 데이터가 없습니다." },
+        { "cn_CN", "暂无利润数据。" }
+    });
+
+    var txtNoAssign = L(new Dictionary<string, string> {
+        { "vi_VN", "Chưa có dữ liệu phân công dự án." },
+        { "en_US", "No project assignment data." },
+        { "jp_JP", "プロジェクトアサインデータがありません。" },
+        { "kr_KR", "프로젝트 배정 데이터가 없습니다." },
+        { "cn_CN", "暂无项目分配数据。" }
+    });
+
+    // format % theo culture ngôn ngữ
+    Func<decimal?, string> FPercent = val =>
+    {
+        if (!val.HasValue) return "N/A";
+        var culture = new CultureInfo(currentLang.Replace("_", "-"));
+        return val.Value.ToString("N2", culture) + "%";
+    };
+}
 
 <div class="fn-analytics">
     <div class="an-header">
-        <span class="an-title">Project Highlights</span>
+        <span class="an-title">@txtTitle</span>
 
         <select id="analyticsFilter" class="an-filter">
-            <option value="revenue">Highest revenue projects</option>
-            <option value="profit">Highest profit (%) projects</option>
-            <option value="employee">Most staffed projects</option>
+            <option value="revenue">@txtOptRevenue</option>
+            <option value="profit">@txtOptProfit</option>
+            <option value="employee">@txtOptEmployee</option>
         </select>
     </div>
 
@@ -22,19 +132,19 @@
                         <div class="an-circle revenue"></div>
                         <div>
                             <div class="an-name">@p.ProjectName</div>
-                            <div class="an-sub">Code: @p.MaDa</div>
+                            <div class="an-sub">@txtCode: @p.MaDa</div>
                         </div>
                     </div>
                     <div class="an-right">
-                        <div class="an-main">@p.Revenue.ToString("N0")</div>
-                        <div class="an-meta">Cost: @p.Cost.ToString("N0")</div>
+                        <div class="an-main">@p.Revenue.ToShortCurrency(currentLang)</div>
+                        <div class="an-meta">@txtCost: @p.Cost.ToShortCurrency(currentLang)</div>
                     </div>
                 </div>
             }
         }
         else
         {
-            <div class="an-empty">No project revenue data.</div>
+            <div class="an-empty">@txtNoRevenue</div>
         }
     </div>
 
@@ -49,15 +159,15 @@
                         <div class="an-circle profit"></div>
                         <div>
                             <div class="an-name">@p.ProjectName</div>
-                            <div class="an-sub">Code: @p.MaDa</div>
+                            <div class="an-sub">@txtCode: @p.MaDa</div>
                         </div>
                     </div>
                     <div class="an-right">
                         <div class="an-main">
-                            @(p.ProfitPercent.HasValue ? p.ProfitPercent.Value.ToString("N2") + "%" : "N/A")
+                            @FPercent(p.ProfitPercent)
                         </div>
                         <div class="an-meta">
-                            Rev: @p.Revenue.ToString("N0") · Cost: @p.Cost.ToString("N0")
+                            @txtRevShort: @p.Revenue.ToShortCurrency(currentLang) · @txtCost: @p.Cost.ToShortCurrency(currentLang)
                         </div>
                     </div>
                 </div>
@@ -65,7 +175,7 @@
         }
         else
         {
-            <div class="an-empty">No profit data.</div>
+            <div class="an-empty">@txtNoProfit</div>
         }
     </div>
 
@@ -80,19 +190,19 @@
                         <div class="an-circle employee"></div>
                         <div>
                             <div class="an-name">@p.ProjectName</div>
-                            <div class="an-sub">Code: @p.MaDa</div>
+                            <div class="an-sub">@txtCode: @p.MaDa</div>
                         </div>
                     </div>
                     <div class="an-right">
                         <div class="an-main">@p.EmployeeCount</div>
-                        <div class="an-meta">employees joined</div>
+                        <div class="an-meta">@p.EmployeeCount @txtEmployeesJoined</div>
                     </div>
                 </div>
             }
         }
         else
         {
-            <div class="an-empty">No project assignment data.</div>
+            <div class="an-empty">@txtNoAssign</div>
         }
     </div>
 </div>
@@ -100,23 +210,23 @@
 <link href="~/Content/CSS/FNManager/Highlight.css" rel="stylesheet" />
 
 <script>
-(function () {
-    const sel = document.getElementById("analyticsFilter");
-    if (!sel) return;
+    (function () {
+        const sel = document.getElementById("analyticsFilter");
+        if (!sel) return;
 
-    const blocks = {
-        revenue: document.querySelector(".an-revenue"),
-        profit: document.querySelector(".an-profit"),
-        employee: document.querySelector(".an-employee")
-    };
+        const blocks = {
+            revenue: document.querySelector(".an-revenue"),
+            profit: document.querySelector(".an-profit"),
+            employee: document.querySelector(".an-employee")
+        };
 
-    sel.addEventListener("change", function () {
-        const val = this.value;
-        Object.keys(blocks).forEach(k => {
-            if (blocks[k]) {
-                blocks[k].classList.toggle("active", k === val);
-            }
+        sel.addEventListener("change", function () {
+            const val = this.value;
+            Object.keys(blocks).forEach(k => {
+                if (blocks[k]) {
+                    blocks[k].classList.toggle("active", k === val);
+                }
+            });
         });
-    });
-})();
+    })();
 </script>

@@ -13,25 +13,24 @@
     padding: 18px 20px;
     color: var(--text);
 }
-
     .fn-card.highlight {
         background: var(--accent);
-        color: #ffffff;
+        color: var(--text);
     }
 
     .fn-card .label {
-        font-size: 13px;
+        font-size: var(--fz);
         opacity: .9;
         margin-bottom: 6px;
     }
 
     .fn-card .value {
-        font-size: 22px;
+        font-size: var(--fz);
         font-weight: 600;
         margin-bottom: 4px;
     }
 
     .fn-card .sub {
-        font-size: 11px;
+        font-size: var(--fz);
         opacity: .85;
     }

@@ -1,0 +1,76 @@
+﻿@using System.Collections.Generic
+@{
+    string lang = ViewBag.CurrentLang as string ?? "en_US";
+    Func<Dictionary<string, string>, string> L = d =>
+    {
+        if (d.ContainsKey(lang)) return d[lang];
+        if (d.ContainsKey("en_US")) return d["en_US"];
+        return d.Values.First();
+    };
+
+    var tTitle = new Dictionary<string, string> {
+        { "vi_VN", "Truy cập nhanh" },
+        { "en_US", "Quick access" },
+        { "jp_JP", "クイックアクセス" },
+        { "kr_KR", "빠른 액세스" },
+        { "cn_CN", "快速操作" }
+    };
+
+    var tNewExpense = new Dictionary<string, string> {
+        { "vi_VN", "Thêm chi phí" },
+        { "en_US", "New expense" },
+        { "jp_JP", "経費登録" },
+        { "kr_KR", "비용 등록" },
+        { "cn_CN", "新增费用" }
+    };
+
+    var tAddInvoice = new Dictionary<string, string> {
+        { "vi_VN", "Tải hóa đơn" },
+        { "en_US", "Add receipt" },
+        { "jp_JP", "領収書追加" },
+        { "kr_KR", "영수증 추가" },
+        { "cn_CN", "添加单据" }
+    };
+
+    var tCreateReport = new Dictionary<string, string> {
+        { "vi_VN", "Lập báo cáo" },
+        { "en_US", "Create report" },
+        { "jp_JP", "レポート作成" },
+        { "kr_KR", "보고서 생성" },
+        { "cn_CN", "生成报表" }
+    };
+
+    var tCreateTrip = new Dictionary<string, string> {
+        { "vi_VN", "Chi phí công tác" },
+        { "en_US", "Create trip" },
+        { "jp_JP", "出張登録" },
+        { "kr_KR", "출장 등록" },
+        { "cn_CN", "创建差旅" }
+    };
+}
+
+<div class="expdash-card expdash-quick">
+    <div class="expdash-card-header">
+        <span class="expdash-card-title">@L(tTitle)</span>
+    </div>
+
+    <div class="expdash-quick-grid">
+        <button class="expdash-quick-btn">
+            <span class="icon icon-green"><i class="fa-solid fa-plus"></i></span>
+            <span class="label">@L(tNewExpense)</span>
+        </button>
+        <button class="expdash-quick-btn">
+            <span class="icon icon-purple"><i class="fa-solid fa-receipt"></i></span>
+            <span class="label">@L(tAddInvoice)</span>
+        </button>
+        <button class="expdash-quick-btn">
+            <span class="icon icon-teal"><i class="fa-solid fa-file-invoice-dollar"></i></span>
+            <span class="label">@L(tCreateReport)</span>
+        </button>
+        <button class="expdash-quick-btn">
+            <span class="icon icon-pink"><i class="fa-solid fa-plane-departure"></i></span>
+            <span class="label">@L(tCreateTrip)</span>
+        </button>
+    </div>
+</div>
+

@@ -1,36 +1,121 @@
-﻿<div class="fn-target">
+﻿@using System.Collections.Generic
+
+@{
+    string currentLang = ViewBag.CurrentLang as string ?? "vi_VN";
+
+    Func<Dictionary<string, string>, string> L = dict =>
+    {
+        if (dict.ContainsKey(currentLang)) return dict[currentLang];
+        if (dict.ContainsKey("en_US")) return dict["en_US"];
+        return dict.Values.First();
+    };
+
+    var txtTitle = L(new Dictionary<string, string> {
+        { "vi_VN", "Mục tiêu" },
+        { "en_US", "Target" },
+        { "jp_JP", "ターゲット" },
+        { "kr_KR", "목표" },
+        { "cn_CN", "目标" }
+    });
+
+    var txtSaleOfGoods = L(new Dictionary<string, string> {
+        { "vi_VN", "Doanh thu hàng hoá" },
+        { "en_US", "Sale Of Goods" },
+        { "jp_JP", "商品売上" },
+        { "kr_KR", "상품 매출" },
+        { "cn_CN", "货物销售" }
+    });
+
+    var txtPropertyRental = L(new Dictionary<string, string> {
+        { "vi_VN", "Cho thuê tài sản" },
+        { "en_US", "Property Rental" },
+        { "jp_JP", "不動産賃貸" },
+        { "kr_KR", "자산 임대" },
+        { "cn_CN", "资产租赁" }
+    });
+
+    var txtDesignServices = L(new Dictionary<string, string> {
+        { "vi_VN", "Dịch vụ thiết kế" },
+        { "en_US", "Design Services" },
+        { "jp_JP", "デザインサービス" },
+        { "kr_KR", "디자인 서비스" },
+        { "cn_CN", "设计服务" }
+    });
+
+    var txtService = L(new Dictionary<string, string> {
+        { "vi_VN", "Dịch vụ" },
+        { "en_US", "Service" },
+        { "jp_JP", "サービス" },
+        { "kr_KR", "서비스" },
+        { "cn_CN", "服务" }
+    });
+
+    var txt1MonthLater = L(new Dictionary<string, string> {
+        { "vi_VN", "Sau 1 tháng" },
+        { "en_US", "1 month later" },
+        { "jp_JP", "1か月後" },
+        { "kr_KR", "1개월 후" },
+        { "cn_CN", "1个月后" }
+    });
+
+    var txt3MonthLater = L(new Dictionary<string, string> {
+        { "vi_VN", "Sau 3 tháng" },
+        { "en_US", "3 month later" },
+        { "jp_JP", "3か月後" },
+        { "kr_KR", "3개월 후" },
+        { "cn_CN", "3个月后" }
+    });
+
+    var txt4MonthLater = L(new Dictionary<string, string> {
+        { "vi_VN", "Sau 4 tháng" },
+        { "en_US", "4 month later" },
+        { "jp_JP", "4か月後" },
+        { "kr_KR", "4개월 후" },
+        { "cn_CN", "4个月后" }
+    });
+
+    var txt1YearLater = L(new Dictionary<string, string> {
+        { "vi_VN", "Sau 1 năm" },
+        { "en_US", "1 year later" },
+        { "jp_JP", "1年後" },
+        { "kr_KR", "1년 후" },
+        { "cn_CN", "1年后" }
+    });
+}
+
+<div class="fn-target">
     <div class="box">
-        <h3 class="title">Target</h3>
+        <h3 class="title">@txtTitle</h3>
 
         <div class="tg-row">
             <span class="dot dot-blue"></span>
             <div class="tg-text">
-                <div>Sale Of Goods</div>
-                <small>1 month later</small>
+                <div>@txtSaleOfGoods</div>
+                <small>@txt1MonthLater</small>
             </div>
         </div>
 
         <div class="tg-row">
             <span class="dot dot-green"></span>
             <div class="tg-text">
-                <div>Property Rental</div>
-                <small>3 month later</small>
+                <div>@txtPropertyRental</div>
+                <small>@txt3MonthLater</small>
             </div>
         </div>
 
         <div class="tg-row">
             <span class="dot dot-purple"></span>
             <div class="tg-text">
-                <div>Design Services</div>
-                <small>4 month later</small>
+                <div>@txtDesignServices</div>
+                <small>@txt4MonthLater</small>
             </div>
         </div>
 
         <div class="tg-row">
             <span class="dot dot-orange"></span>
             <div class="tg-text">
-                <div>Service</div>
-                <small>1 year later</small>
+                <div>@txtService</div>
+                <small>@txt1YearLater</small>
             </div>
         </div>
     </div>
@@ -47,7 +132,7 @@
     }
 
     .fn-target .title {
-        font-size: 14px;
+        font-size: var(--fz);
         margin-bottom: 10px;
     }
 

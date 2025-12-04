@@ -1,13 +1,107 @@
-﻿@* Views/FNManager/_Activity.cshtml *@
+﻿@using System.Collections.Generic
+
+@{
+    string currentLang = ViewBag.CurrentLang as string ?? "vi_VN";
+
+    Func<Dictionary<string, string>, string> L = dict =>
+    {
+        if (dict.ContainsKey(currentLang)) return dict[currentLang];
+        if (dict.ContainsKey("en_US")) return dict["en_US"];
+        return dict.Values.First();
+    };
+
+    var txtTitle = L(new Dictionary<string, string> {
+        { "vi_VN", "Tổng quan hoạt động" },
+        { "en_US", "Activity Summary" },
+        { "jp_JP", "アクティビティ概要" },
+        { "kr_KR", "활동 요약" },
+        { "cn_CN", "活动概览" }
+    });
+
+    var txtViewMore = L(new Dictionary<string, string> {
+        { "vi_VN", "Xem thêm →" },
+        { "en_US", "View more →" },
+        { "jp_JP", "もっと見る →" },
+        { "kr_KR", "더 보기 →" },
+        { "cn_CN", "查看更多 →" }
+    });
+
+    var txtTabHistory = L(new Dictionary<string, string> {
+        { "vi_VN", "Lịch sử" },
+        { "en_US", "History" },
+        { "jp_JP", "履歴" },
+        { "kr_KR", "기록" },
+        { "cn_CN", "历史" }
+    });
+
+    var txtTabUpcoming = L(new Dictionary<string, string> {
+        { "vi_VN", "Sắp tới" },
+        { "en_US", "Upcoming" },
+        { "jp_JP", "今後" },
+        { "kr_KR", "예정" },
+        { "cn_CN", "即将进行" }
+    });
+
+    var txtOnSchedule = L(new Dictionary<string, string> {
+        { "vi_VN", "Đúng tiến độ" },
+        { "en_US", "On schedule" },
+        { "jp_JP", "予定通り" },
+        { "kr_KR", "일정 준수" },
+        { "cn_CN", "按计划进行" }
+    });
+
+    var txtQAApproved = L(new Dictionary<string, string> {
+        { "vi_VN", "Đã kiểm định chất lượng" },
+        { "en_US", "QA approved" },
+        { "jp_JP", "品質確認済み" },
+        { "kr_KR", "QA 승인" },
+        { "cn_CN", "质量已通过" }
+    });
+
+    var txtClientSigned = L(new Dictionary<string, string> {
+        { "vi_VN", "Khách hàng đã ký" },
+        { "en_US", "Client signed" },
+        { "jp_JP", "顧客署名済み" },
+        { "kr_KR", "고객 서명 완료" },
+        { "cn_CN", "客户已签署" }
+    });
+
+    var txt75Completed = L(new Dictionary<string, string> {
+        { "vi_VN", "Hoàn thành 75%" },
+        { "en_US", "75% completed" },
+        { "jp_JP", "75% 完了" },
+        { "kr_KR", "75% 완료" },
+        { "cn_CN", "完成 75%" }
+    });
+
+    var txtOnTrack = L(new Dictionary<string, string> {
+        { "vi_VN", "Đúng tiến độ" },
+        { "en_US", "On track" },
+        { "jp_JP", "順調" },
+        { "kr_KR", "순조로움" },
+        { "cn_CN", "进展顺利" }
+    });
+
+    var txtRiskDelay = L(new Dictionary<string, string> {
+        { "vi_VN", "Rủi ro: chậm vật tư" },
+        { "en_US", "Risk: material delay" },
+        { "jp_JP", "リスク：資材遅延" },
+        { "kr_KR", "위험: 자재 지연" },
+        { "cn_CN", "风险：材料延误" }
+    });
+
+    // Các dòng mô tả activity bạn có thể sau này chuyển sang dynamic, tạm thời giữ tiếng Anh gốc.
+}
+
 <div class="fn-activity">
     <div class="as-header">
-        <div class="as-title">Activity Summary</div>
-        <a href="#" class="as-more">View more →</a>
+        <div class="as-title">@txtTitle</div>
+        <a href="#" class="as-more">@txtViewMore</a>
     </div>
 
     <div class="as-tabs">
-        <button type="button" class="as-tab active" data-tab="history">History</button>
-        <button type="button" class="as-tab" data-tab="upcoming">Upcoming</button>
+        <button type="button" class="as-tab active" data-tab="history">@txtTabHistory</button>
+        <button type="button" class="as-tab" data-tab="upcoming">@txtTabUpcoming</button>
     </div>
 
     <div class="as-body">
@@ -21,7 +115,7 @@
                         <div class="as-meta">Site: Riverside Residence · 28/11/2025</div>
                     </div>
                 </div>
-                <div class="as-right">On schedule</div>
+                <div class="as-right">@txtOnSchedule</div>
             </div>
 
             <div class="as-row">
@@ -32,7 +126,7 @@
                         <div class="as-meta">Site: City Center Mall · 25/11/2025</div>
                     </div>
                 </div>
-                <div class="as-right">QA approved</div>
+                <div class="as-right">@txtQAApproved</div>
             </div>
 
             <div class="as-row">
@@ -43,7 +137,7 @@
                         <div class="as-meta">Site: GreenView Complex · 20/11/2025</div>
                     </div>
                 </div>
-                <div class="as-right">Client signed</div>
+                <div class="as-right">@txtClientSigned</div>
             </div>
         </div>
 
@@ -57,7 +151,7 @@
                         <div class="as-meta">Planned: 05–18/12/2025 · Riverside Residence</div>
                     </div>
                 </div>
-                <div class="as-right warn">75% completed</div>
+                <div class="as-right warn">@txt75Completed</div>
             </div>
 
             <div class="as-row">
@@ -68,7 +162,7 @@
                         <div class="as-meta">Planned finish: 22/12/2025 · City Center Mall</div>
                     </div>
                 </div>
-                <div class="as-right">On track</div>
+                <div class="as-right">@txtOnTrack</div>
             </div>
 
             <div class="as-row">
@@ -79,7 +173,7 @@
                         <div class="as-meta">Planned finish: 10/01/2026 · TechPark Campus</div>
                     </div>
                 </div>
-                <div class="as-right warn">Risk: material delay</div>
+                <div class="as-right warn">@txtRiskDelay</div>
             </div>
         </div>
     </div>
@@ -104,12 +198,12 @@
     }
 
     .as-title {
-        font-size: 14px;
+        font-size: var(--fz);
         font-weight: 500;
     }
 
     .as-more {
-        font-size: 12px;
+        font-size: var(--fz);
         text-decoration: none;
         color: var(--accent);
         opacity: .9;

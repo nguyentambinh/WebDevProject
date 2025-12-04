@@ -1,30 +1,120 @@
-﻿@model QLNSVATC.Models.FNDashboardViewModel
+﻿@using System.Collections.Generic
+@using QLNSVATC.Helpers
+
+@model QLNSVATC.Models.FNDashboardViewModel
+
+@{
+    string currentLang = ViewBag.CurrentLang as string ?? "vi_VN";
+
+    Func<Dictionary<string, string>, string> L = dict =>
+    {
+        if (dict.ContainsKey(currentLang)) return dict[currentLang];
+        if (dict.ContainsKey("en_US")) return dict["en_US"];
+        return dict.Values.First();
+    };
+
+    var txtTotalEarning = L(new Dictionary<string, string> {
+        { "vi_VN", "Tổng thu" },
+        { "en_US", "Total earning" },
+        { "jp_JP", "総収益" },
+        { "kr_KR", "총 수익" },
+        { "cn_CN", "总收入" }
+    });
+
+    var txtTotalEarningSub = L(new Dictionary<string, string> {
+        { "vi_VN", "Từ dự án & dịch vụ" },
+        { "en_US", "From projects & services" },
+        { "jp_JP", "プロジェクトとサービスから" },
+        { "kr_KR", "프로젝트 및 서비스 수익" },
+        { "cn_CN", "来自项目和服务" }
+    });
+
+    var txtFromProjects = L(new Dictionary<string, string> {
+        { "vi_VN", "Từ dự án" },
+        { "en_US", "From projects" },
+        { "jp_JP", "プロジェクトから" },
+        { "kr_KR", "프로젝트 수익" },
+        { "cn_CN", "来自项目" }
+    });
+
+    var txtFromProjectsSub = L(new Dictionary<string, string> {
+        { "vi_VN", "Doanh thu dự án" },
+        { "en_US", "Project revenue" },
+        { "jp_JP", "プロジェクト収益" },
+        { "kr_KR", "프로젝트 매출" },
+        { "cn_CN", "项目收入" }
+    });
+
+    var txtFromServices = L(new Dictionary<string, string> {
+        { "vi_VN", "Từ dịch vụ" },
+        { "en_US", "From services" },
+        { "jp_JP", "サービスから" },
+        { "kr_KR", "서비스 수익" },
+        { "cn_CN", "来自服务" }
+    });
+
+    var txtFromServicesSub = L(new Dictionary<string, string> {
+        { "vi_VN", "Giao dịch dịch vụ" },
+        { "en_US", "Service transactions" },
+        { "jp_JP", "サービス取引" },
+        { "kr_KR", "서비스 거래" },
+        { "cn_CN", "服务交易" }
+    });
+
+    var txtTransactions = L(new Dictionary<string, string> {
+        { "vi_VN", "giao dịch" },
+        { "en_US", "transactions" },
+        { "jp_JP", "件" },
+        { "kr_KR", "건" },
+        { "cn_CN", "笔交易" }
+    });
+
+    var txtTotalSpending = L(new Dictionary<string, string> {
+        { "vi_VN", "Tổng chi" },
+        { "en_US", "Total spending" },
+        { "jp_JP", "総支出" },
+        { "kr_KR", "총 지출" },
+        { "cn_CN", "总支出" }
+    });
+
+    var txtBalanceLabel = L(new Dictionary<string, string> {
+        { "vi_VN", "Số dư:" },
+        { "en_US", "Balance:" },
+        { "jp_JP", "残高：" },
+        { "kr_KR", "잔액:" },
+        { "cn_CN", "余额：" }
+    });
+}
 
 <div class="fn-top-cards">
 
     <div class="fn-card highlight">
-        <p class="label">Total Earning</p>
-        <h3 class="value">@Model.TotalEarning.ToString("N0")</h3>
-        <span class="sub">From projects &amp; services</span>
+        <p class="label">@txtTotalEarning</p>
+        <h3 class="value">@Model.TotalEarning.ToShortCurrency(currentLang)</h3>
+        <span class="sub">@Model.TotalEarning.ToCurrency(currentLang)</span>
     </div>
 
     <div class="fn-card">
-        <p class="label">From Projects</p>
-        <h3 class="value">@Model.RevenueFromProjects.ToString("N0")</h3>
-        <span class="sub">Project revenue</span>
+        <p class="label">@txtFromProjects</p>
+        <h3 class="value">@Model.RevenueFromProjects.ToShortCurrency(currentLang)</h3>
+        <span class="sub">@txtFromProjectsSub</span>
     </div>
 
     <div class="fn-card">
-        <p class="label">From Services</p>
-        <h3 class="value">@Model.RevenueFromServices.ToString("N0")</h3>
-        <span class="sub">@Model.RevenueInvoiceCount.ToString("N0") transactions</span>
+        <p class="label">@txtFromServices</p>
+        <h3 class="value">@Model.RevenueFromServices.ToShortCurrency(currentLang)</h3>
+        <span class="sub">
+            @Model.RevenueInvoiceCount.FormatNumber(currentLang) @txtTransactions
+        </span>
     </div>
 
     <div class="fn-card">
-        <p class="label">Total Spending</p>
-        <h3 class="value">@Model.TotalSpending.ToString("N0")</h3>
-        <span class="sub">Balance: @Model.Balance.ToString("N0")</span>
+        <p class="label">@txtTotalSpending</p>
+        <h3 class="value">@Model.TotalSpending.ToShortCurrency(currentLang)</h3>
+        <span class="sub">
+            @txtBalanceLabel @Model.Balance.ToCurrency(currentLang)
+        </span>
     </div>
 </div>
 
-<link href="~/Content/CSS/FNManager/_TopCards.css" rel="stylesheet" />
+<link href="~/Content/CSS/FNManager/_TopCards.css?v=2" rel="stylesheet" />

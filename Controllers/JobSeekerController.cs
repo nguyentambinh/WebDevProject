@@ -112,7 +112,7 @@ namespace QLNSVATC.Controllers
                     }
                 }
 
-                string rootFolder = Server.MapPath("~/Uploads/HoSoUngVien/");
+                string rootFolder = Server.MapPath("~/Content/Uploads/HoSoUngVien/");
                 if (!Directory.Exists(rootFolder))
                     Directory.CreateDirectory(rootFolder);
 

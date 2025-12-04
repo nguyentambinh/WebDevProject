@@ -1,0 +1,106 @@
+﻿@model IEnumerable<QLNSVATC.Models.FN_Models.RecentExpenseVM>
+@using System.Collections.Generic
+
+@{
+    string lang = ViewBag.CurrentLang as string ?? "en_US";
+    Func<Dictionary<string, string>, string> L = d =>
+    {
+        if (d.ContainsKey(lang)) return d[lang];
+        if (d.ContainsKey("en_US")) return d["en_US"];
+        return d.Values.First();
+    };
+
+    var tTitle = new Dictionary<string, string> {
+        { "vi_VN", "Chi phí gần đây" },
+        { "en_US", "Recent expenses" },
+        { "jp_JP", "最近の経費" },
+        { "kr_KR", "최근 비용" },
+        { "cn_CN", "最近费用" }
+    };
+
+    var tSubject = new Dictionary<string, string> {
+        { "vi_VN", "Hạng mục" },
+        { "en_US", "Subject" },
+        { "jp_JP", "項目" },
+        { "kr_KR", "항목" },
+        { "cn_CN", "项目" }
+    };
+    var tEmp = new Dictionary<string, string> {
+        { "vi_VN", "Nhân viên" },
+        { "en_US", "Employee" },
+        { "jp_JP", "担当者" },
+        { "kr_KR", "담당자" },
+        { "cn_CN", "员工" }
+    };
+    var tTeam = new Dictionary<string, string> {
+        { "vi_VN", "Nhóm" },
+        { "en_US", "Team" },
+        { "jp_JP", "チーム" },
+        { "kr_KR", "팀" },
+        { "cn_CN", "团队" }
+    };
+    var tAmount = new Dictionary<string, string> {
+        { "vi_VN", "Số tiền" },
+        { "en_US", "Amount" },
+        { "jp_JP", "金額" },
+        { "kr_KR", "금액" },
+        { "cn_CN", "金额" }
+    };
+}
+
+<div class="expdash-card expdash-recent">
+    <div class="expdash-card-header">
+        <span class="expdash-card-title">@L(tTitle)</span>
+    </div>
+
+    <table class="expdash-table">
+        <thead>
+            <tr>
+                <th>@L(tSubject)</th>
+                <th>@L(tEmp)</th>
+                <th>@L(tTeam)</th>
+                <th class="right">@L(tAmount)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @item.Description
+                        <div style="font-size:11px;color:#9ca3af;">
+                            @item.ProjectCode
+                            @if (item.Date.HasValue)
+                            {
+                                @: · @item.Date.Value.ToString("dd/MM/yyyy")
+                            }
+                        </div>
+                    </td>
+                    <td>
+                        <!-- tên nhân viên chưa có trong DB nên tạm để trống hoặc "N/A" -->
+                        N/A
+                    </td>
+                    <td>
+                        @if (item.Type == "Project")
+                        {
+                            <span class="expdash-chip expdash-chip-project">Project</span>
+                        }
+                        else if (item.Type == "Material")
+                        {
+                            <span class="expdash-chip expdash-chip-material">Material</span>
+                        }
+                        else
+                        {
+                            <span class="expdash-chip expdash-chip-transport">Transport</span>
+                        }
+                    </td>
+                    <td class="right">
+                        @item.Amount.ToString("N0")
+                    </td>
+                </tr>
+            }
+        </tbody>
+
+    </table>
+</div>
+

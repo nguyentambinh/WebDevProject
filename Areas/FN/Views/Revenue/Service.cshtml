@@ -1,0 +1,230 @@
+﻿@using System.Linq
+@using QLNSVATC.Models.FN_Models
+@using QLNSVATC.Models
+@using QLNSVATC.Helpers
+@model ServiceRevenueViewModel
+
+@{
+    Layout = "~/Areas/FN/Views/Shared/_LayoutFN.cshtml";
+
+    var st = ViewBag.Settings as UserViewBagModel;
+
+    string theme = st?.ThemeHex ?? "#22c55e";
+    bool dark = st?.DarkMode ?? true;
+
+    string bg = dark ? "#020617" : "#f5f7fb";
+    string cardBg = dark ? "#020617" : "#ffffff";
+    string textColor = dark ? "#e5e7eb" : "#0f172a";
+    string border = dark ? "#1e293b" : "#e2e8f0";
+
+    string font = !string.IsNullOrEmpty(st?.FontFamily)
+        ? st.FontFamily
+        : "Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
+    int fz = st?.FontSize ?? 16;
+
+    string lang = ViewBag.CurrentLang as string ?? st?.Lang ?? "vi_VN";
+    ViewBag.CurrentLang = lang;
+
+    Func<Dictionary<string, string>, string> L = dict =>
+    {
+        if (dict.ContainsKey(lang)) return dict[lang];
+        if (dict.ContainsKey("en_US")) return dict["en_US"];
+        return dict.Values.First();
+    };
+
+    var txtTitle = L(new Dictionary<string, string> {
+        { "vi_VN", "Doanh thu từ dịch vụ" },
+        { "en_US", "Service revenue overview" },
+        { "jp_JP", "サービス収益概要" },
+        { "kr_KR", "서비스 매출 요약" },
+        { "cn_CN", "服务收入概览" }
+    });
+
+    var txtTotalRevenue = L(new Dictionary<string, string> {
+        { "vi_VN", "Tổng doanh thu dịch vụ" },
+        { "en_US", "Total service revenue" }
+    });
+
+    var txtServiceOrders = L(new Dictionary<string, string> {
+        { "vi_VN", "Số giao dịch dịch vụ" },
+        { "en_US", "Service orders" }
+    });
+
+    var txtAvgOrder = L(new Dictionary<string, string> {
+        { "vi_VN", "Giá trị TB / giao dịch" },
+        { "en_US", "Average order value" }
+    });
+
+    var txtChartTitle = L(new Dictionary<string, string> {
+        { "vi_VN", "Doanh thu theo tháng" },
+        { "en_US", "Service revenue by month" }
+    });
+
+    var txtChartSeries = L(new Dictionary<string, string> {
+        { "vi_VN", "Doanh thu dịch vụ" },
+        { "en_US", "Service revenue" }
+    });
+
+    var txtTopServices = L(new Dictionary<string, string> {
+        { "vi_VN", "Top loại dịch vụ theo doanh thu" },
+        { "en_US", "Top service types by revenue" }
+    });
+
+    var txtColServiceType = L(new Dictionary<string, string> {
+        { "vi_VN", "Loại dịch vụ" },
+        { "en_US", "Service type" }
+    });
+
+    var txtColOrders = L(new Dictionary<string, string> {
+        { "vi_VN", "Số giao dịch" },
+        { "en_US", "Orders" }
+    });
+
+    var txtColRevenue = L(new Dictionary<string, string> {
+        { "vi_VN", "Doanh thu" },
+        { "en_US", "Revenue" }
+    });
+
+    var monthLabels = Model.RevenueByMonth
+        .OrderBy(m => m.Year).ThenBy(m => m.Month)
+        .Select(m => $"{m.Month:00}/{m.Year}")
+        .ToList();
+
+    var revSeries = Model.RevenueByMonth
+        .OrderBy(m => m.Year).ThenBy(m => m.Month)
+        .Select(m => m.Revenue)
+        .ToList();
+}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="rev-page">
+    <div class="rev-header">
+        <div>
+            <h2>@txtTitle</h2>
+            <p class="sub">
+                @Model.FromDate.ToString("dd/MM/yyyy") – @Model.ToDate.ToString("dd/MM/yyyy")
+            </p>
+        </div>
+    </div>
+
+    <div class="rev-top-cards">
+        <div class="card primary">
+            <p class="label">@txtTotalRevenue</p>
+            <h3 class="value">@Model.TotalRevenue.ToShortCurrency(lang)</h3>
+        </div>
+        <div class="card">
+            <p class="label">@txtServiceOrders</p>
+            <h3 class="value">@Model.ServiceOrders.FormatNumber(lang)</h3>
+        </div>
+        <div class="card">
+            <p class="label">@txtAvgOrder</p>
+            <h3 class="value">@Model.AverageOrderValue.ToShortCurrency(lang)</h3>
+        </div>
+    </div>
+
+    <div class="rev-main-grid">
+        <div class="panel wide">
+            <div class="panel-header">
+                <span class="panel-title">@txtChartTitle</span>
+            </div>
+            <div class="chart-wrap">
+                <canvas id="svcChart"></canvas>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <span class="panel-title">@txtTopServices</span>
+            </div>
+
+            @if (Model.TopServices.Any())
+            {
+                <table class="rev-table">
+                    <thead>
+                        <tr>
+                            <th>@txtColServiceType</th>
+                            <th class="right">@txtColOrders</th>
+                            <th class="right">@txtColRevenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var s in Model.TopServices)
+                        {
+                            <tr>
+                                <td>@s.ServiceType</td>
+                                <td class="right">@s.Count.FormatNumber(lang)</td>
+                                <td class="right">@s.Revenue.ToShortCurrency(lang)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="empty">No service data.</div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --bg: @bg;
+        --card: @cardBg;
+        --text: @textColor;
+        --border: @border;
+        --accent: @theme;
+        --font: @font;
+        --fz: @(fz)px;
+    }
+
+</style>
+<link href="~/Content/CSS/FNManager/Revenue/ServiceREV.css" rel="stylesheet" />
+<script>
+    (function () {
+        const labels = @Html.Raw(Json.Encode(monthLabels));
+        const revenue = @Html.Raw(Json.Encode(revSeries));
+
+        const ctx = document.getElementById('svcChart');
+        if (!ctx) return;
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: '@txtChartSeries',
+                        data: revenue,
+                        backgroundColor: 'rgba(34,197,94,0.75)',
+                        borderRadius: 8,
+                        maxBarThickness: 26
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (value) {
+                                if (value >= 1_000_000) return (value / 1_000_000).toFixed(1) + 'M';
+                                if (value >= 1_000) return (value / 1_000).toFixed(1) + 'K';
+                                return value;
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: { font: { size: 11 } }
+                    }
+                }
+            }
+        });
+    })();
+</script>

@@ -1,0 +1,120 @@
+﻿@model QLNSVATC.Models.FN_Models.FNExpenseViewModel
+@using System.Collections.Generic
+
+@{
+    string lang = ViewBag.CurrentLang as string ?? "en_US";
+
+    Func<Dictionary<string, string>, string> L = d =>
+    {
+        if (d.ContainsKey(lang)) return d[lang];
+        if (d.ContainsKey("en_US")) return d["en_US"];
+        return d.Values.First();
+    };
+
+    var tTitle = new Dictionary<string, string> {
+        { "vi_VN", "Công việc đang chờ" },
+        { "en_US", "Pending tasks" },
+        { "jp_JP", "保留中タスク" },
+        { "kr_KR", "대기 작업" },
+        { "cn_CN", "待处理任务" }
+    };
+
+    var t1 = new Dictionary<string, string> {
+        { "vi_VN", "Đề nghị chi dự án chờ duyệt" },
+        { "en_US", "Project expense approvals" },
+        { "jp_JP", "プロジェクト経費承認待ち" },
+        { "kr_KR", "프로젝트 비용 승인대기" },
+        { "cn_CN", "项目费用待审批" }
+    };
+
+    var t2 = new Dictionary<string, string> {
+        { "vi_VN", "Đơn mua vật liệu chờ duyệt" },
+        { "en_US", "Material purchase requests" },
+        { "jp_JP", "資材購入申請" },
+        { "kr_KR", "자재 구매 요청" },
+        { "cn_CN", "材料采购申请" }
+    };
+
+    var t3 = new Dictionary<string, string> {
+        { "vi_VN", "Chi phí vận chuyển chưa báo cáo" },
+        { "en_US", "Unreported transport expenses" },
+        { "jp_JP", "未計上の輸送費" },
+        { "kr_KR", "미보고 운송비" },
+        { "cn_CN", "未报销运输费" }
+    };
+
+    var t4 = new Dictionary<string, string> {
+        { "vi_VN", "Chi phí khác chưa báo cáo" },
+        { "en_US", "Other unreported expenses" },
+        { "jp_JP", "未計上その他経費" },
+        { "kr_KR", "미보고 기타 비용" },
+        { "cn_CN", "其他未报销费用" }
+    };
+
+    var t5 = new Dictionary<string, string> {
+        { "vi_VN", "Tạm ứng chưa quyết toán" },
+        { "en_US", "Uncleared advances" },
+        { "jp_JP", "未精算前払金" },
+        { "kr_KR", "정산 전 대여금" },
+        { "cn_CN", "未清算预支款" }
+    };
+}
+
+<div class="expdash-card expdash-pending">
+    <div class="expdash-card-header">
+        <span class="expdash-card-title">@L(tTitle)</span>
+    </div>
+
+    <div class="expdash-pending-list">
+        <div class="expdash-pending-item">
+            <div class="expdash-pending-left">
+                <span class="expdash-icon-circle">
+                    <i class="fa-solid fa-clipboard-check"></i>
+                </span>
+                <span>@L(t1)</span>
+            </div>
+            <span class="expdash-pending-value">@Model.PendingApprovals</span>
+        </div>
+
+        <div class="expdash-pending-item">
+            <div class="expdash-pending-left">
+                <span class="expdash-icon-circle">
+                    <i class="fa-solid fa-box-open"></i>
+                </span>
+                <span>@L(t2)</span>
+            </div>
+            <span class="expdash-pending-value">@Model.PendingMaterial</span>
+        </div>
+
+        <div class="expdash-pending-item">
+            <div class="expdash-pending-left">
+                <span class="expdash-icon-circle">
+                    <i class="fa-solid fa-truck"></i>
+                </span>
+                <span>@L(t3)</span>
+            </div>
+            <span class="expdash-pending-value">@Model.PendingTransport</span>
+        </div>
+
+        <div class="expdash-pending-item">
+            <div class="expdash-pending-left">
+                <span class="expdash-icon-circle">
+                    <i class="fa-solid fa-receipt"></i>
+                </span>
+                <span>@L(t4)</span>
+            </div>
+            <span class="expdash-pending-value">0</span>
+        </div>
+
+        <div class="expdash-pending-item expdash-pending-last">
+            <div class="expdash-pending-left">
+                <span class="expdash-icon-circle">
+                    <i class="fa-solid fa-wallet"></i>
+                </span>
+                <span>@L(t5)</span>
+            </div>
+            <span class="expdash-pending-value">@Model.TotalProjectCost.ToString("N0")</span>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,105 @@
+﻿@using System.Linq
+@using QLNSVATC.Models
+@model QLNSVATC.Models.FN_Models.FNExpenseViewModel
+
+@{
+    string lang = ViewBag.CurrentLang as string ?? "en_US";
+    Func<Dictionary<string, string>, string> L = d =>
+    {
+        if (d.ContainsKey(lang)) return d[lang];
+        if (d.ContainsKey("en_US")) return d["en_US"];
+        return d.Values.First();
+    };
+
+    var maxTeam = Model.TeamSpendings.Any()
+        ? Model.TeamSpendings.Max(x => x.Amount)
+        : 0m;
+
+    var maxCat = Model.CategorySpendings.Any()
+        ? Model.CategorySpendings.Max(x => x.Amount)
+        : 0m;
+}
+
+<div class="expdash-card expdash-monthly">
+    <div class="expdash-card-header">
+        <span class="expdash-card-title">
+            @L(new Dictionary<string, string> {
+                { "vi_VN","Báo cáo theo tháng" },
+                { "en_US","Monthly report" },
+                { "jp_JP","月次レポート" },
+                { "kr_KR","월간 보고" },
+                { "cn_CN","月度报表" }
+            })
+        </span>
+    </div>
+
+    <div class="expdash-monthly-grid">
+        <!-- Chart 1: team -->
+        <div class="expdash-chart-card">
+            <div class="chart-header">
+                @L(new Dictionary<string, string> {
+                    { "vi_VN","Chi tiêu theo đội thi công" },
+                    { "en_US","Team spending trend" },
+                    { "jp_JP","部署別支出状況" },
+                    { "kr_KR","팀 / 부서별 지출" },
+                    { "cn_CN","团队/部门支出" }
+                })
+            </div>
+            <div class="chart-bars">
+                @foreach (var t in Model.TeamSpendings)
+                {
+                    var h = maxTeam > 0 ? (int)Math.Round((t.Amount / maxTeam) * 100m) : 0;
+
+                    <div class="bar" title="@t.TeamName - @t.Amount.ToString("N0")">
+                        <div class="bar-inner" style="height:@h%;"></div>
+
+                        <div class="bar-text">
+                            <div class="bar-label">@t.TeamName</div>
+                            <div class="bar-amount">@t.Amount.ToString("N0")</div>
+                        </div>
+                    </div>
+                }
+
+                @if (!Model.TeamSpendings.Any())
+                {
+                    <div style="font-size:12px;color:#9ca3af;">No data</div>
+                }
+            </div>
+        </div>
+
+        <!-- Chart 2: category -->
+        <div class="expdash-chart-card">
+            <div class="chart-header">
+                @L(new Dictionary<string, string> {
+                    { "vi_VN","Chi phí theo loại" },
+                    { "en_US","Expense breakdown" },
+                    { "jp_JP","費用構成" },
+                    { "kr_KR","비용 구조" },
+                    { "cn_CN","费用结构" }
+                })
+            </div>
+            <div class="chart-bars">
+                @foreach (var c in Model.CategorySpendings)
+                {
+                    var h2 = maxCat > 0 ? (int)Math.Round((c.Amount / maxCat) * 100m) : 0;
+                    var barClass = "bar-inner bar-purple";
+                    if (c.CategoryCode == "Project") { barClass = "bar-inner"; } ;
+
+                    <div class="bar" title="@c.Label - @c.Amount.ToString("N0")">
+                        <div class="@barClass" style="height:@h2%;"></div>
+
+                        <div class="bar-text">
+                            <div class="bar-label">@c.Label</div>
+                            <div class="bar-amount">@c.Amount.ToString("N0")</div>
+                        </div>
+                    </div>
+                }
+
+                @if (!Model.CategorySpendings.Any())
+                {
+                    <div style="font-size:12px;color:#9ca3af;">No data</div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

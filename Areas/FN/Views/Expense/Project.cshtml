@@ -1,0 +1,343 @@
+﻿@using System.Collections.Generic
+@using QLNSVATC.Models
+@using QLNSVATC.Models.FN_Models
+@model ProjectExpenseListViewModel
+
+@{
+    Layout = "~/Areas/FN/Views/Shared/_LayoutFN.cshtml";
+
+    var st = ViewBag.Settings as UserViewBagModel;
+    string theme = st?.ThemeHex ?? "#22c55e";
+    bool dark = st?.DarkMode ?? true;
+
+    string bg = dark ? "#020617" : "#f5f5f5";
+    string cardBg = dark ? "#020617" : "#ffffff";
+    string headerBg = dark ? "#020617" : "#0f172a";
+
+    string text = dark ? "#e5e7eb" : "#020617";
+    string textSoft = dark ? "#9ca3af" : "#6b7280";
+    string border = dark ? "#1f2937" : "#d1d5db";
+
+    string font = !string.IsNullOrEmpty(st?.FontFamily)
+        ? st.FontFamily
+        : "Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
+    int fz = st?.FontSize ?? 16;
+
+    string lang = ViewBag.CurrentLang as string ?? st?.Lang ?? "en_US";
+
+    Func<Dictionary<string, string>, string> L = d =>
+    {
+        if (d.ContainsKey(lang)) return d[lang];
+        if (d.ContainsKey("en_US")) return d["en_US"];
+        return d.Values.First();
+    };
+    var tPrev = new Dictionary<string, string> {
+    { "vi_VN","Trước" },
+    { "en_US","Prev" },
+    { "jp_JP","前へ" },
+    { "kr_KR","이전" },
+    { "cn_CN","上一页" }
+};
+    var tNext = new Dictionary<string, string> {
+    { "vi_VN","Sau" },
+    { "en_US","Next" },
+    { "jp_JP","次へ" },
+    { "kr_KR","다음" },
+    { "cn_CN","下一页" }
+};
+
+    var tTitle = new Dictionary<string, string> {
+        { "vi_VN","Chi phí dự án" },
+        { "en_US","Project expenses" },
+        { "jp_JP","プロジェクト費用" },
+        { "kr_KR","프로젝트 비용" },
+        { "cn_CN","项目费用" }
+    };
+
+    var tColDetails = new Dictionary<string, string> {
+        { "vi_VN","Chi tiết" },
+        { "en_US","Details" },
+        { "jp_JP","詳細" },
+        { "kr_KR","세부 정보" },
+        { "cn_CN","明细" }
+    };
+
+    var tColProject = new Dictionary<string, string> {
+        { "vi_VN","Dự án" },
+        { "en_US","Project" },
+        { "jp_JP","プロジェクト" },
+        { "kr_KR","프로젝트" },
+        { "cn_CN","项目" }
+    };
+
+    var tColAmount = new Dictionary<string, string> {
+        { "vi_VN","Số tiền" },
+        { "en_US","Amount" },
+        { "jp_JP","金額" },
+        { "kr_KR","금액" },
+        { "cn_CN","金额" }
+    };
+
+    var tColType = new Dictionary<string, string> {
+        { "vi_VN","Loại chi" },
+        { "en_US","Category" },
+        { "jp_JP","区分" },
+        { "kr_KR","구분" },
+        { "cn_CN","类型" }
+    };
+
+    var tColStatus = new Dictionary<string, string> {
+        { "vi_VN","Trạng thái" },
+        { "en_US","Status" },
+        { "jp_JP","状態" },
+        { "kr_KR","상태" },
+        { "cn_CN","状态" }
+    };
+
+    string FormatType(string code)
+    {
+        return L(new Dictionary<string, string>{
+        { "vi_VN","Chi phí dự án" },
+        { "en_US","Project cost" },
+        { "jp_JP","プロジェクト費用" },
+        { "kr_KR","프로젝트 비용" },
+        { "cn_CN","项目费用" }
+    });
+    }
+
+
+    string StatusText(string code)
+    {
+        switch (code)
+        {
+            case "done":
+                return L(new Dictionary<string, string>{
+                { "vi_VN","Xong" },
+                { "en_US","Completed" },
+                { "jp_JP","完了" },
+                { "kr_KR","완료" },
+                { "cn_CN","已完成" }});
+            case "overdue":
+                return L(new Dictionary<string, string>{
+                { "vi_VN","Quá hạn" },
+                { "en_US","Overdue" },
+                { "jp_JP","期限超過" },
+                { "kr_KR","기한 초과" },
+                { "cn_CN","已逾期" }});
+            case "near":
+                return L(new Dictionary<string, string>{
+                { "vi_VN","Gần đến hạn" },
+                { "en_US","Due soon" },
+                { "jp_JP","期限間近" },
+                { "kr_KR","마감 임박" },
+                { "cn_CN","即将到期" }});
+            default:
+                return L(new Dictionary<string, string>{
+                { "vi_VN","Đang thực hiện" },
+                { "en_US","In progress" },
+                { "jp_JP","進行中" },
+                { "kr_KR","진행 중" },
+                { "cn_CN","进行中" }});
+        }
+    }
+
+    string StatusCss(string code)
+    {
+        switch (code)
+        {
+            case "done": return "pexp-badge pexp-badge-done";
+            case "overdue": return "pexp-badge pexp-badge-overdue";
+            case "near": return "pexp-badge pexp-badge-near";
+            default: return "pexp-badge pexp-badge-ongoing";
+        }
+    }
+
+}
+
+<div class="pexp-root">
+    <div class="pexp-main">
+        <div class="pexp-header">
+            <div>
+                <h2 class="pexp-title">@L(tTitle)</h2>
+                <p class="pexp-sub">
+                    @L(new Dictionary<string, string>{
+                        { "vi_VN","Danh sách các khoản chi phí theo từng dự án." },
+                        { "en_US","List of all expense items per project." },
+                        { "jp_JP","プロジェクトごとの費用一覧です。" },
+                        { "kr_KR","프로젝트별 비용 내역입니다." },
+                        { "cn_CN","按项目列出的费用明细。" }
+                    })
+                </p>
+            </div>
+
+            <div class="pexp-summary">
+                <div class="item">
+                    <span class="label">
+                        @L(new Dictionary<string, string>{
+    { "vi_VN","Tổng số dòng" },
+    { "en_US","Total items" }
+})
+                </span>
+                <span class="value">@Model.TotalCount</span>
+            </div>
+            <div class="item">
+                <span class="label">
+                    @L(new Dictionary<string, string>{
+{ "vi_VN","Tổng chi" },
+{ "en_US","Total amount" }
+})
+            </span>
+            <span class="value">@Model.TotalAmount.ToString("N0")</span>
+        </div>
+    </div>
+</div>
+
+<div class="pexp-toolbar">
+    <button class="pexp-btn-primary">
+        <span>
+            + @L(new Dictionary<string, string>{
+        { "vi_VN","Thêm chi phí" },
+        { "en_US","New expense" }
+    })
+        </span>
+    </button>
+    <div class="pexp-toolbar-right">
+        <span class="info">
+            @L(new Dictionary<string, string>{
+                { "vi_VN","Chờ duyệt" },
+                { "en_US","Pending" }
+            }): @Model.PendingCount
+        </span>
+        <span class="info">
+            @L(new Dictionary<string, string>{
+                { "vi_VN","Đã duyệt" },
+                { "en_US","Approved" }
+            }): @Model.ApprovedCount
+        </span>
+    </div>
+</div>
+
+<div class="pexp-table-wrap">
+    <table class="pexp-table">
+        <thead>
+            <tr>
+                <th class="col-details">@L(tColDetails)</th>
+                <th class="col-project">@L(tColProject)</th>
+                <th class="col-type">@L(tColType)</th>
+                <th class="col-amount">@L(tColAmount)</th>
+                <th class="col-status">@L(tColStatus)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in Model.Items)
+            {
+                <tr>
+                    <td class="col-details">
+                        <div class="detail-main">
+                            <div class="detail-icon"></div>
+                            <div class="detail-text">
+                                <div class="detail-date">
+                                    @(row.ExpenseDate?.ToString("dd/MM/yyyy") ?? "-")
+                                </div>
+                                <div class="detail-label">
+                                    @row.DetailLabel
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="col-project">
+                        <div class="project-code">@row.ProjectCode</div>
+                        @if (!string.IsNullOrEmpty(row.ProjectName))
+                        {
+                            <div class="project-name">@row.ProjectName</div>
+                        }
+                    </td>
+                    <td class="col-type">
+                        @FormatType(row.ExpenseType)
+                    </td>
+                    <td class="col-amount right">
+                        @row.Amount.ToString("N0")
+                    </td>
+                    <td class="col-status">
+                        <span class="@StatusCss(row.StatusCode)">
+                            @StatusText(row.StatusCode)
+                        </span>
+                    </td>
+                </tr>
+            }
+
+            @if (!Model.Items.Any())
+            {
+                <tr>
+                    <td colspan="5" class="empty">
+                        @L(new Dictionary<string, string>{
+                            { "vi_VN","Chưa có dữ liệu chi phí." },
+                            { "en_US","No expense data yet." }
+                        })
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+<div class="pexp-pager">
+    <div class="pager-info">
+        @L(new Dictionary<string, string>{
+            { "vi_VN","Trang" },
+            { "en_US","Page" }
+        })
+        @Model.Page / @Model.TotalPages
+    </div>
+
+    <div class="pager-buttons">
+        @if (Model.Page > 1)
+        {
+            <a class="pg-btn"
+               href="@Url.Action("Project", "Expense", new { area = "FN", page = Model.Page - 1 })">
+                «
+            </a>
+        }
+
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            if (i == Model.Page)
+            {
+                <span class="pg-btn pg-btn-active">@i</span>
+            }
+            else
+            {
+                <a class="pg-btn"
+                   href="@Url.Action("Project", "Expense", new { area = "FN", page = i })">
+                    @i
+                </a>
+            }
+        }
+
+        @if (Model.Page < Model.TotalPages)
+        {
+            <a class="pg-btn"
+               href="@Url.Action("Project", "Expense", new { area = "FN", page = Model.Page + 1 })">
+                »
+            </a>
+        }
+    </div>
+</div>
+
+<link href="~/Content/CSS/FNManager/Expense/ProjectExpense.css" rel="stylesheet" />
+
+<style>
+    :root {
+        --pexp-bg: @bg;
+        --pexp-card: @cardBg;
+        --pexp-header-bg: @headerBg;
+        --pexp-text: @text;
+        --pexp-text-soft: @textSoft;
+        --pexp-border: @border;
+        --pexp-accent: @theme;
+        --pexp-font: @font;
+        --pexp-fz: @(fz)px;
+    }
+</style>

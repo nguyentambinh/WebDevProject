@@ -12,14 +12,7 @@ namespace QLNSVATC
         public static void RegisterRoutes(RouteCollection routes)
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
-            routes.MapRoute(
-                name: "FN - Earning Management",
-                url: "fn-quan-ly-doanh-thu",
-                defaults: new { controller = "Home", action = "Index" },
-                namespaces: new[] { "QLNSVATC.Areas.FN.Controllers" }
-            );
 
-            //fn - quan - ly - doanh - thu
             routes.MapRoute(
                 name: "Trang chu",
                 url: "trang-chu",

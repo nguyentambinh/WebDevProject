@@ -1,5 +1,7 @@
-﻿@using QLNSVATC.Models
-@model QLNSVATC.Models.FNDashboardViewModel
+﻿@using System.Collections.Generic
+@using QLNSVATC.Models
+@model FNDashboardViewModel
+
 @{
     Layout = "~/Areas/FN/Views/Shared/_LayoutFN.cshtml";
 
@@ -14,46 +16,62 @@
     string textColor = dark ? "#e5e7eb" : "#000000";
     string border = dark ? "#2b303b" : "#d8dce3";
 
-    string font = st?.FontFamily ?? "Inter";
+    string font = !string.IsNullOrEmpty(st?.FontFamily)
+        ? st.FontFamily
+        : "Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
     int fsize = (st?.FontSize ?? 16);
 
-    Func<string, string> T = key =>
-st.TranslateDict.ContainsKey(key) ? st.TranslateDict[key] : key;
+    string currentLang = ViewBag.CurrentLang as string ?? st?.Lang ?? "en_US";
+    ViewBag.CurrentLang = currentLang;
+
+    Func<Dictionary<string, string>, string> L = dict =>
+    {
+        if (dict.ContainsKey(currentLang)) return dict[currentLang];
+        if (dict.ContainsKey("en_US")) return dict["en_US"];
+        return dict.Values.First();
+    };
+
+    var langDashboardTitle = new Dictionary<string, string> {
+        { "vi_VN", "Tổng quan tài chính" },
+        { "en_US", "Finance dashboard" },
+        { "jp_JP", "財務ダッシュボード" },
+        { "kr_KR", "재무 대시보드" },
+        { "cn_CN", "财务概览" }
+    };
+
+    var textDashboardTitle = L(langDashboardTitle);
 }
 
 <div class="fn-dashboard">
-    <!-- SIDEBAR -->
-    @Html.Partial("_Sidebar")
-
-    <!-- CONTENT -->
     <div class="fn-main">
         <div class="fn-header-row">
-            <h2 class="fn-title">@T("DASHBOARD")</h2>
+            <h2 class="fn-title">@textDashboardTitle</h2>
         </div>
 
         @Html.Partial("_TopCards", Model)
         @Html.Partial("_Highlight", Model)
 
-
         <div class="fn-bottom">
-            @Html.Partial("_Bank", Model)
             @Html.Partial("_Target")
-
         </div>
+
         @Html.Partial("_Activity")
     </div>
 </div>
 
 <link href="~/Content/CSS/FNManager/Index.css" rel="stylesheet" />
+
 <style>
     :root {
-    --bg: @bg;
-    --card: @cardBg;
-    --card2: @cardBg2;
-    --text: @textColor;
-    --accent: @theme;
-    --border: @border;
-    --font: @font;
-    --fz: @fsize;
-}
+        --bg: @bg;
+        --card: @cardBg;
+        --card2: @cardBg2;
+        --text: @textColor;
+        --accent: @theme;
+        --border: @border;
+        --font: @font;
+        --fz: @(fsize)px;
+    }
+
 </style>

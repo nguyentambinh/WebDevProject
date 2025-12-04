@@ -1,0 +1,138 @@
+﻿
+.rev-page {
+    width: 95%;
+    margin: 24px auto 40px auto;
+    padding: 16px 20px 28px 20px;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: var(--fz);
+}
+
+.rev-header h2 {
+    margin: 0;
+    font-size: var(--fz);
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.rev-header .sub {
+    margin: 4px 0 0 0;
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.rev-top-cards {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: 2fr 1.2fr 1.2fr;
+    gap: 16px;
+    font-size: var(--fz);
+}
+
+.card {
+    background: var(--card);
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+}
+
+    .card.primary {
+        background: var(--accent);
+        border: none;
+        color: var(--text);
+    }
+
+    .card .label {
+        font-size: 12px;
+        opacity: .9;
+        margin-bottom: 4px;
+    }
+
+    .card .value {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 600;
+    }
+
+.rev-main-grid {
+    margin-top: 22px;
+    display: grid;
+    grid-template-columns: 2.1fr 1fr;
+    gap: 16px;
+}
+
+.panel {
+    background: var(--card);
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.panel-title {
+    color: var(--accent);
+    font-size: var(--fz);
+    font-weight: 500;
+}
+
+.chart-wrap {
+    position: relative;
+    width: 100%;
+    height: 280px;
+    margin-top: 6px;
+}
+
+#svcChart {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.rev-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-top: 6px;
+}
+
+    .rev-table th,
+    .rev-table td {
+        padding: 6px 4px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .rev-table th {
+        font-weight: 500;
+        font-size: 11px;
+        opacity: .8;
+        text-align: left;
+    }
+
+        .rev-table th.right {
+            text-align: right;
+        }
+
+    .rev-table td.right {
+        text-align: right;
+    }
+
+.empty {
+    font-size: 12px;
+    opacity: .7;
+    padding: 8px 0;
+}
+
+@@media (max-width: 992px) {
+    .rev-top-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .rev-main-grid {
+        grid-template-columns: 1fr;
+    }
+}

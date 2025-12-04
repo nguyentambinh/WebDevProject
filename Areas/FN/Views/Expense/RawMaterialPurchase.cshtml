@@ -1,0 +1,102 @@
+﻿@using System.Collections.Generic
+@using QLNSVATC.Models
+@model QLNSVATC.Models.FN_Models.MaterialPurchaseListVM
+
+
+@{
+    Layout = "~/Areas/FN/Views/Shared/_LayoutFN.cshtml";
+
+    var st = ViewBag.Settings as UserViewBagModel;
+
+    string theme = st?.ThemeHex ?? "#22c55e";
+    bool dark = st?.DarkMode ?? true;
+
+    string bg = dark ? "#050816" : "#f5f7ff";
+    string card = dark ? "#0b0f1b" : "#ffffff";
+    string rowEven = dark ? "#101421" : "#f9fafb";
+    string text = dark ? "#e5e7eb" : "#020617";
+    string textSoft = dark ? "#9ca3af" : "#4b5563";
+    string border = dark ? "#272b3a" : "#d1d5db";
+
+    string font = !string.IsNullOrEmpty(st?.FontFamily)
+        ? st.FontFamily
+        : "Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
+    int fz = st?.FontSize ?? 16;
+
+    string lang = ViewBag.CurrentLang as string ?? st?.Lang ?? "en_US";
+    ViewBag.CurrentLang = lang;
+
+    Func<Dictionary<string, string>, string> L = d =>
+    {
+        if (d.ContainsKey(lang)) return d[lang];
+        if (d.ContainsKey("en_US")) return d["en_US"];
+        return d.Values.First();
+    };
+
+    var titleDic = new Dictionary<string, string> {
+        { "vi_VN", "Chi phí nhập nguyên vật liệu" },
+        { "en_US", "Raw material purchase approvals" },
+        { "jp_JP", "原材料仕入れ承認" },
+        { "kr_KR", "원자재 구매 승인" },
+        { "cn_CN", "原材料采购审批" }
+    };
+
+    var subDic = new Dictionary<string, string> {
+        { "vi_VN", "Duyệt các đơn mua thép, xi măng, gạch… cho công ty xây dựng" },
+        { "en_US", "Review and approve steel, cement and brick purchase requests" },
+        { "jp_JP", "鉄筋・セメント・レンガなどの仕入れ申請を管理" },
+        { "kr_KR", "철근·시멘트·벽돌 등 원자재 구매 요청을 관리합니다" },
+        { "cn_CN", "管理钢筋、水泥、砖块等原材料采购申请" }
+    };
+
+    var title = L(titleDic);
+    var sub = L(subDic);
+}
+
+<div class="mat-root">
+    <div class="mat-main">
+        <header class="mat-header">
+            <div>
+                <h2 class="mat-title">@title</h2>
+                <p class="mat-sub">@sub</p>
+            </div>
+            <div class="mat-header-right">
+                <div class="mat-pill">
+                    <i class="fa-solid fa-user-gear"></i>
+                    <span>@lang · @(fz)px</span>
+                </div>
+                <button class="mat-icon-btn" title="Filter">
+                    <i class="fa-solid fa-filter"></i>
+                </button>
+                <button class="mat-icon-btn" title="More">
+                    <i class="fa-solid fa-ellipsis"></i>
+                </button>
+            </div>
+        </header>
+
+        @Html.Partial("_MaterialApprovalsTable", Model.Items)
+
+    </div>
+</div>
+
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+      crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<link href="~/Content/CSS/FNManager/Expense/ExpenseMaterial.css" rel="stylesheet" />
+
+<style>
+    :root {
+        --mat-bg: @bg;
+        --mat-card: @card;
+        --mat-row-even: @rowEven;
+        --mat-text: @text;
+        --mat-text-soft: @textSoft;
+        --mat-border: @border;
+        --mat-accent: @theme;
+        --mat-font: @font;
+        --mat-fz: @(fz)px;
+    }
+</style>

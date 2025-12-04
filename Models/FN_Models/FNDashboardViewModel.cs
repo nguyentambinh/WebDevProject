@@ -17,7 +17,7 @@ namespace QLNSVATC.Models
         public decimal CostForMaterials { get; set; }
         public decimal CostForTransport { get; set; }
         //Charts
-        public int RevenueInvoiceCount { get; set; }
+        public decimal RevenueInvoiceCount { get; set; }
         public int TransactionCount { get; set; }
         public decimal Balance => TotalEarning - TotalSpending;
         public List<FNChartPointVM> RevenueTrend { get; set; } = new List<FNChartPointVM>();

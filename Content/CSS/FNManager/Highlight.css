@@ -1,5 +1,5 @@
 ﻿.fn-analytics {
-    background: var(--card2);
+    background: var(--card);
     border-radius: 18px;
     border: 1px solid var(--border);
     padding: 18px 22px;
@@ -7,7 +7,6 @@
     font-size: var(--fsize);
 }
 
-/* header + filter */
 .an-header {
     display: flex;
     justify-content: space-between;
@@ -16,16 +15,16 @@
 }
 
 .an-title {
-    font-size: 14px;
+    font-size: var(--fz);
     font-weight: 500;
 }
 
 .an-filter {
     border-radius: 999px;
     border: 1px solid var(--border);
-    background: var(--card);
+    background: var(--accent);
     color: var(--text);
-    font-size: 12px;
+    font-size: var(--fz);
     padding: 6px 10px;
 }
 

@@ -1,0 +1,303 @@
+﻿@using System.Linq
+@using System.Web.Helpers
+@using QLNSVATC.Models.FN_Models
+@using QLNSVATC.Models
+@using QLNSVATC.Helpers
+@model ProjectRevenueViewModel
+
+@{
+    Layout = "~/Areas/FN/Views/Shared/_LayoutFN.cshtml";
+
+    var st = ViewBag.Settings as UserViewBagModel;
+
+    string theme = st?.ThemeHex ?? "#38bdf8";
+    bool dark = st?.DarkMode ?? true;
+
+    string bg = dark ? "#0b1120" : "#f5f7fb";
+    string cardBg = dark ? "#0f172a" : "#ffffff";
+    string textColor = dark ? "#e5e7eb" : "#0f172a";
+    string border = dark ? "#1e293b" : "#e2e8f0";
+
+    string font = !string.IsNullOrEmpty(st?.FontFamily)
+        ? st.FontFamily
+        : "Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
+    int fz = st?.FontSize ?? 16;
+
+    string lang = st?.Lang ?? "en_US";
+    ViewBag.CurrentLang = lang;
+
+    Func<Dictionary<string, string>, string> L = dict =>
+    {
+        if (dict.ContainsKey(lang)) return dict[lang];
+        if (dict.ContainsKey("en_US")) return dict["en_US"];
+        return dict.Values.First();
+    };
+
+    var txtTitle = L(new Dictionary<string, string> {
+        { "vi_VN", "Doanh thu từ dự án" },
+        { "en_US", "Project revenue overview" },
+        { "jp_JP", "プロジェクト収益概要" },
+        { "kr_KR", "프로젝트 매출 요약" },
+        { "cn_CN", "项目收入概览" }
+    });
+
+    var txtTotalRevenue = L(new Dictionary<string, string> {
+        { "vi_VN", "Tổng doanh thu dự án" },
+        { "en_US", "Total project revenue" }
+    });
+
+    var txtCompleted = L(new Dictionary<string, string> {
+        { "vi_VN", "Dự án đã hoàn thành" },
+        { "en_US", "Completed projects" }
+    });
+
+    var txtAvg = L(new Dictionary<string, string> {
+        { "vi_VN", "Doanh thu TB / dự án" },
+        { "en_US", "Average revenue per project" }
+    });
+
+    var txtChart = L(new Dictionary<string, string> {
+        { "vi_VN", "Doanh thu theo tháng" },
+        { "en_US", "Revenue by month" }
+    });
+
+    var txtRegion = L(new Dictionary<string, string> {
+        { "vi_VN", "Doanh thu theo khu vực" },
+        { "en_US", "Revenue by region" }
+    });
+
+    var txtTopProjects = L(new Dictionary<string, string> {
+        { "vi_VN", "Top dự án theo doanh thu" },
+        { "en_US", "Top projects by revenue" }
+    });
+
+    var txtNoRegion = L(new Dictionary<string, string> {
+        { "vi_VN", "Không có dữ liệu theo khu vực." },
+        { "en_US", "No regional data." }
+    });
+
+    var txtNoProject = L(new Dictionary<string, string> {
+        { "vi_VN", "Không có dữ liệu dự án." },
+        { "en_US", "No project data." }
+    });
+
+    var txtThProject = L(new Dictionary<string, string> {
+        { "vi_VN", "Dự án" },
+        { "en_US", "Project" }
+    });
+
+    var txtThRegion = L(new Dictionary<string, string> {
+        { "vi_VN", "Khu vực" },
+        { "en_US", "Region" }
+    });
+
+    var txtThType = L(new Dictionary<string, string> {
+        { "vi_VN", "Loại" },
+        { "en_US", "Type" }
+    });
+
+    var txtThRevenue = L(new Dictionary<string, string> {
+        { "vi_VN", "Doanh thu" },
+        { "en_US", "Revenue" }
+    });
+
+    var txtSeriesRevenue = L(new Dictionary<string, string> {
+        { "vi_VN", "Doanh thu" },
+        { "en_US", "Revenue" }
+    });
+
+    var txtSeriesMarket = L(new Dictionary<string, string> {
+        { "vi_VN", "Chỉ số thị trường" },
+        { "en_US", "Market index" }
+    });
+
+    var monthLabels = Model.RevenueByMonth
+        .OrderBy(m => m.Year).ThenBy(m => m.Month)
+        .Select(m => $"{m.Month:00}/{m.Year}")
+        .ToList();
+
+    var revSeries = Model.RevenueByMonth
+        .OrderBy(m => m.Year).ThenBy(m => m.Month)
+        .Select(m => m.Revenue)
+        .ToList();
+
+    var marketSeries = Model.RevenueByMonth
+        .OrderBy(m => m.Year).ThenBy(m => m.Month)
+        .Select(m => m.MarketIndex ?? 0)
+        .ToList();
+}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="rev-page">
+    <div class="rev-header">
+        <div>
+            <h2>@txtTitle</h2>
+            <p class="sub">
+                @Model.FromDate.ToString("dd/MM/yyyy") – @Model.ToDate.ToString("dd/MM/yyyy")
+            </p>
+        </div>
+    </div>
+
+    <div class="rev-top-cards">
+        <div class="card primary">
+            <p class="label">@txtTotalRevenue</p>
+            <h3 class="value">@Model.TotalRevenue.ToShortCurrency(lang)</h3>
+        </div>
+        <div class="card">
+            <p class="label">@txtCompleted</p>
+            <h3 class="value">@Model.CompletedProjects.FormatNumber(lang)</h3>
+        </div>
+        <div class="card">
+            <p class="label">@txtAvg</p>
+            <h3 class="value">@Model.AveragePerProject.ToShortCurrency(lang)</h3>
+        </div>
+    </div>
+
+    <div class="rev-main-grid">
+        <div class="panel wide">
+            <div class="panel-header">
+                <span class="panel-title">@txtChart</span>
+            </div>
+            <div class="chart-wrap">
+                <canvas id="projChart"></canvas>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <span class="panel-title">@txtRegion</span>
+            </div>
+            @if (Model.RevenueByRegion.Any())
+            {
+                <ul class="region-list">
+                    @foreach (var r in Model.RevenueByRegion)
+                    {
+                        <li>
+                            <span>@r.RegionName (@r.RegionCode)</span>
+                            <span class="num">@r.Revenue.ToShortCurrency(lang)</span>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <div class="empty">@txtNoRegion</div>
+            }
+        </div>
+    </div>
+
+    <div class="panel" style="margin-top:18px;">
+        <div class="panel-header">
+            <span class="panel-title">@txtTopProjects</span>
+        </div>
+        @if (Model.TopProjects.Any())
+        {
+            <table class="rev-table">
+                <thead>
+                    <tr>
+                        <th>@txtThProject</th>
+                        <th>@txtThRegion</th>
+                        <th>@txtThType</th>
+                        <th class="right">@txtThRevenue</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model.TopProjects)
+                    {
+                        <tr>
+                            <td>
+                                <div class="t-name">@p.ProjectName</div>
+                                <div class="t-sub">Code: @p.ProjectCode</div>
+                            </td>
+                            <td>@p.RegionName</td>
+                            <td>@p.TypeName</td>
+                            <td class="right">@p.Revenue.ToShortCurrency(lang)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="empty">@txtNoProject</div>
+        }
+    </div>
+</div>
+
+<style>
+    :root {
+        --bg: @bg;
+        --card: @cardBg;
+        --text: @textColor;
+        --border: @border;
+        --accent: @theme;
+        --font: @font;
+        --fz: @(fz)px;
+    }
+</style>
+<link href="~/Content/CSS/FNManager/Revenue/ProjectREV.css" rel="stylesheet" />
+<script>
+    (function () {
+        const labels = @Html.Raw(Json.Encode(monthLabels));
+        const revenue = @Html.Raw(Json.Encode(revSeries));
+        const market = @Html.Raw(Json.Encode(marketSeries));
+
+        const ctx = document.getElementById('projChart');
+        if (!ctx) return;
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        type: 'bar',
+                        label: '@txtSeriesRevenue',
+                        data: revenue,
+                        backgroundColor: 'rgba(59,130,246,0.7)',
+                        borderRadius: 8,
+                        maxBarThickness: 26
+                    },
+                    {
+                        type: 'line',
+                        label: '@txtSeriesMarket',
+                        data: market,
+                        borderColor: 'rgba(234,179,8,0.9)',
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        fill: false,
+                        yAxisID: 'y1',
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (value) {
+                                if (value >= 1_000_000) return (value / 1_000_000).toFixed(1) + 'M';
+                                if (value >= 1_000) return (value / 1_000).toFixed(1) + 'K';
+                                return value;
+                            }
+                        }
+                    },
+                    y1: {
+                        position: 'right',
+                        grid: { drawOnChartArea: false }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: { font: { size: 11 } }
+                    }
+                }
+            }
+        });
+    })();
+</script>

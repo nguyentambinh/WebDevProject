@@ -242,6 +242,8 @@
     <Compile Include="Areas\Admin\Controllers\HomeController.cs" />
     <Compile Include="Areas\Employee\Controllers\HomeController.cs" />
     <Compile Include="Areas\Employee\EmployeeAreaRegistration.cs" />
+    <Compile Include="Areas\FN\Controllers\ExpenseController.cs" />
+    <Compile Include="Areas\FN\Controllers\RevenueController.cs" />
     <Compile Include="Areas\FN\FNAreaRegistration.cs" />
     <Compile Include="Areas\HR\Controllers\HomeController.cs" />
     <Compile Include="Areas\OF\Controllers\HomeController.cs" />
@@ -320,7 +322,10 @@
     <Compile Include="Models\DUANTHEOHOPDONG.cs">
       <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\FNDashboardViewModel.cs" />
+    <Compile Include="Models\FN_Models\FNDashboardViewModel.cs" />
+    <Compile Include="Models\FN_Models\FNExpenseViewModel.cs" />
+    <Compile Include="Models\FN_Models\FNRevenueViewModel.cs" />
+    <Compile Include="Models\FN_Models\ProjectExpenseViewModels.cs" />
     <Compile Include="Models\FONT.cs">
       <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
     </Compile>
@@ -441,9 +446,13 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
+    <Content Include="Content\CSS\FNManager\Expense\ExpenseMaterial.css" />
+    <Content Include="Content\CSS\FNManager\Expense\ProjectExpense.css" />
     <Content Include="Content\CSS\FNManager\Highlight.css" />
     <Content Include="Content\CSS\FNManager\Index.css" />
-    <Content Include="Content\CSS\FNManager\_Bank.css" />
+    <Content Include="Content\CSS\FNManager\Revenue\ProjectREV.css" />
+    <Content Include="Content\CSS\FNManager\Revenue\ServiceREV.css" />
+    <Content Include="Content\CSS\FNManager\Expense\Index.css" />
     <Content Include="Content\CSS\FNManager\_TopCards.css" />
     <Content Include="Content\CSS\Slider.css" />
     <Content Include="Content\CSS\Footer.css" />
@@ -686,12 +695,20 @@
     <Content Include="packages\EntityFramework.6.5.1\tools\net6.0\any\ef6.dll" />
     <Content Include="packages\EntityFramework.6.5.1\tools\net6.0\any\ef6.pdb" />
     <Content Include="Areas\FN\Views\Home\_Activity.cshtml" />
-    <Content Include="Areas\FN\Views\Home\_Bank.cshtml" />
     <Content Include="Areas\FN\Views\Home\_Highlight.cshtml" />
-    <Content Include="Areas\FN\Views\Home\_Sidebar.cshtml" />
     <Content Include="Areas\FN\Views\Home\_Target.cshtml" />
     <Content Include="Areas\FN\Views\Home\_TopCards.cshtml" />
     <Content Include="Content\CSS\app.config" />
+    <Content Include="Areas\FN\Views\Revenue\Project.cshtml" />
+    <Content Include="Areas\FN\Views\Revenue\Service.cshtml" />
+    <Content Include="Areas\FN\Views\Expense\Index.cshtml" />
+    <Content Include="Areas\FN\Views\Expense\_PendingTasks.cshtml" />
+    <Content Include="Areas\FN\Views\Expense\_RecentExpenses.cshtml" />
+    <Content Include="Areas\FN\Views\Expense\_QuickAccess.cshtml" />
+    <Content Include="Areas\FN\Views\Expense\_MonthlyReport.cshtml" />
+    <Content Include="Areas\FN\Views\Expense\RawMaterialPurchase.cshtml" />
+    <Content Include="Areas\FN\Views\Expense\_MaterialApprovalsTable.cshtml" />
+    <Content Include="Areas\FN\Views\Expense\Project.cshtml" />
     <None Include="packages\jQuery.3.7.0\Content\Scripts\jquery-3.7.0-vsdoc.js" />
     <Content Include="packages\jQuery.3.7.0\Content\Scripts\jquery-3.7.0.js" />
     <Content Include="packages\jQuery.3.7.0\Content\Scripts\jquery-3.7.0.min.js" />

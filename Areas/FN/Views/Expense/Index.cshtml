@@ -1,0 +1,114 @@
+﻿@using System.Collections.Generic
+@using QLNSVATC.Models
+@model QLNSVATC.Models.FN_Models.FNExpenseViewModel
+
+
+@{
+    Layout = "~/Areas/FN/Views/Shared/_LayoutFN.cshtml";
+
+    var st = ViewBag.Settings as UserViewBagModel;
+
+    string theme = st?.ThemeHex ?? "#22c55e";
+    bool dark = st?.DarkMode ?? true;
+
+    string bg = dark ? "#050816" : "#f5f7ff";
+    string card = dark ? "#101320" : "#ffffff";
+    string cardSoft = dark ? "#151826" : "#f3f4fb";
+    string text = dark ? "#e5e7eb" : "#020617";
+    string textSoft = dark ? "#9ca3af" : "#4b5563";
+    string border = dark ? "#252a3a" : "#d1d5db";
+
+    string font = !string.IsNullOrEmpty(st?.FontFamily)
+        ? st.FontFamily
+        : "Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
+    int fz = st?.FontSize ?? 16;
+
+    string currentLang = ViewBag.CurrentLang as string ?? st?.Lang ?? "en_US";
+    ViewBag.CurrentLang = currentLang;
+
+    Func<Dictionary<string, string>, string> L = d =>
+    {
+        if (d.ContainsKey(currentLang)) return d[currentLang];
+        if (d.ContainsKey("en_US")) return d["en_US"];
+        return d.Values.First();
+    };
+
+    var langTitle = new Dictionary<string, string> {
+        { "vi_VN", "Tổng quan chi phí" },
+        { "en_US", "Expense management" },
+        { "jp_JP", "経費ダッシュボード" },
+        { "kr_KR", "비용 대시보드" },
+        { "cn_CN", "费用总览" }
+    };
+
+    var langSub = new Dictionary<string, string> {
+        { "vi_VN", "Theo dõi chi phí dự án, vật liệu và vận chuyển của công ty xây dựng" },
+        { "en_US", "Track project, material and transport costs for the construction company" },
+        { "jp_JP", "建設会社のプロジェクト・資材・輸送コストを一元管理" },
+        { "kr_KR", "건설사의 프로젝트·자재·운송 비용을 한 눈에 관리" },
+        { "cn_CN", "统一管理施工项目、材料及运输费用" }
+    };
+
+    var title = L(langTitle);
+    var sub = L(langSub);
+}
+
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+      crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<div class="expdash-root">
+    <div class="expdash-main">
+        <header class="expdash-header">
+            <div>
+                <h2 class="expdash-title">@title</h2>
+                <p class="expdash-sub">@sub</p>
+            </div>
+        </header>
+
+        <section class="expdash-row expdash-row-top">
+            @Html.Partial("_PendingTasks", Model)
+            @Html.Partial("_RecentExpenses", Model.RecentExpenses)
+        </section>
+
+        <section class="expdash-row">
+            @Html.Partial("_QuickAccess")
+        </section>
+
+        <section class="expdash-row">
+            @Html.Partial("_MonthlyReport", Model)
+        </section>
+    </div>
+</div>
+
+<link href="~/Content/CSS/FNManager/Expense/Index.css?v=2" rel="stylesheet" />
+
+<style>
+    :root {
+        --exp-bg: @bg;
+        --exp-card: @card;
+        --exp-card-soft: @cardSoft;
+        --exp-text: @text;
+        --exp-text-soft: @textSoft;
+        --exp-border: @border;
+        --exp-accent: @theme;
+        --exp-font: @font;
+        --exp-fz: @(fz)px;
+    }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var containers = document.querySelectorAll('.chart-bars');
+
+        containers.forEach(function (el) {
+            el.addEventListener('wheel', function (e) {
+                if (e.deltaY === 0) return;
+
+                e.preventDefault();
+                el.scrollLeft += e.deltaY;
+            }, { passive: false });
+        });
+    });
+</script>
