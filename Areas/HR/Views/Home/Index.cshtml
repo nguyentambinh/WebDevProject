@@ -1,8 +1,1095 @@
-﻿
+﻿@model QLNSVATC.Models.HRDashboardViewModel
+@using System.Linq
+@using QLNSVATC.Models
+
 @{
-    ViewBag.Title = "Index";
     Layout = "~/Areas/HR/Views/Shared/_LayoutHR.cshtml";
+    ViewBag.Title = "Dashboard Summary";
+
+    var settings = ViewBag.Settings as UserViewBagModel;
+
+    string themeColor = (settings != null && !string.IsNullOrEmpty(settings.ThemeHex))
+                        ? settings.ThemeHex
+                        : "#2563eb";
+
+    string fontFamily = (settings != null && !string.IsNullOrEmpty(settings.FontFamily))
+                        ? settings.FontFamily
+                        : "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
+    int fontSize = (settings != null && settings.FontSize > 0)
+                    ? settings.FontSize
+                    : 18;
+    if (fontSize < 18) { fontSize = 18; }
+    if (fontSize > 24) { fontSize = 24; }
+
+    bool isDarkMode = settings != null ? settings.DarkMode : true;
+
+    string pageBg = isDarkMode ? "#0f172a" : "#f5f5f5";
+    string cardBg = isDarkMode ? "#303030" : "#EBEBEB";
+
+    string mainTextColor = isDarkMode ? "#e5e7eb" : "#111827";
+
+    string primaryTextColor = themeColor;
+
+    string subTextColor = isDarkMode ? "#cbd5f5" : "#6b7280";
+
+    string currentLang = (settings != null && !string.IsNullOrEmpty(settings.Lang))
+                         ? settings.Lang
+                         : "vi_VN";
+
+    string lblDashboardTitle;
+    string lblDashboardSubtitle;
+    string lblTotalEmployeesTitle;
+    string lblTotalDeptSuffix;
+
+    string lblGenderTitle;
+    string lblGenderCardExtra;
+    string lblGenderLabelMale;
+    string lblGenderLabelFemale;
+    string lblGenderRatioMale;
+    string lblGenderRatioFemale;
+
+    string lblInsuranceTitle;
+    string lblInsuranceBadge;
+    string lblInsuranceDesc;
+    string lblHealthInfoDescSuffix;
+
+    string lblDepartmentTitle;
+    string lblDeptSortDesc;
+    string lblDeptMostPrefix;
+    string lblDeptMostSuffixEmployees;
+
+    string lblBaseSalaryTitle;
+    string lblTop5Employees;
+    string lblNoSalaryData;
+
+    string lblBonusPenaltyTitle;
+    string lblTopBonus;
+    string lblTopPenalty;
+    string lblNoBonusData;
+    string lblNoPenaltyData;
+
+    string lblDepartmentSummaryTitle;
+    string lblDeptSummaryExtra;
+    string lblDeptHeaderMaPB;
+    string lblDeptHeaderTenPB;
+    string lblDeptHeaderTotal;
+    string lblDeptHeaderMale;
+    string lblDeptHeaderFemale;
+    string lblNoDeptData;
+
+    string lblOvertimeTitle;
+    string lblOvertimeExtra;
+    string lblOvertimeUnit;
+    string lblNoOvertimeData;
+
+    string lblActivityLogTitle;
+    string lblActivityExtra;
+    string lblNoLogData;
+
+    switch (currentLang)
+    {
+        case "en_US":
+            lblDashboardTitle = "HR Dashboard";
+            lblDashboardSubtitle = "Overview of HR, salary, rewards/penalties, departments and performance in QLNSVATC system.";
+            lblTotalEmployeesTitle = "Total employees";
+            lblTotalDeptSuffix = "departments managing";
+
+            lblGenderTitle = "Gender structure";
+            lblGenderCardExtra = "Male / Female";
+            lblGenderLabelMale = "male";
+            lblGenderLabelFemale = "female";
+            lblGenderRatioMale = "Male ratio";
+            lblGenderRatioFemale = "Female ratio";
+
+            lblInsuranceTitle = "Insurance & health records";
+            lblInsuranceBadge = "Records";
+            lblInsuranceDesc = "Employees with insurance information";
+            lblHealthInfoDescSuffix = "employees have health records.";
+
+            lblDepartmentTitle = "Departments";
+            lblDeptSortDesc = "Sorted by number of employees";
+            lblDeptMostPrefix = "Largest:";
+            lblDeptMostSuffixEmployees = "employees";
+
+            lblBaseSalaryTitle = "Base salary ranking";
+            lblTop5Employees = "Top 5 employees";
+            lblNoSalaryData = "No salary data.";
+
+            lblBonusPenaltyTitle = "Bonus & Penalty";
+            lblTopBonus = "Top bonus";
+            lblTopPenalty = "Top penalty";
+            lblNoBonusData = "No bonus data.";
+            lblNoPenaltyData = "No penalty data.";
+
+            lblDepartmentSummaryTitle = "Department overview";
+            lblDeptSummaryExtra = "Employees, male / female by department";
+            lblDeptHeaderMaPB = "Dept code";
+            lblDeptHeaderTenPB = "Department name";
+            lblDeptHeaderTotal = "Total";
+            lblDeptHeaderMale = "Male";
+            lblDeptHeaderFemale = "Female";
+            lblNoDeptData = "No department data.";
+
+            lblOvertimeTitle = "Top overtime / total shifts";
+            lblOvertimeExtra = "Based on attendance (TONGCA)";
+            lblOvertimeUnit = "shifts";
+            lblNoOvertimeData = "No attendance data.";
+
+            lblActivityLogTitle = "Recent activities";
+            lblActivityExtra = "Statistics from the system";
+            lblNoLogData = "No activity log.";
+            break;
+
+        case "jp_JP":
+            lblDashboardTitle = "人事ダッシュボード";
+            lblDashboardSubtitle = "人事、給与、賞罰、部署、業務効率の概要（QLNSVATCシステム）。";
+            lblTotalEmployeesTitle = "従業員総数";
+            lblTotalDeptSuffix = "部署を管理中";
+
+            lblGenderTitle = "性別構成";
+            lblGenderCardExtra = "男性 / 女性";
+            lblGenderLabelMale = "男性";
+            lblGenderLabelFemale = "女性";
+            lblGenderRatioMale = "男性比率";
+            lblGenderRatioFemale = "女性比率";
+
+            lblInsuranceTitle = "保険と健康情報";
+            lblInsuranceBadge = "記録";
+            lblInsuranceDesc = "保険情報を登録済みの従業員";
+            lblHealthInfoDescSuffix = "人が健康記録を持っています。";
+
+            lblDepartmentTitle = "部署一覧";
+            lblDeptSortDesc = "従業員数順に並び替え";
+            lblDeptMostPrefix = "最大：";
+            lblDeptMostSuffixEmployees = "人";
+
+            lblBaseSalaryTitle = "基本給ランキング";
+            lblTop5Employees = "上位5名";
+            lblNoSalaryData = "給与データがありません。";
+
+            lblBonusPenaltyTitle = "賞与・罰金";
+            lblTopBonus = "賞与トップ";
+            lblTopPenalty = "罰金トップ";
+            lblNoBonusData = "賞与データがありません。";
+            lblNoPenaltyData = "罰金データがありません。";
+
+            lblDepartmentSummaryTitle = "部署サマリー";
+            lblDeptSummaryExtra = "部署ごとの従業員数・男女比";
+            lblDeptHeaderMaPB = "部署コード";
+            lblDeptHeaderTenPB = "部署名";
+            lblDeptHeaderTotal = "合計";
+            lblDeptHeaderMale = "男性";
+            lblDeptHeaderFemale = "女性";
+            lblNoDeptData = "部署のデータがありません。";
+
+            lblOvertimeTitle = "残業 / 総勤務シフト";
+            lblOvertimeExtra = "勤怠表 に基づく";
+            lblOvertimeUnit = "シフト";
+            lblNoOvertimeData = "勤怠データがありません。";
+
+            lblActivityLogTitle = "最近の活動";
+            lblActivityExtra = "テーブルより";
+            lblNoLogData = "活動ログがありません。";
+            break;
+
+        case "kr_KR":
+            lblDashboardTitle = "인사 대시보드";
+            lblDashboardSubtitle = "QLNSVATC 시스템의 인사, 급여, 상벌, 부서 및 성과 현황.";
+            lblTotalEmployeesTitle = "총 직원 수";
+            lblTotalDeptSuffix = "개의 부서 관리 중";
+
+            lblGenderTitle = "성별 구성";
+            lblGenderCardExtra = "남 / 여";
+            lblGenderLabelMale = "남";
+            lblGenderLabelFemale = "여";
+            lblGenderRatioMale = "남성 비율";
+            lblGenderRatioFemale = "여성 비율";
+
+            lblInsuranceTitle = "보험 및 건강 정보";
+            lblInsuranceBadge = "기록";
+            lblInsuranceDesc = "보험 정보가 있는 직원";
+            lblHealthInfoDescSuffix = "명이 건강 기록을 보유하고 있습니다.";
+
+            lblDepartmentTitle = "부서";
+            lblDeptSortDesc = "직원 수 기준 정렬";
+            lblDeptMostPrefix = "가장 많음:";
+            lblDeptMostSuffixEmployees = "명";
+
+            lblBaseSalaryTitle = "기본 급여 순위";
+            lblTop5Employees = "상위 5명";
+            lblNoSalaryData = "급여 데이터가 없습니다.";
+
+            lblBonusPenaltyTitle = "보너스 & 벌금";
+            lblTopBonus = "보너스 TOP";
+            lblTopPenalty = "벌금 TOP";
+            lblNoBonusData = "보너스 데이터가 없습니다.";
+            lblNoPenaltyData = "벌금 데이터가 없습니다.";
+
+            lblDepartmentSummaryTitle = "부서 요약";
+            lblDeptSummaryExtra = "부서별 직원 수, 남/여 비율";
+            lblDeptHeaderMaPB = "부서 코드";
+            lblDeptHeaderTenPB = "부서명";
+            lblDeptHeaderTotal = "총원";
+            lblDeptHeaderMale = "남";
+            lblDeptHeaderFemale = "여";
+            lblNoDeptData = "부서 데이터가 없습니다.";
+
+            lblOvertimeTitle = "연장 근무 / 총 근무 교대";
+            lblOvertimeExtra = "근태표를 기준으로";
+            lblOvertimeUnit = "교대";
+            lblNoOvertimeData = "근태 데이터가 없습니다.";
+
+            lblActivityLogTitle = "최근 활동";
+            lblActivityExtra = " 테이블 기준";
+            lblNoLogData = "활동 로그가 없습니다.";
+            break;
+
+        case "cn_CN":
+            lblDashboardTitle = "人力资源仪表盘";
+            lblDashboardSubtitle = "QLNSVATC 系统中的人事、薪资、奖惩、部门和绩效总览。";
+            lblTotalEmployeesTitle = "员工总数";
+            lblTotalDeptSuffix = "个部门在管理";
+
+            lblGenderTitle = "性别结构";
+            lblGenderCardExtra = "男 / 女";
+            lblGenderLabelMale = "男";
+            lblGenderLabelFemale = "女";
+            lblGenderRatioMale = "男性比例";
+            lblGenderRatioFemale = "女性比例";
+
+            lblInsuranceTitle = "保险与健康档案";
+            lblInsuranceBadge = "档案";
+            lblInsuranceDesc = "已有保险信息的员工";
+            lblHealthInfoDescSuffix = "名员工有健康档案。";
+
+            lblDepartmentTitle = "部门";
+            lblDeptSortDesc = "按员工数量排序";
+            lblDeptMostPrefix = "最多：";
+            lblDeptMostSuffixEmployees = "人";
+
+            lblBaseSalaryTitle = "基本薪资排名";
+            lblTop5Employees = "前5名员工";
+            lblNoSalaryData = "暂无薪资数据。";
+
+            lblBonusPenaltyTitle = "奖励与处罚";
+            lblTopBonus = "奖励 Top";
+            lblTopPenalty = "处罚 Top";
+            lblNoBonusData = "暂无奖励数据。";
+            lblNoPenaltyData = "暂无处罚数据。";
+
+            lblDepartmentSummaryTitle = "部门汇总";
+            lblDeptSummaryExtra = "各部门员工数及男女比例";
+            lblDeptHeaderMaPB = "部门编号";
+            lblDeptHeaderTenPB = "部门名称";
+            lblDeptHeaderTotal = "总人数";
+            lblDeptHeaderMale = "男";
+            lblDeptHeaderFemale = "女";
+            lblNoDeptData = "暂无部门数据。";
+
+            lblOvertimeTitle = "加班 / 总班次";
+            lblOvertimeExtra = "基于考勤表";
+            lblOvertimeUnit = "班";
+            lblNoOvertimeData = "暂无考勤数据。";
+
+            lblActivityLogTitle = "最近活动";
+            lblActivityExtra = "来自表";
+            lblNoLogData = "暂无活动记录。";
+            break;
+
+        default:
+            lblDashboardTitle = "Quản lý nhân sự";
+            lblDashboardSubtitle = "Tổng quan nhân sự, lương thưởng, phòng ban và hiệu suất làm việc trong hệ thống QLNSVATC.";
+            lblTotalEmployeesTitle = "Tổng số nhân viên";
+            lblTotalDeptSuffix = "phòng ban đang quản lý";
+
+            lblGenderTitle = "Cơ cấu giới tính";
+            lblGenderCardExtra = "Nam / Nữ";
+            lblGenderLabelMale = "nam";
+            lblGenderLabelFemale = "nữ";
+            lblGenderRatioMale = "Tỷ lệ nam";
+            lblGenderRatioFemale = "Tỷ lệ nữ";
+
+            lblInsuranceTitle = "Bảo hiểm & hồ sơ sức khỏe";
+            lblInsuranceBadge = "Hồ sơ";
+            lblInsuranceDesc = "Nhân viên đã có thông tin bảo hiểm";
+            lblHealthInfoDescSuffix = "nhân viên có hồ sơ sức khỏe.";
+
+            lblDepartmentTitle = "Phòng ban";
+            lblDeptSortDesc = "Sắp xếp theo số lượng nhân viên";
+            lblDeptMostPrefix = "Đông nhất:";
+            lblDeptMostSuffixEmployees = "nhân viên";
+
+            lblBaseSalaryTitle = "Xếp hạng lương cơ bản";
+            lblTop5Employees = "Top 5 nhân viên";
+            lblNoSalaryData = "Chưa có dữ liệu lương.";
+
+            lblBonusPenaltyTitle = "Thưởng & Phạt";
+            lblTopBonus = "Top thưởng";
+            lblTopPenalty = "Top phạt";
+            lblNoBonusData = "Chưa có dữ liệu thưởng.";
+            lblNoPenaltyData = "Chưa có dữ liệu phạt.";
+
+            lblDepartmentSummaryTitle = "Tổng hợp phòng ban";
+            lblDeptSummaryExtra = "Số nhân viên, nam / nữ theo phòng";
+            lblDeptHeaderMaPB = "Mã phòng";
+            lblDeptHeaderTenPB = "Tên phòng ban";
+            lblDeptHeaderTotal = "Tổng NV";
+            lblDeptHeaderMale = "Nam";
+            lblDeptHeaderFemale = "Nữ";
+            lblNoDeptData = "Chưa có dữ liệu phòng ban.";
+
+            lblOvertimeTitle = "Top tăng ca / tổng ca làm việc";
+            lblOvertimeExtra = "Dựa trên bảng chấm công";
+            lblOvertimeUnit = "ca";
+            lblNoOvertimeData = "Chưa có dữ liệu chấm công.";
+
+            lblActivityLogTitle = "Hoạt động gần đây";
+            lblActivityExtra = "Thống kê từ hệ thống";
+            lblNoLogData = "Chưa có log hoạt động.";
+            break;
+    }
 }
 
-<h2>Index</h2>
+<style>
+    .hr-page {
+        padding: 24px;
+        font-family: @fontFamily;
+        background: none;
+        color: @mainTextColor;
+        font-size: @(fontSize);
+    }
 
+    .hr-title {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: @primaryTextColor;
+    }
+
+    .hr-subtitle {
+        font-size: 14px;
+        color: @subTextColor;
+        margin-bottom: 20px;
+    }
+
+    .hr-dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        grid-auto-rows: minmax(80px, auto);
+        grid-gap: 16px;
+    }
+
+    .hr-card {
+        background: @cardBg;
+        border-radius: 16px;
+        padding: 16px 18px;
+        border: 1px solid @(isDarkMode ? "#1f2937" : "#d4d4d4");
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.2);
+    }
+
+    .hr-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 12px;
+    }
+
+    .hr-card-title {
+        font-size: 14px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: @primaryTextColor;
+    }
+
+    .hr-card-extra {
+        font-size: 12px;
+        color: @subTextColor;
+    }
+
+    .hr-stat-main {
+        font-size: 26px;
+        font-weight: 700;
+        margin-top: 4px;
+        color: @primaryTextColor;
+    }
+
+    .hr-stat-sub {
+        font-size: 12px;
+        color: @subTextColor;
+    }
+
+    .hr-flex {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .hr-badge {
+        display: inline;
+        font-size: 12px;
+        padding: 0;
+        border-radius: 0;
+        background: transparent;
+        border: none;
+        color: @subTextColor;
+    }
+
+    .hr-badge-blue {
+        color: @primaryTextColor;
+    }
+
+    .hr-badge-red {
+        color: #f97316;
+    }
+
+    .hr-card.stats-1 { grid-column: span 3; }
+    .hr-card.stats-2 { grid-column: span 3; }
+    .hr-card.stats-3 { grid-column: span 3; }
+    .hr-card.stats-4 { grid-column: span 3; }
+
+    .hr-card.top-salary { grid-column: span 6; }
+    .hr-card.top-bonus-penalty { grid-column: span 6; }
+
+    .hr-card.department-table { grid-column: span 12; }
+    .hr-card.overtime { grid-column: span 6; }
+    .hr-card.activity-log { grid-column: span 6; }
+
+    @@media (max-width: 1024px) {
+        .hr-card.stats-1,
+        .hr-card.stats-2,
+        .hr-card.stats-3,
+        .hr-card.stats-4 {
+            grid-column: span 6;
+        }
+
+        .hr-card.top-salary,
+        .hr-card.top-bonus-penalty {
+            grid-column: span 12;
+        }
+
+        .hr-card.overtime,
+        .hr-card.activity-log {
+            grid-column: span 12;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .hr-card {
+            grid-column: span 12 !important;
+        }
+    }
+
+    table.hr-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+        margin-top: 4px;
+    }
+
+    .hr-table thead {
+        background: @(isDarkMode ? "#020617" : "#e5e5e5");
+    }
+
+    .hr-table th,
+    .hr-table td {
+        padding: 8px 6px;
+        border-bottom: 1px solid @(isDarkMode ? "#111827" : "#d4d4d4");
+    }
+
+    .hr-table th {
+        font-weight: 500;
+        color: @subTextColor;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        text-align: left;
+    }
+
+    .hr-table th.hr-cell-right {
+        text-align: right;
+    }
+
+    .hr-table td {
+        text-align: left;
+    }
+
+    .hr-table td.hr-cell-right {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .hr-table tbody tr:hover {
+        background: @(isDarkMode ? "rgba(15,23,42,0.7)" : "#f3f4f6");
+    }
+
+    .hr-bar-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+    }
+
+    .hr-bar-label {
+        flex: 0 0 40%;
+        font-size: 13px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: @primaryTextColor;
+    }
+
+    .hr-bar-wrapper {
+        flex: 1;
+        height: 8px;
+        border-radius: 999px;
+        background: @(isDarkMode ? "#0b1120" : "#e5e7eb");
+        overflow: hidden;
+        border: 1px solid @(isDarkMode ? "#1f2937" : "#d4d4d4");
+    }
+
+    .hr-bar-inner {
+        height: 100%;
+        border-radius: 999px;
+        background-image: linear-gradient(90deg, #22c55e, @primaryTextColor);
+        width: 0;
+        transition: width 0.8s ease;
+    }
+
+    .hr-bar-value {
+        flex: 0 0 auto;
+        font-size: 11px;
+        color: @subTextColor;
+        font-variant-numeric: tabular-nums;
+        min-width: 70px;
+        text-align: right;
+    }
+
+    .hr-gender-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        margin-top: 8px;
+    }
+
+    .hr-gender-col {
+        flex: 1;
+    }
+
+    .hr-gender-bar-wrap {
+        margin-top: 4px;
+        height: 6px;
+        background: @(isDarkMode ? "#020617" : "#e5e7eb");
+        border-radius: 999px;
+        overflow: hidden;
+        border: 1px solid @(isDarkMode ? "#1f2937" : "#d4d4d4");
+    }
+
+    .hr-gender-bar-inner {
+        height: 100%;
+        background-image: linear-gradient(90deg, #3b82f6, @primaryTextColor);
+        width: 0;
+        transition: width 0.8s ease;
+    }
+
+    .hr-log-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        max-height: 240px;
+        overflow-y: auto;
+    }
+
+    .hr-log-item {
+        padding: 8px 0;
+        border-bottom: 1px dashed @(isDarkMode ? "#111827" : "#d4d4d4");
+    }
+
+    .hr-log-main {
+        font-size: 13px;
+        color: @mainTextColor;
+    }
+
+    .hr-log-meta {
+        font-size: 11px;
+        color: @subTextColor;
+        margin-top: 2px;
+    }
+
+    .hr-pill {
+        display: inline-flex;
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 999px;
+        background: @(isDarkMode ? "#111827" : "#e5e7eb");
+        margin-right: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    .hr-pill-set {
+        color: #bfdbfe;
+        border: 1px solid #3b82f6;
+    }
+
+    .hr-pill-add {
+        color: #bbf7d0;
+        border: 1px solid #22c55e;
+    }
+
+    .hr-pill-exp {
+        color: #fed7aa;
+        border: 1px solid #f97316;
+    }
+
+    .hr-log-user {
+        color: @primaryTextColor;
+    }
+
+    .hr-log-time {
+        color: @subTextColor;
+    }
+
+    /* WRAPPER bảng để cuộn riêng phần phòng ban */
+    .hr-table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .hr-dept-table-wrapper {
+        max-height: 320px; /* cỡ ~10 phòng ban, dư thì scroll */
+        overflow-y: auto;
+    }
+
+    /* Scrollbar custom cho bảng + log */
+    .hr-dept-table-wrapper,
+    .hr-log-list {
+        scrollbar-width: thin;
+        scrollbar-color: @primaryTextColor @(isDarkMode ? "#020617" : "#e5e5e5");
+    }
+
+    .hr-dept-table-wrapper::-webkit-scrollbar,
+    .hr-log-list::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .hr-dept-table-wrapper::-webkit-scrollbar-track,
+    .hr-log-list::-webkit-scrollbar-track {
+        background: @(isDarkMode ? "#020617" : "#e5e5e5");
+        border-radius: 999px;
+    }
+
+    .hr-dept-table-wrapper::-webkit-scrollbar-thumb,
+    .hr-log-list::-webkit-scrollbar-thumb {
+        border-radius: 999px;
+        background-image: linear-gradient(180deg, #22c55e, @primaryTextColor);
+    }
+
+    .hr-dept-table-wrapper::-webkit-scrollbar-thumb:hover,
+    .hr-log-list::-webkit-scrollbar-thumb:hover {
+        filter: brightness(1.1);
+    }
+
+    /* Nếu muốn toàn page scrollbar cũng ăn theme luôn: */
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: @(isDarkMode ? "#020617" : "#e5e5e5");
+    }
+
+    ::-webkit-scrollbar-thumb {
+        border-radius: 999px;
+        background-image: linear-gradient(180deg, #22c55e, @primaryTextColor);
+    }
+</style>
+
+<div class="hr-page">
+    <div class="hr-title">@lblDashboardTitle</div>
+    <div class="hr-subtitle">
+        @lblDashboardSubtitle
+    </div>
+
+    <div class="hr-dashboard-grid">
+        <div class="hr-card stats-1">
+            <div class="hr-card-header">
+                <div class="hr-card-title">@lblTotalEmployeesTitle</div>
+                <div class="hr-badge hr-badge-blue">
+                    @DateTime.Now.ToString("dd/MM/yyyy")
+                </div>
+            </div>
+            <div class="hr-stat-main">
+                @Model.TotalEmployees
+            </div>
+            <div class="hr-stat-sub">
+                @Model.TotalDepartments @lblTotalDeptSuffix
+            </div>
+        </div>
+
+        <div class="hr-card stats-2">
+            <div class="hr-card-header">
+                <div class="hr-card-title">@lblGenderTitle</div>
+                <div class="hr-card-extra">
+                    @lblGenderCardExtra
+                </div>
+            </div>
+
+            <div class="hr-flex">
+                <div>
+                    <div class="hr-stat-main" style="font-size:20px;">
+                        @Model.TotalMale
+                        <span style="font-size:14px;color:@subTextColor;">@lblGenderLabelMale</span>
+                    </div>
+                    <div class="hr-stat-sub">
+                        @Model.TotalFemale @lblGenderLabelFemale
+                    </div>
+                </div>
+            </div>
+
+            <div class="hr-gender-row" data-gender-total="@Model.TotalEmployees"
+                 data-gender-male="@Model.TotalMale" data-gender-female="@Model.TotalFemale">
+                <div class="hr-gender-col">
+                    <div class="hr-stat-sub">@lblGenderRatioMale</div>
+                    <div class="hr-gender-bar-wrap">
+                        <div class="hr-gender-bar-inner hr-gender-male"></div>
+                    </div>
+                </div>
+                <div class="hr-gender-col">
+                    <div class="hr-stat-sub">@lblGenderRatioFemale</div>
+                    <div class="hr-gender-bar-wrap">
+                        <div class="hr-gender-bar-inner hr-gender-female"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hr-card stats-3">
+            <div class="hr-card-header">
+                <div class="hr-card-title">@lblInsuranceTitle</div>
+                <div class="hr-badge">
+                    @lblInsuranceBadge
+                </div>
+            </div>
+            <div class="hr-stat-main" style="font-size:20px;">
+                @Model.EmployeesWithInsurance / @Model.TotalEmployees
+            </div>
+            <div class="hr-stat-sub">
+                @lblInsuranceDesc
+            </div>
+
+            <div style="margin-top:10px;font-size:12px;color:@subTextColor;">
+                @Model.EmployeesWithHealthInfo @lblHealthInfoDescSuffix
+            </div>
+        </div>
+
+        <div class="hr-card stats-4">
+            <div class="hr-card-header">
+                <div class="hr-card-title">@lblDepartmentTitle</div>
+                <div class="hr-card-extra">
+                    @Model.TotalDepartments
+                </div>
+            </div>
+            <div class="hr-stat-main" style="font-size:20px;">
+                @Model.TotalDepartments
+            </div>
+            <div class="hr-stat-sub">
+                @lblDeptSortDesc
+            </div>
+
+            <div style="margin-top:10px;font-size:12px;color:@subTextColor;">
+                @if (Model.DepartmentSummaries != null && Model.DepartmentSummaries.Any())
+                {
+                    <span>
+                        @lblDeptMostPrefix
+                        <strong>@Model.DepartmentSummaries.First().TenPB</strong>
+                        (@Model.DepartmentSummaries.First().SoNhanVien @lblDeptMostSuffixEmployees)
+                    </span>
+                }
+            </div>
+        </div>
+
+        <div class="hr-card top-salary">
+            <div class="hr-card-header">
+                <div class="hr-card-title">@lblBaseSalaryTitle</div>
+                <div class="hr-card-extra">@lblTop5Employees</div>
+            </div>
+
+            @if (Model.TopSalaries != null && Model.TopSalaries.Any())
+            {
+                <div>
+                    @foreach (var item in Model.TopSalaries)
+                    {
+                        <div class="hr-bar-row"
+                             data-bar-value="@item.Value"
+                             data-bar-max="@Model.MaxBaseSalary">
+                            <div class="hr-bar-label" title="@item.HoTen (@item.TenPhongBan)">
+                                @item.HoTen
+                                <div style="font-size:11px;color:@subTextColor;">
+                                    @item.TenPhongBan
+                                </div>
+                            </div>
+                            <div class="hr-bar-wrapper">
+                                <div class="hr-bar-inner"></div>
+                            </div>
+                            <div class="hr-bar-value">
+                                @item.Value.ToString("#,0") @item.Unit
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="hr-stat-sub">@lblNoSalaryData</div>
+            }
+        </div>
+
+        <div class="hr-card top-bonus-penalty">
+            <div class="hr-card-header">
+                <div class="hr-card-title">@lblBonusPenaltyTitle</div>
+                <div class="hr-card-extra">@lblTop5Employees</div>
+            </div>
+
+            <div style="display:flex;gap:14px;flex-wrap:wrap;">
+                <div style="flex:1;min-width:220px;">
+                    <div class="hr-flex" style="margin-bottom:6px;">
+                        <div class="hr-card-title" style="font-size:12px;">@lblTopBonus</div>
+                        <span class="hr-badge">@lblTopBonus</span>
+                    </div>
+
+                    @if (Model.TopBonuses != null && Model.TopBonuses.Any())
+                    {
+                        foreach (var item in Model.TopBonuses)
+                        {
+                            <div class="hr-bar-row"
+                                 data-bar-value="@item.Value"
+                                 data-bar-max="@Model.MaxBonus">
+                                <div class="hr-bar-label" title="@item.HoTen (@item.TenPhongBan)">
+                                    @item.HoTen
+                                </div>
+                                <div class="hr-bar-wrapper">
+                                    <div class="hr-bar-inner"></div>
+                                </div>
+                                <div class="hr-bar-value">
+                                    @item.Value.ToString("#,0")
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="hr-stat-sub">@lblNoBonusData</div>
+                    }
+                </div>
+
+                <div style="flex:1;min-width:220px;">
+                    <div class="hr-flex" style="margin-bottom:6px;">
+                        <div class="hr-card-title" style="font-size:12px;">@lblTopPenalty</div>
+                        <span class="hr-badge hr-badge-red">@lblTopPenalty</span>
+                    </div>
+
+                    @if (Model.TopPenalties != null && Model.TopPenalties.Any())
+                    {
+                        foreach (var item in Model.TopPenalties)
+                        {
+                            <div class="hr-bar-row"
+                                 data-bar-value="@item.Value"
+                                 data-bar-max="@Model.MaxPenalty">
+                                <div class="hr-bar-label" title="@item.HoTen (@item.TenPhongBan)">
+                                    @item.HoTen
+                                </div>
+                                <div class="hr-bar-wrapper">
+                                    <div class="hr-bar-inner"></div>
+                                </div>
+                                <div class="hr-bar-value">
+                                    @item.Value.ToString("#,0")
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="hr-stat-sub">@lblNoPenaltyData</div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="hr-card department-table">
+            <div class="hr-card-header">
+                <div class="hr-card-title">@lblDepartmentSummaryTitle</div>
+                <div class="hr-card-extra">
+                    @lblDeptSummaryExtra
+                </div>
+            </div>
+
+            @if (Model.DepartmentSummaries != null && Model.DepartmentSummaries.Any())
+            {
+                <div class="hr-table-wrapper hr-dept-table-wrapper">
+                    <table class="hr-table">
+                        <thead>
+                            <tr>
+                                <th>@lblDeptHeaderMaPB</th>
+                                <th>@lblDeptHeaderTenPB</th>
+                                <th class="hr-cell-right">@lblDeptHeaderTotal</th>
+                                <th class="hr-cell-right">@lblDeptHeaderMale</th>
+                                <th class="hr-cell-right">@lblDeptHeaderFemale</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var pb in Model.DepartmentSummaries)
+                            {
+                                <tr>
+                                    <td>@pb.MaPB</td>
+                                    <td>@pb.TenPB</td>
+                                    <td class="hr-cell-right">@pb.SoNhanVien</td>
+                                    <td class="hr-cell-right">@pb.SoNam</td>
+                                    <td class="hr-cell-right">@pb.SoNu</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="hr-stat-sub">@lblNoDeptData</div>
+            }
+        </div>
+
+        <div class="hr-card overtime">
+            <div class="hr-card-header">
+                <div class="hr-card-title">@lblOvertimeTitle</div>
+                <div class="hr-card-extra">
+                    @lblOvertimeExtra
+                </div>
+            </div>
+
+            @if (Model.TopOvertime != null && Model.TopOvertime.Any())
+            {
+                foreach (var item in Model.TopOvertime)
+                {
+                    <div class="hr-bar-row"
+                         data-bar-value="@item.TongCa"
+                         data-bar-max="@Model.MaxOvertime">
+                        <div class="hr-bar-label" title="@item.HoTen (@item.TenPhongBan)">
+                            @item.HoTen
+                            <div style="font-size:11px;color:@subTextColor;">
+                                @item.TenPhongBan
+                            </div>
+                        </div>
+                        <div class="hr-bar-wrapper">
+                            <div class="hr-bar-inner"></div>
+                        </div>
+                        <div class="hr-bar-value">
+                            @item.TongCa.ToString("0.##") @lblOvertimeUnit
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="hr-stat-sub">@lblNoOvertimeData</div>
+            }
+        </div>
+
+        <div class="hr-card activity-log">
+            <div class="hr-card-header">
+                <div class="hr-card-title">@lblActivityLogTitle</div>
+                <div class="hr-card-extra">
+                    @lblActivityExtra
+                </div>
+            </div>
+
+            @if (Model.RecentLogs != null && Model.RecentLogs.Any())
+            {
+                <ul class="hr-log-list">
+                    @foreach (var log in Model.RecentLogs)
+                    {
+                        string pillClass = "hr-pill";
+                        if (log.ActionCode == "Set") { pillClass += " hr-pill-set"; }
+                        else if (log.ActionCode == "Add") { pillClass += " hr-pill-add"; }
+                        else if (log.ActionCode == "Exp") { pillClass += " hr-pill-exp"; }
+
+                        <li class="hr-log-item">
+                            <div class="hr-log-main">
+                                <span class="@pillClass">@log.ActionCode</span>
+                                @log.Description
+                            </div>
+                            <div class="hr-log-meta">
+                                <span class="hr-log-user">@log.PerformedBy</span>
+                                &nbsp;•&nbsp;
+                                <span class="hr-log-time">
+                                    @string.Format("{0:dd/MM/yyyy HH:mm}", log.AcTionTime)
+                                </span>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <div class="hr-stat-sub">@lblNoLogData</div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        var barGroups = document.querySelectorAll(".hr-card");
+
+        barGroups.forEach(function (card) {
+            var rows = card.querySelectorAll(".hr-bar-row");
+            if (rows.length === 0) return;
+
+            var maxValue = 0;
+            rows.forEach(function (row) {
+                var val = parseFloat(row.getAttribute("data-bar-value") || "0");
+                var customMax = parseFloat(row.getAttribute("data-bar-max") || "0");
+                if (!isNaN(customMax) && customMax > 0) {
+                    maxValue = customMax;
+                } else if (val > maxValue) {
+                    maxValue = val;
+                }
+            });
+
+            if (maxValue <= 0) maxValue = 1;
+
+            rows.forEach(function (row) {
+                var val = parseFloat(row.getAttribute("data-bar-value") || "0");
+                var inner = row.querySelector(".hr-bar-inner");
+                if (!inner) return;
+
+                var ratio = val / maxValue;
+                if (ratio < 0) ratio = 0;
+                if (ratio > 1) ratio = 1;
+                inner.style.width = (ratio * 100).toFixed(1) + "%";
+            });
+        });
+
+        var genderRow = document.querySelector(".hr-gender-row");
+        if (genderRow) {
+            var total = parseFloat(genderRow.getAttribute("data-gender-total") || "0");
+            var male = parseFloat(genderRow.getAttribute("data-gender-male") || "0");
+            var female = parseFloat(genderRow.getAttribute("data-gender-female") || "0");
+
+            var maleBar = genderRow.querySelector(".hr-gender-male");
+            var femaleBar = genderRow.querySelector(".hr-gender-female");
+
+            if (total <= 0) total = 1;
+
+            if (maleBar) {
+                var ratioMale = male / total;
+                maleBar.style.width = (ratioMale * 100).toFixed(1) + "%";
+            }
+            if (femaleBar) {
+                var ratioFemale = female / total;
+                femaleBar.style.width = (ratioFemale * 100).toFixed(1) + "%";
+            }
+        }
+    })();
+</script>

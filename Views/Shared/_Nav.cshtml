@@ -6,7 +6,9 @@
 
     string themeColor = ViewBag.ThemeColor as string ?? "#121212";
     string fontFamily = ViewBag.FontFamily as string ?? "Inter";
-    int fontSize = ViewBag.FontSize != null ? (int)ViewBag.FontSize : 14;
+    int fontSize = ViewBag.FontSize != null ? (int)ViewBag.FontSize : 20;
+    if (fontSize <= 0) { fontSize = 20; }
+
     string currentLang = ViewBag.CurrentLang as string ?? "vi_VN";
     bool isDarkMode = ViewBag.DarkMode != null ? (bool)ViewBag.DarkMode : false;
 
@@ -17,6 +19,7 @@
 
     string userName = Session["FullName"] as string ?? null;
 
+    // Label cho menu ACCOUNT
     var langAccount = new Dictionary<string, string>
 {
         { "vi_VN", userName == null ? "TÀI KHOẢN" : $"XIN CHÀO, {userName.ToUpper()}" },
@@ -62,16 +65,106 @@
         { "cn_CN", "退出登录" }
     };
 
-    string accountLabel = langAccount[currentLang];
-    string loginLabel = langLogin[currentLang];
-    string registerLabel = langRegister[currentLang];
-    string profileLabel = langProfile[currentLang];
-    string logoutLabel = langLogout[currentLang];
+    string accountLabel = langAccount.ContainsKey(currentLang) ? langAccount[currentLang] : langAccount["vi_VN"];
+    string loginLabel = langLogin.ContainsKey(currentLang) ? langLogin[currentLang] : langLogin["vi_VN"];
+    string registerLabel = langRegister.ContainsKey(currentLang) ? langRegister[currentLang] : langRegister["vi_VN"];
+    string profileLabel = langProfile.ContainsKey(currentLang) ? langProfile[currentLang] : langProfile["vi_VN"];
+    string logoutLabel = langLogout.ContainsKey(currentLang) ? langLogout[currentLang] : langLogout["vi_VN"];
+
+    // FontCode hiện tại (để dropdown chọn đúng)
+    string currentFontCode = ViewBag.FontCode as string;
+    if (string.IsNullOrEmpty(currentFontCode))
+    {
+        var lower = fontFamily.ToLower();
+        if (lower.Contains("arial"))
+        {
+            currentFontCode = "arial";
+        }
+        else if (lower.Contains("roboto"))
+        {
+            currentFontCode = "roboto";
+        }
+        else
+        {
+            currentFontCode = "inter";
+        }
+    }
+
+    // Label cho UI Setting (đa ngôn ngữ)
+    string uiSettingsTitle;
+    string uiThemeColorLbl;
+    string uiTypeLbl;
+    string uiTypeDarkLbl;
+    string uiTypeLightLbl;
+    string uiLanguageLbl;
+    string uiFontFamilyLbl;
+    string uiTextSizeLbl;
+    string uiSaveBtnLbl;
+
+    switch (currentLang)
+    {
+        case "en_US":
+            uiSettingsTitle = "UI SETTINGS";
+            uiThemeColorLbl = "Theme color";
+            uiTypeLbl = "Theme type";
+            uiTypeDarkLbl = "Dark";
+            uiTypeLightLbl = "Light";
+            uiLanguageLbl = "Language";
+            uiFontFamilyLbl = "Font family";
+            uiTextSizeLbl = "Text size";
+            uiSaveBtnLbl = "Save changes";
+            break;
+        case "jp_JP":
+            uiSettingsTitle = "UI設定";
+            uiThemeColorLbl = "テーマカラー";
+            uiTypeLbl = "テーマタイプ";
+            uiTypeDarkLbl = "ダーク";
+            uiTypeLightLbl = "ライト";
+            uiLanguageLbl = "言語";
+            uiFontFamilyLbl = "フォント";
+            uiTextSizeLbl = "文字サイズ";
+            uiSaveBtnLbl = "変更を保存";
+            break;
+        case "kr_KR":
+            uiSettingsTitle = "UI 설정";
+            uiThemeColorLbl = "테마 색상";
+            uiTypeLbl = "테마 타입";
+            uiTypeDarkLbl = "다크";
+            uiTypeLightLbl = "라이트";
+            uiLanguageLbl = "언어";
+            uiFontFamilyLbl = "글꼴";
+            uiTextSizeLbl = "글자 크기";
+            uiSaveBtnLbl = "변경사항 저장";
+            break;
+        case "cn_CN":
+            uiSettingsTitle = "界面设置";
+            uiThemeColorLbl = "主题颜色";
+            uiTypeLbl = "主题类型";
+            uiTypeDarkLbl = "深色";
+            uiTypeLightLbl = "浅色";
+            uiLanguageLbl = "语言";
+            uiFontFamilyLbl = "字体";
+            uiTextSizeLbl = "字号";
+            uiSaveBtnLbl = "保存更改";
+            break;
+        default: // vi_VN
+            uiSettingsTitle = "TÙY CHỈNH GIAO DIỆN";
+            uiThemeColorLbl = "Màu chủ đề";
+            uiTypeLbl = "Kiểu nền";
+            uiTypeDarkLbl = "Tối (Black)";
+            uiTypeLightLbl = "Sáng (White)";
+            uiLanguageLbl = "Ngôn ngữ";
+            uiFontFamilyLbl = "Phông chữ";
+            uiTextSizeLbl = "Cỡ chữ";
+            uiSaveBtnLbl = "Lưu thay đổi";
+            break;
+    }
+
     string themeRgbaColor = QLNSVATC.Helpers.ColorHelper.HexToRgba(themeColor, 0.95);
 }
 
 <style>
-    :root {
+:root {
     --text-color: @textColor;
     --theme-color: @themeColor;
     --theme-rgba: @themeRgbaColor;
@@ -104,6 +197,7 @@ nav {
     padding: 0 20px;
     height: 58px;
     white-space: nowrap;
+    font-family: var(--font);
 }
 
 .navbar-brand {
@@ -114,7 +208,6 @@ nav {
     text-decoration: none;
     user-select: none;
 }
-
 
 .main-menu {
     list-style: none;
@@ -339,6 +432,7 @@ nav {
     transition: opacity 0.25s ease, visibility 0.25s ease;
     box-shadow: 0 18px 45px rgba(0,0,0,0.4);
     color: #f5f5ff;
+    font-family: var(--font);
 }
 
 .settings-panel.show {
@@ -356,7 +450,7 @@ nav {
     font-size: 20px;
     font-weight: 700;
     text-align: center;
-    margin-bottom: 6px;
+    margin-bottom: 10px;
 }
 
 .settings-row {
@@ -378,6 +472,7 @@ nav {
     border: 1px solid rgba(255,255,255,0.15);
     color: #f5f5ff;
     font-size: 14px;
+    box-sizing: border-box;
 }
 
 .settings-input:focus {
@@ -386,27 +481,63 @@ nav {
     box-shadow: 0 0 0 1px #40c9ff;
 }
 
+.settings-input[type="number"]::-webkit-outer-spin-button,
+.settings-input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.settings-input[type="number"] {
+    -moz-appearance: textfield;
+}
+
 .settings-save {
     width: 100%;
     padding: 10px 0;
     margin-top: 4px;
-    background: linear-gradient(135deg, #0d6efd, #40c9ff);
     border-radius: 999px;
     border: none;
-    color: #fff;
-    font-size: 16px;
     cursor: pointer;
+    font-size: 16px;
     font-weight: 600;
+    font-family: var(--font);
+    /* GOLD gradient giống login */
+    background: linear-gradient(135deg, #fceabb, #f8b500);
+    color: #1a1a1a;
+    box-shadow: 0 0 12px rgba(255, 209, 80, 0.4);
+    transition: 0.3s;
 }
 
 .settings-save:hover {
-    opacity: .9;
+    box-shadow: 0 0 20px rgba(255, 209, 80, 0.7);
+    transform: translateY(-1px);
 }
-    .settings-input[type="number"]::-webkit-outer-spin-button,
-    .settings-input[type="number"]::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
+
+/* nút X đóng panel */
+.settings-close {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    border: none;
+    background: transparent;
+    color: #e5e7eb;
+    font-size: 18px;
+    cursor: pointer;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+
+.settings-close:hover {
+    background: rgba(255,255,255,0.08);
+    transform: scale(1.05);
+}
+
 .msg-popup {
     position: fixed;
     top: -80px;
@@ -437,17 +568,11 @@ nav {
     background: #dc3545;
 }
 
-body.blur-active {
-    filter: blur(4px);
-    transition: .25s;
-}
-
 #logo {
     height: 100%;
     max-height: 58px;
     width: auto;
 }
-
 </style>
 
 
@@ -461,11 +586,9 @@ body.blur-active {
             TBT CENTER
         </a>
 
-
         <div class="menu-toggle" onclick="document.querySelector('nav').classList.toggle('open')">☰</div>
 
         <ul class="main-menu">
-
             @foreach (var root in roots)
             {
                 var children = menus.Where(c => c.ParentId == root.MenuId).OrderBy(c => c.OrderNumber).ToList();
@@ -477,7 +600,9 @@ body.blur-active {
                         <ul class="dropdown-menu">
                             @foreach (var child in children)
                             {
-                                <li style="list-style: none"><a href="@child.MenuLink">@child.MenuName</a></li>
+                                <li style="list-style: none">
+                                    <a href="@child.MenuLink">@child.MenuName</a>
+                                </li>
                             }
                         </ul>
                     </li>
@@ -505,54 +630,66 @@ body.blur-active {
                 </ul>
             </li>
 
-            <!-- Setting -->
+            <!-- Setting icon -->
             <li class="settings-btn" onclick="openSettingCheck()">⚙</li>
-
         </ul>
 
-        <!-- Setting -->
+        <!-- Overlay -->
         <div id="settingsOverlay" class="settings-overlay" onclick="closeSettingsPanel()"></div>
 
+        <!-- Settings Panel -->
         <div id="settingsPanel" class="settings-panel" onclick="event.stopPropagation()">
+            <button type="button" class="settings-close" onclick="closeSettingsPanel()">×</button>
 
-            <h2 class="settings-title">UI SETTING</h2>
+            <h2 class="settings-title">@uiSettingsTitle</h2>
 
             <form action="/Shared/SaveSettings" method="post">
+                <div class="settings-row">
+                    <label class="settings-label">@uiThemeColorLbl</label>
+                    <input type="color" name="ThemeColor" class="settings-input" value="@themeColor" />
+                </div>
 
-                <label>Theme Color</label>
-                <input type="color" name="ThemeColor" class="settings-input" value="@themeColor" />
+                <div class="settings-row">
+                    <label class="settings-label">@uiTypeLbl</label>
+                    <select name="DarkMode" class="settings-input">
+                        <option value="true" @(isDarkMode ? "selected" : "")>@uiTypeDarkLbl</option>
+                        <option value="false" @(!isDarkMode ? "selected" : "")>@uiTypeLightLbl</option>
+                    </select>
+                </div>
 
-                <label>Type</label>
-                <select name="DarkMode" class="settings-input">
-                    <option value="true" @(isDarkMode ? "selected" : "")>Black</option>
-                    <option value="false" @(!isDarkMode ? "selected" : "")>White</option>
-                </select>
+                <div class="settings-row">
+                    <label class="settings-label">@uiLanguageLbl</label>
+                    <select name="LanguageCode" class="settings-input">
+                        <option value="vi_VN" @(currentLang == "vi_VN" ? "selected" : "")>Việt Nam</option>
+                        <option value="en_US" @(currentLang == "en_US" ? "selected" : "")>English</option>
+                        <option value="jp_JP" @(currentLang == "jp_JP" ? "selected" : "")>日本語</option>
+                        <option value="kr_KR" @(currentLang == "kr_KR" ? "selected" : "")>한국어</option>
+                        <option value="cn_CN" @(currentLang == "cn_CN" ? "selected" : "")>中文</option>
+                    </select>
+                </div>
 
+                <div class="settings-row">
+                    <label class="settings-label">@uiFontFamilyLbl</label>
+                    <select name="FontCode" class="settings-input">
+                        <option value="inter" @(currentFontCode == "inter" ? "selected" : "")>Inter</option>
+                        <option value="arial" @(currentFontCode == "arial" ? "selected" : "")>Arial</option>
+                        <option value="roboto" @(currentFontCode == "roboto" ? "selected" : "")>Roboto</option>
+                    </select>
+                </div>
 
-                <label>Language</label>
-                <select name="LanguageCode" class="settings-input">
-                    <option value="vi_VN" @(currentLang == "vi_VN" ? "selected" : "")>Việt Nam</option>
-                    <option value="en_US" @(currentLang == "en_US" ? "selected" : "")>English</option>
-                    <option value="jp_JP" @(currentLang == "jp_JP" ? "selected" : "")>日本語</option>
-                    <option value="kr_KR" @(currentLang == "kr_KR" ? "selected" : "")>한국어</option>
-                    <option value="cn_CN" @(currentLang == "cn_CN" ? "selected" : "")>中文</option>
-                </select>
+                <div class="settings-row">
+                    <label class="settings-label">@uiTextSizeLbl</label>
+                    <input type="number"
+                           name="FontSize"
+                           class="settings-input"
+                           min="10"
+                           max="24"
+                           value="@fontSize" />
+                </div>
 
-                <label>Font family</label>
-                <select name="FontCode" class="settings-input">
-                    <option value="inter">Inter</option>
-                    <option value="arial">Arial</option>
-                    <option value="roboto">Roboto</option>
-                </select>
-
-                <label>Text size</label>
-                <input type="number" name="FontSize" class="settings-input" min="10" max="24" value="@fontSize" />
-
-                <button type="submit" class="settings-save">Lưu thay đổi</button>
-
+                <button type="submit" class="settings-save">@uiSaveBtnLbl</button>
             </form>
         </div>
-
     </div>
 </nav>
 
@@ -566,15 +703,16 @@ body.blur-active {
         document.getElementById("settingsOverlay").classList.remove("show");
         document.getElementById("settingsPanel").classList.remove("show");
     }
-    document.querySelectorAll(".main-menu > li > a").forEach(link => {
 
+    // Mobile dropdown click
+    document.querySelectorAll(".main-menu > li > a").forEach(link => {
         link.addEventListener("click", function (e) {
             if (window.innerWidth > 1200) return;
             const li = this.parentElement;
             const submenu = li.querySelector(".dropdown-menu");
             if (!submenu) return;
             e.preventDefault();
-            e.stopPropagation()
+            e.stopPropagation();
             document.querySelectorAll(".dropdown-menu").forEach(menu => {
                 if (menu !== submenu) menu.style.display = "none";
             });
@@ -588,6 +726,7 @@ body.blur-active {
         document.querySelectorAll(".dropdown-menu")
             .forEach(menu => menu.style.display = "none");
     });
+
     function openSettingCheck() {
         var user = "@(Session["UserId"] ?? "")";
         if (!user || user.trim() === "") {
@@ -604,4 +743,3 @@ body.blur-active {
         setTimeout(() => popup.classList.remove("show"), 2500);
     }
 </script>
-

@@ -331,6 +331,7 @@
     <Compile Include="Models\HOSOVIECLAM.cs">
       <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\HRDashboardViewModel.cs" />
     <Compile Include="Models\KHACHHANG.cs">
       <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
     </Compile>
