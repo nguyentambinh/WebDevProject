@@ -1,0 +1,1509 @@
+﻿@model IEnumerable<QLNSVATC.Models.NHANVIEN>
+@using QLNSVATC.Models
+
+@{
+    Layout = "~/Areas/HR/Views/Shared/_LayoutHR.cshtml";
+    ViewBag.Title = "Employee personal";
+
+    var settings = ViewBag.Settings as UserViewBagModel;
+
+    string themeColor = (settings != null && !string.IsNullOrEmpty(settings.ThemeHex))
+                        ? settings.ThemeHex
+                        : "#2563eb";
+
+    string fontFamily = (settings != null && !string.IsNullOrEmpty(settings.FontFamily))
+                        ? settings.FontFamily
+                        : "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
+    int fontSize = (settings != null && settings.FontSize > 0)
+                    ? settings.FontSize
+                    : 18;
+
+    bool isDarkMode = settings != null ? settings.DarkMode : true;
+    string currentLang = (settings != null && !string.IsNullOrEmpty(settings.Lang))
+                         ? settings.Lang
+                         : "vi_VN";
+
+    string pageBg = isDarkMode ? "#020617" : "#f3f4f6";
+    string cardBg = isDarkMode ? "#020617" : "#ffffff";
+    string borderColor = isDarkMode ? "#1f2937" : "#e5e7eb";
+    string mainTextColor = isDarkMode ? "#e5e7eb" : "#0f172a";
+    string subTextColor = isDarkMode ? "#9ca3af" : "#6b7280";
+
+    var departments = ViewBag.Departments as List<PHONGBAN>;
+    var positions = ViewBag.Positions as List<VITRICONGVIEC>;
+    var loaiNVs = ViewBag.LoaiNVs as List<string>;
+
+    string lblPageTitle, lblPageSubtitle, lblSearchPlaceholder, lblAllDept, lblAllPos,
+       lblAllTypes, lblFilter, lblReset, lblAddEmployee, lblDropToRemove,
+       lblConfirmDelete, lblReward, lblPenalty, lblChangePos, lblViewProfile,
+       lblHealth, lblInsurance, lblModalSave, lblModalCancel, lblNewEmployee,
+       lblEmployeeCodeLabel,
+       lblCreateLastName, lblCreateFirstName, lblCreateGender, lblCreateBirthYear,
+       lblCreateDept, lblCreatePosition, lblCreatePhoto;
+
+    string msgNoEmployeeFilter, msgDeleteSuccess, msgDeleteFailed, msgDeleteSystemError,
+           msgRewardSaved, msgPenaltySaved, msgRewardPenaltyFailed, msgSystemError,
+           msgAmountGreaterZero, msgPositionUpdated, msgPositionUpdateFailed,
+           msgPositionUpdateSystemError;
+
+    switch (currentLang)
+    {
+        case "en_US":
+            lblPageTitle = "Employee management";
+            lblPageSubtitle = "Manage employees, drag to trash to remove, adjust positions and rewards/penalties.";
+            lblSearchPlaceholder = "Search by name....";
+            lblAllDept = "All departments";
+            lblAllPos = "All positions";
+            lblAllTypes = "All types";
+            lblFilter = "Filter";
+            lblReset = "Reset";
+            lblAddEmployee = "Add employee";
+            lblDropToRemove = "Drag employee here to remove";
+            lblConfirmDelete = "Are you sure you want to remove this employee?";
+            lblReward = "Reward";
+            lblPenalty = "Penalty";
+            lblChangePos = "Change position";
+            lblViewProfile = "Profile";
+            lblHealth = "Health";
+            lblInsurance = "Insurance";
+            lblModalSave = "Save";
+            lblModalCancel = "Cancel";
+            lblNewEmployee = "New employee";
+            lblEmployeeCodeLabel = "Employee code";
+            lblCreateLastName = "Last / middle name";
+            lblCreateFirstName = "First name";
+            lblCreateGender = "Gender";
+            lblCreateBirthYear = "Birth year";
+            lblCreateDept = "Department";
+            lblCreatePosition = "Position";
+            lblCreatePhoto = "Employee photo";
+
+            msgNoEmployeeFilter = "No employees match the current filters.";
+            msgDeleteSuccess = "Employee has been deleted.";
+            msgDeleteFailed = "Failed to delete employee.";
+            msgDeleteSystemError = "System error when deleting employee.";
+            msgRewardSaved = "Reward has been saved.";
+            msgPenaltySaved = "Penalty has been saved.";
+            msgRewardPenaltyFailed = "Failed to save reward or penalty.";
+            msgSystemError = "System error.";
+            msgAmountGreaterZero = "Amount must be greater than 0.";
+            msgPositionUpdated = "Position has been updated.";
+            msgPositionUpdateFailed = "Failed to update position.";
+            msgPositionUpdateSystemError = "System error when updating position.";
+            break;
+
+        case "jp_JP":
+            lblPageTitle = "従業員管理";
+            lblPageSubtitle = "従業員一覧を管理し、ドラッグして削除し、役職や賞与・罰則を調整します。";
+            lblSearchPlaceholder = "ID または氏名で検索...";
+            lblAllDept = "すべての部署";
+            lblAllPos = "すべての役職";
+            lblAllTypes = "すべての社員区分";
+            lblFilter = "絞り込み";
+            lblReset = "条件クリア";
+            lblAddEmployee = "従業員を追加";
+            lblDropToRemove = "削除するにはここへドラッグ";
+            lblConfirmDelete = "この従業員を削除してもよろしいですか？";
+            lblReward = "ボーナス";
+            lblPenalty = "ペナルティ";
+            lblChangePos = "役職変更";
+            lblViewProfile = "プロフィール";
+            lblHealth = "健康情報";
+            lblInsurance = "保険";
+            lblModalSave = "保存";
+            lblModalCancel = "キャンセル";
+            lblNewEmployee = "新しい従業員";
+            lblEmployeeCodeLabel = "社員コード";
+            lblCreateLastName = "姓・ミドルネーム";
+            lblCreateFirstName = "名";
+            lblCreateGender = "性別";
+            lblCreateBirthYear = "生年";
+            lblCreateDept = "部署";
+            lblCreatePosition = "役職";
+            lblCreatePhoto = "社員写真";
+
+            msgNoEmployeeFilter = "現在の条件に一致する従業員がいません。";
+            msgDeleteSuccess = "従業員を削除しました。";
+            msgDeleteFailed = "従業員の削除に失敗しました。";
+            msgDeleteSystemError = "従業員削除中にシステムエラーが発生しました。";
+            msgRewardSaved = "賞与情報を保存しました。";
+            msgPenaltySaved = "ペナルティ情報を保存しました。";
+            msgRewardPenaltyFailed = "賞与またはペナルティの保存に失敗しました。";
+            msgSystemError = "システムエラーが発生しました。";
+            msgAmountGreaterZero = "金額は 0 より大きくなければなりません。";
+            msgPositionUpdated = "役職を更新しました。";
+            msgPositionUpdateFailed = "役職の更新に失敗しました。";
+            msgPositionUpdateSystemError = "役職更新中にシステムエラーが発生しました。";
+            break;
+
+        case "cn_CN":
+            lblPageTitle = "员工管理";
+            lblPageSubtitle = "管理员工列表，拖动到垃圾桶以删除，并调整职务和奖罚。";
+            lblSearchPlaceholder = "按工号或姓名搜索...";
+            lblAllDept = "所有部门";
+            lblAllPos = "所有职位";
+            lblAllTypes = "所有员工类型";
+            lblFilter = "筛选";
+            lblReset = "清除筛选";
+            lblAddEmployee = "新增员工";
+            lblDropToRemove = "拖到这里删除员工";
+            lblConfirmDelete = "确定要删除该员工吗？";
+            lblReward = "奖励";
+            lblPenalty = "惩罚";
+            lblChangePos = "调整职位";
+            lblViewProfile = "档案";
+            lblHealth = "健康";
+            lblInsurance = "保险";
+            lblModalSave = "保存";
+            lblModalCancel = "取消";
+            lblNewEmployee = "新员工";
+            lblEmployeeCodeLabel = "员工编号";
+            lblCreateLastName = "姓 / 中间名";
+            lblCreateFirstName = "名字";
+            lblCreateGender = "性别";
+            lblCreateBirthYear = "出生年份";
+            lblCreateDept = "部门";
+            lblCreatePosition = "职位";
+            lblCreatePhoto = "员工照片";
+
+            msgNoEmployeeFilter = "没有员工符合当前筛选条件。";
+            msgDeleteSuccess = "已删除该员工。";
+            msgDeleteFailed = "删除员工失败。";
+            msgDeleteSystemError = "删除员工时发生系统错误。";
+            msgRewardSaved = "奖励记录已保存。";
+            msgPenaltySaved = "惩罚记录已保存。";
+            msgRewardPenaltyFailed = "保存奖励或惩罚记录失败。";
+            msgSystemError = "系统发生错误。";
+            msgAmountGreaterZero = "金额必须大于 0。";
+            msgPositionUpdated = "职位已更新。";
+            msgPositionUpdateFailed = "更新职位失败。";
+            msgPositionUpdateSystemError = "更新职位时发生系统错误。";
+            break;
+
+        case "kr_KR":
+            lblPageTitle = "직원 관리";
+            lblPageSubtitle = "직원 목록을 관리하고, 드래그하여 삭제하며, 직책과 포상·징계를 조정합니다.";
+            lblSearchPlaceholder = "사번 또는 이름으로 검색...";
+            lblAllDept = "전체 부서";
+            lblAllPos = "전체 직책";
+            lblAllTypes = "전체 직원 유형";
+            lblFilter = "필터";
+            lblReset = "필터 초기화";
+            lblAddEmployee = "직원 추가";
+            lblDropToRemove = "삭제하려면 여기에 드롭";
+            lblConfirmDelete = "이 직원을 삭제하시겠습니까?";
+            lblReward = "포상";
+            lblPenalty = "징계";
+            lblChangePos = "직책 변경";
+            lblViewProfile = "프로필";
+            lblHealth = "건강";
+            lblInsurance = "보험";
+            lblModalSave = "저장";
+            lblModalCancel = "취소";
+            lblNewEmployee = "새 직원";
+            lblEmployeeCodeLabel = "직원 코드";
+            lblCreateLastName = "성 / 중간 이름";
+            lblCreateFirstName = "이름";
+            lblCreateGender = "성별";
+            lblCreateBirthYear = "출생 연도";
+            lblCreateDept = "부서";
+            lblCreatePosition = "직책";
+            lblCreatePhoto = "직원 사진";
+
+            msgNoEmployeeFilter = "현재 조건에 해당하는 직원이 없습니다.";
+            msgDeleteSuccess = "직원을 삭제했습니다.";
+            msgDeleteFailed = "직원 삭제에 실패했습니다.";
+            msgDeleteSystemError = "직원 삭제 중 시스템 오류가 발생했습니다.";
+            msgRewardSaved = "포상 기록을 저장했습니다.";
+            msgPenaltySaved = "징계 기록을 저장했습니다.";
+            msgRewardPenaltyFailed = "포상 또는 징계 저장에 실패했습니다.";
+            msgSystemError = "시스템 오류가 발생했습니다.";
+            msgAmountGreaterZero = "금액은 0보다 커야 합니다.";
+            msgPositionUpdated = "직책을 업데이트했습니다.";
+            msgPositionUpdateFailed = "직책 업데이트에 실패했습니다.";
+            msgPositionUpdateSystemError = "직책 업데이트 중 시스템 오류가 발생했습니다.";
+            break;
+
+        default:
+            lblPageTitle = "Quản lý nhân viên";
+            lblPageSubtitle = "Quản lý danh sách nhân viên, kéo thả để xóa, điều chỉnh chức vụ và thưởng phạt.";
+            lblSearchPlaceholder = "Tìm theo họ tên...";
+            lblAllDept = "Tất cả phòng ban";
+            lblAllPos = "Tất cả chức vụ";
+            lblAllTypes = "Tất cả loại nhân viên";
+            lblFilter = "Lọc";
+            lblReset = "Xóa lọc";
+            lblAddEmployee = "Thêm nhân viên";
+            lblDropToRemove = "Kéo nhân viên vào đây để xóa";
+            lblConfirmDelete = "Bạn có chắc muốn xóa nhân viên này?";
+            lblReward = "Thưởng";
+            lblPenalty = "Phạt";
+            lblChangePos = "Đổi vị trí";
+            lblViewProfile = "Hồ sơ";
+            lblHealth = "Sức khỏe";
+            lblInsurance = "Bảo hiểm";
+            lblModalSave = "Lưu";
+            lblModalCancel = "Hủy";
+            lblNewEmployee = "Nhân viên mới";
+            lblEmployeeCodeLabel = "Mã nhân viên";
+            lblCreateLastName = "Họ lót";
+            lblCreateFirstName = "Tên nhân viên";
+            lblCreateGender = "Giới tính";
+            lblCreateBirthYear = "Năm sinh";
+            lblCreateDept = "Phòng ban";
+            lblCreatePosition = "Vị trí công việc";
+            lblCreatePhoto = "Ảnh nhân viên";
+
+            msgNoEmployeeFilter = "Không có nhân viên nào phù hợp điều kiện lọc.";
+            msgDeleteSuccess = "Đã xóa nhân viên.";
+            msgDeleteFailed = "Xóa nhân viên thất bại.";
+            msgDeleteSystemError = "Lỗi hệ thống khi xóa nhân viên.";
+            msgRewardSaved = "Đã lưu thông tin thưởng.";
+            msgPenaltySaved = "Đã lưu thông tin phạt.";
+            msgRewardPenaltyFailed = "Lưu thông tin thưởng phạt thất bại.";
+            msgSystemError = "Lỗi hệ thống.";
+            msgAmountGreaterZero = "Số tiền phải lớn hơn 0.";
+            msgPositionUpdated = "Đã cập nhật vị trí.";
+            msgPositionUpdateFailed = "Cập nhật vị trí thất bại.";
+            msgPositionUpdateSystemError = "Lỗi hệ thống khi cập nhật vị trí.";
+            break;
+    }
+
+    var createError = TempData["CreateError"] as string ?? "";
+    var createSuccess = TempData["CreateSuccess"] as string ?? "";
+    var createModel = ViewBag.CreateModel as NHANVIEN;
+    bool openCreateModal = ViewBag.OpenCreateModal != null && (bool)ViewBag.OpenCreateModal;
+}
+
+<style>
+    :root {
+        --emp-theme: @themeColor;
+        --emp-font: @fontFamily;
+        --emp-fz: @(fontSize)px;
+        --emp-bg: @pageBg;
+        --emp-card-bg: @cardBg;
+        --emp-border: @borderColor;
+        --emp-text: @mainTextColor;
+        --emp-sub: @subTextColor;
+    }
+
+    .emp-page {
+        padding: 20px 24px;
+        font-family: var(--emp-font);
+        font-size: var(--emp-fz);
+        color: var(--emp-text);
+        background: none;
+    }
+
+    .emp-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+
+    .emp-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--emp-theme);
+    }
+
+    .emp-subtitle {
+        font-size: 14px;
+        color: var(--emp-sub);
+    }
+
+    .emp-header-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .emp-btn {
+        border-radius: 999px;
+        padding: 8px 16px;
+        border: 1px solid var(--emp-border);
+        background: transparent;
+        color: var(--emp-text);
+        font-size: 14px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .emp-btn:hover {
+        background: rgba(255,255,255,0.04);
+    }
+
+    .emp-btn-primary {
+        border: none;
+        background: linear-gradient(135deg, #fceabb, #f8b500);
+        color: #1f2933;
+        font-weight: 600;
+        box-shadow: 0 0 14px rgba(248, 181, 0, 0.5);
+    }
+
+    .emp-btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 0 18px rgba(248, 181, 0, 0.7);
+    }
+
+    .emp-btn-ghost {
+        opacity: .8;
+    }
+
+    .emp-toolbar {
+        background: var(--emp-card-bg);
+        border-radius: 16px;
+        border: 1px solid var(--emp-border);
+        padding: 10px 14px;
+        margin-bottom: 16px;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.25);
+    }
+
+    .emp-filter-form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .emp-input,
+    .emp-select {
+        border-radius: 999px;
+        border: 1px solid var(--emp-border);
+        background: rgba(15, 23, 42, 0.4);
+        color: var(--emp-text);
+        padding: 7px 12px;
+        font-size: 13px;
+        min-width: 160px;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    .emp-input::placeholder {
+        color: var(--emp-sub);
+    }
+
+    .emp-select {
+        background: rgba(15, 23, 42, 0.7);
+    }
+
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    input[type="number"] {
+        -moz-appearance: textfield;
+    }
+
+    .emp-layout {
+        display: block;
+    }
+
+    .emp-list {
+        background: var(--emp-card-bg);
+        border-radius: 16px;
+        border: 1px solid var(--emp-border);
+        max-height: calc(100vh - 220px);
+        overflow-y: auto;
+        padding: 10px 10px 6px;
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.35);
+    }
+
+    .emp-list::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .emp-list::-webkit-scrollbar-track {
+        background: rgba(15,23,42,0.6);
+    }
+
+    .emp-list::-webkit-scrollbar-thumb {
+        background-image: linear-gradient(180deg, var(--emp-theme), #22c55e);
+        border-radius: 999px;
+    }
+
+    .emp-card {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        border-radius: 14px;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        background: radial-gradient(circle at top left, rgba(148,163,184,0.15), transparent 60%);
+        cursor: grab;
+        transition: 0.18s;
+    }
+
+    .emp-card.dragging {
+        opacity: 0.6;
+        transform: scale(0.98);
+    }
+
+    .emp-card-main {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .emp-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 999px;
+        overflow: hidden;
+        flex-shrink: 0;
+        border: 2px solid rgba(248, 181, 0, 0.6);
+        box-shadow: 0 0 8px rgba(248, 181, 0, 0.3);
+    }
+
+    .emp-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .emp-name {
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .emp-meta {
+        font-size: 12px;
+        color: var(--emp-sub);
+        margin-top: 2px;
+    }
+
+    .emp-tag-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-top: 4px;
+    }
+
+    .emp-tag {
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.6);
+        color: var(--emp-sub);
+    }
+
+    .emp-card-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 4px;
+    }
+
+    .emp-chip {
+        padding: 4px 8px;
+        border-radius: 999px;
+        border: 1px solid rgba(148,163,184,0.5);
+        background: transparent;
+        font-size: 11px;
+        cursor: pointer;
+        color: var(--emp-sub);
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        text-decoration: none;
+        transition: 0.18s;
+    }
+
+    .emp-chip:hover {
+        background: rgba(148,163,184,0.2);
+        color: var(--emp-text);
+    }
+
+    .emp-chip-link {
+        text-decoration: none;
+    }
+
+    .emp-chip-green {
+        border-color: #22c55e;
+        color: #22c55e;
+    }
+
+    .emp-chip-red {
+        border-color: #f97316;
+        color: #f97316;
+    }
+
+    .emp-trash {
+        border-radius: 999px;
+        border: 1px dashed rgba(248, 113, 113, 0.8);
+        padding: 6px 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: #fecaca;
+        background: radial-gradient(circle at top, rgba(248,113,113,0.18), transparent 70%);
+        cursor: default;
+        white-space: nowrap;
+    }
+
+    .emp-trash-icon {
+        font-size: 16px;
+    }
+
+    .emp-trash-label {
+        font-size: 12px;
+    }
+
+    .emp-trash.over {
+        box-shadow: 0 0 18px rgba(248, 113, 113, 0.7);
+        transform: translateY(-1px);
+    }
+
+    .emp-modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(15,23,42,0.7);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    .emp-modal-backdrop.show {
+        display: flex;
+    }
+
+    .emp-modal {
+        width: 600px;
+        max-width: 95vw;
+        border-radius: 18px;
+        background: #020617;
+        border: 1px solid rgba(148,163,184,0.5);
+        padding: 18px 20px 16px;
+        color: #e5e7eb;
+        box-shadow: 0 18px 40px rgba(0,0,0,0.7);
+    }
+
+    .emp-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .emp-modal-title {
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .emp-modal-close {
+        border: none;
+        background: transparent;
+        color: #9ca3af;
+        font-size: 18px;
+        cursor: pointer;
+    }
+
+    .emp-modal-body {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 12px;
+        font-size: 13px;
+    }
+
+    .emp-label {
+        font-size: 13px;
+        margin-bottom: 4px;
+    }
+
+    .emp-field,
+    .emp-field-select {
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid rgba(148,163,184,0.7);
+        background: #020617;
+        color: #e5e7eb;
+        padding: 7px 10px;
+        font-size: 13px;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    .emp-modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+
+    .emp-toast {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.9);
+        padding: 14px 18px;
+        border-radius: 16px;
+        background: #0f172acc;
+        border: 1px solid #22c55e;
+        color: #bbf7d0;
+        font-size: 14px;
+        box-shadow: 0 20px 45px rgba(0,0,0,0.7);
+        opacity: 0;
+        pointer-events: none;
+        transition: 0.25s;
+        z-index: 9999;
+        max-width: 90vw;
+        text-align: center;
+    }
+
+    .emp-toast.show {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+        pointer-events: auto;
+    }
+
+    .emp-toast.success {
+    }
+
+    .emp-toast.error {
+        background: #1f2937cc;
+        border-color: #f97373;
+        color: #fee2e2;
+    }
+
+    .emp-toast.warning {
+        background: #1f2937cc;
+        border-color: #f97316;
+        color: #ffedd5;
+    }
+
+    .emp-create-grid {
+        display: grid;
+        grid-template-columns: 1.1fr 1.4fr;
+        gap: 16px;
+        align-items: flex-start;
+    }
+
+    .emp-create-photo {
+        border-radius: 16px;
+        border: 2px dashed rgba(248, 181, 0, 0.8);
+        overflow: hidden;
+        position: relative;
+        height: 100%;
+        min-height: 280px;
+        cursor: pointer;
+        box-shadow: 0 0 16px rgba(248, 181, 0, 0.35);
+    }
+
+    .emp-create-photo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .emp-create-photo-label {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-size: 13px;
+        color: #facc15;
+        padding: 0 10px;
+        background: linear-gradient(to top, rgba(0,0,0,0.55), transparent 55%);
+        pointer-events: none;
+    }
+
+    .emp-create-photo input[type="file"] {
+        display: none;
+    }
+
+    .emp-create-fields {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+   @@media (max-width: 768px) {
+        .emp-modal {
+            width: 95vw;
+        }
+
+        .emp-create-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .emp-create-photo {
+            height: 260px;
+            max-height: 260px;
+            margin-bottom: 12px;
+        }
+
+        .emp-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .emp-header-actions {
+            width: 100%;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 8px;
+        }
+
+        .emp-header-actions .emp-btn-primary {
+            width: 100%;
+        }
+
+        .emp-header-actions .emp-trash {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="emp-page">
+    @Html.AntiForgeryToken()
+
+    <div class="emp-header">
+        <div>
+            <div class="emp-title">@lblPageTitle</div>
+            <div class="emp-subtitle">@lblPageSubtitle</div>
+        </div>
+        <div class="emp-header-actions">
+            <button type="button" class="emp-btn emp-btn-primary" id="btnOpenCreate">
+                + @lblAddEmployee
+            </button>
+            <div class="emp-trash" id="empTrash">
+                <span class="emp-trash-icon">🗑</span>
+                <span class="emp-trash-label">@lblDropToRemove</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="emp-toolbar">
+        <form method="get" class="emp-filter-form">
+            <input type="text"
+                   name="keyword"
+                   class="emp-input"
+                   value="@Request["keyword"]"
+                   placeholder="@lblSearchPlaceholder" />
+
+            <select name="maPB" class="emp-select">
+                <option value="">@lblAllDept</option>
+                @if (departments != null)
+                {
+                    foreach (var pb in departments)
+                    {
+                        <option value="@pb.MAPB"
+                                @(Request["maPB"] == pb.MAPB ? "selected" : "")>
+                            @pb.TENPB
+                        </option>
+                    }
+                }
+            </select>
+
+            <select name="maCV" class="emp-select">
+                <option value="">@lblAllPos</option>
+                @if (positions != null)
+                {
+                    foreach (var cv in positions)
+                    {
+                        <option value="@cv.MACV"
+                                @(Request["maCV"] == cv.MACV ? "selected" : "")>
+                            @cv.TENCV
+                        </option>
+                    }
+                }
+            </select>
+
+            <select name="loaiNV" class="emp-select">
+                <option value="">@lblAllTypes</option>
+                @if (loaiNVs != null)
+                {
+                    foreach (var t in loaiNVs)
+                    {
+                        <option value="@t"
+                                @(Request["loaiNV"] == t ? "selected" : "")>
+                            @t
+                        </option>
+                    }
+                }
+            </select>
+
+            <button type="submit" class="emp-btn">@lblFilter</button>
+            <a href="@Url.Action("Information", "Employee", new { area = "HR" })"
+               class="emp-btn emp-btn-ghost">@lblReset</a>
+        </form>
+    </div>
+
+    <div class="emp-layout">
+        <div class="emp-list" id="empList">
+            @if (!Model.Any())
+            {
+                <div style="font-size:13px;color:@subTextColor;padding:8px;">
+                    @msgNoEmployeeFilter
+                </div>
+            }
+            else
+            {
+                foreach (var nv in Model)
+                {
+                    var fullName = ((nv.HOLOT ?? "") + " " + (nv.TENNV ?? "")).Trim();
+                    if (string.IsNullOrEmpty(fullName)) { fullName = nv.MANV; }
+
+                    bool isMale = nv.GIOITINH ?? true;
+                    string genderTextVi = isMale ? "Nam" : "Nữ";
+                    string genderText =
+                        currentLang == "en_US" ? (isMale ? "Male" : "Female") :
+                        currentLang == "jp_JP" ? (isMale ? "男性" : "女性") :
+                        currentLang == "cn_CN" ? (isMale ? "男" : "女") :
+                        currentLang == "kr_KR" ? (isMale ? "남" : "여") :
+                        genderTextVi;
+
+                    var luong = nv.LUONG;
+                    string loaiNV = luong != null ? luong.LOAINV : null;
+
+                    <div class="emp-card"
+                         draggable="true"
+                         data-id="@nv.MANV">
+                        <div class="emp-card-main">
+                            <div class="emp-avatar">
+                                <img src="@Url.Content("~/Content/Images/Home/NhanVien/" + nv.MANV + ".jpg")"
+                                     alt="@fullName"
+                                     onerror="this.onerror=null;this.src='@Url.Content("~/Content/Images/Home/NhanVien/default.jpg")';" />
+                            </div>
+                            <div>
+                                <div class="emp-name">@fullName</div>
+                                <div class="emp-meta">
+                                    @nv.MANV
+                                    @if (nv.PHONGBAN != null)
+                                    {
+                                        @: · @nv.PHONGBAN.TENPB
+                                    }
+                                    @if (nv.VITRICONGVIEC != null)
+                                    {
+                                        @: · @nv.VITRICONGVIEC.TENCV
+                                    }
+                                </div>
+                                <div class="emp-tag-row">
+                                    <span class="emp-tag">@genderText</span>
+                                    @if (!string.IsNullOrEmpty(loaiNV))
+                                    {
+                                        <span class="emp-tag">@loaiNV</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="emp-card-actions">
+                            <button type="button"
+                                    class="emp-chip emp-chip-green"
+                                    onclick="openRewardPenalty('@nv.MANV', '@fullName.Replace("'", "\\'")', true)">
+                                @lblReward
+                            </button>
+                            <button type="button"
+                                    class="emp-chip emp-chip-red"
+                                    onclick="openRewardPenalty('@nv.MANV', '@fullName.Replace("'", "\\'")', false)">
+                                @lblPenalty
+                            </button>
+                            <button type="button"
+                                    class="emp-chip"
+                                    onclick="openChangePosition('@nv.MANV', '@(nv.MAPB ?? "")', '@(nv.MACV ?? "")')">
+                                @lblChangePos
+                            </button>
+                            <a class="emp-chip emp-chip-link"
+                               href="@Url.Action("Profile", "Employee", new { area = "HR", id = nv.MANV })">
+                                @lblViewProfile
+                            </a>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+<div class="emp-modal-backdrop" id="rewardModal">
+    <div class="emp-modal">
+        <div class="emp-modal-header">
+            <div class="emp-modal-title" id="rewardModalTitle">@lblReward</div>
+            <button type="button" class="emp-modal-close" onclick="closeRewardPenalty()">×</button>
+        </div>
+        <div class="emp-modal-body">
+            <input type="hidden" id="rewardEmpId" />
+            <div>
+                <div class="emp-label">
+                    @(currentLang == "en_US" ? "Employee" :
+                      currentLang == "jp_JP" ? "従業員" :
+                      currentLang == "cn_CN" ? "员工" :
+                      currentLang == "kr_KR" ? "직원" :
+                      "Nhân viên")
+                </div>
+                <div id="rewardEmpName" style="font-size:13px;color:#e5e7eb;font-weight:500;"></div>
+            </div>
+            <div>
+                <div class="emp-label">
+                    @(currentLang == "en_US" ? "Amount" :
+                      currentLang == "jp_JP" ? "金額" :
+                      currentLang == "cn_CN" ? "金额" :
+                      currentLang == "kr_KR" ? "금액" :
+                      "Số tiền")
+                </div>
+                <input type="number" class="emp-field" id="rewardAmount" step="1000" />
+            </div>
+            <div>
+                <div class="emp-label">
+                    @(currentLang == "en_US" ? "Note" :
+                      currentLang == "jp_JP" ? "メモ" :
+                      currentLang == "cn_CN" ? "备注" :
+                      currentLang == "kr_KR" ? "비고" :
+                      "Ghi chú")
+                </div>
+                <textarea id="rewardNote" rows="3" class="emp-field"></textarea>
+            </div>
+        </div>
+        <div class="emp-modal-footer">
+            <button type="button" class="emp-btn emp-btn-ghost" onclick="closeRewardPenalty()">
+                @lblModalCancel
+            </button>
+            <button type="button" class="emp-btn emp-btn-primary" onclick="submitRewardPenalty()">
+                @lblModalSave
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="emp-modal-backdrop" id="positionModal">
+    <div class="emp-modal">
+        <div class="emp-modal-header">
+            <div class="emp-modal-title">@lblChangePos</div>
+            <button type="button" class="emp-modal-close" onclick="closePositionModal()">×</button>
+        </div>
+        <div class="emp-modal-body">
+            <input type="hidden" id="posEmpId" />
+            <div>
+                <div class="emp-label">
+                    @(currentLang == "en_US" ? "Department" :
+                      currentLang == "jp_JP" ? "部署" :
+                      currentLang == "cn_CN" ? "部门" :
+                      currentLang == "kr_KR" ? "부서" :
+                      "Phòng ban")
+                </div>
+                <select id="posMaPB" class="emp-field-select">
+                    @if (departments != null)
+                    {
+                        foreach (var pb in departments)
+                        {
+                            <option value="@pb.MAPB">@pb.TENPB</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div>
+                <div class="emp-label">
+                    @(currentLang == "en_US" ? "Position" :
+                      currentLang == "jp_JP" ? "役職" :
+                      currentLang == "cn_CN" ? "职位" :
+                      currentLang == "kr_KR" ? "직책" :
+                      "Chức vụ")
+                </div>
+                <select id="posMaCV" class="emp-field-select">
+                    @if (positions != null)
+                    {
+                        foreach (var cv in positions)
+                        {
+                            <option value="@cv.MACV">@cv.TENCV</option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="emp-modal-footer">
+            <button type="button" class="emp-btn emp-btn-ghost" onclick="closePositionModal()">@lblModalCancel</button>
+            <button type="button" class="emp-btn emp-btn-primary" onclick="submitChangePosition()">@lblModalSave</button>
+        </div>
+    </div>
+</div>
+
+<div class="emp-modal-backdrop" id="createModal">
+    <div class="emp-modal">
+        <div class="emp-modal-header">
+            <div class="emp-modal-title">@lblNewEmployee</div>
+            <button type="button" class="emp-modal-close" onclick="closeCreateModal()">×</button>
+        </div>
+
+        <form id="createForm"
+              method="post"
+              enctype="multipart/form-data"
+              action="@Url.Action("Create", "Employee", new { area = "HR" })">
+
+            @Html.AntiForgeryToken()
+
+            <div class="emp-modal-body emp-create-grid">
+                <div class="emp-create-photo">
+                    <div class="emp-create-photo-frame" id="createPhotoFrame">
+                        <img id="createPhotoPreview"
+                             src="@Url.Content("~/Content/Images/Home/NhanVien/default.jpg")"
+                             alt="photo preview" />
+                    </div>
+
+                    <input type="file"
+                           id="createPhotoInput"
+                           name="PhotoFile"
+                           accept="image/*"
+                           style="display:none" />
+                </div>
+                <div class="emp-create-fields">
+                    <div>
+                        <div class="emp-label">
+                            @(currentLang == "en_US" ? "Last name / Middle" :
+                              currentLang == "jp_JP" ? "姓・ミドルネーム" :
+                              currentLang == "cn_CN" ? "姓 / 中间名" :
+                              currentLang == "kr_KR" ? "성 / 가운데 이름" :
+                              "Họ lót")
+                        </div>
+                        <input name="HOLOT" class="emp-field"
+                               value="@((createModel != null) ? createModel.HOLOT : "")" />
+                    </div>
+
+                    <div>
+                        <div class="emp-label">
+                            @(currentLang == "en_US" ? "First name" :
+                              currentLang == "jp_JP" ? "名" :
+                              currentLang == "cn_CN" ? "名" :
+                              currentLang == "kr_KR" ? "이름" :
+                              "Tên")
+                        </div>
+                        <input name="TENNV" class="emp-field"
+                               value="@((createModel != null) ? createModel.TENNV : "")" />
+                    </div>
+
+                    <div>
+                        <div class="emp-label">
+                            @(currentLang == "en_US" ? "Gender" :
+                              currentLang == "jp_JP" ? "性別" :
+                              currentLang == "cn_CN" ? "性别" :
+                              currentLang == "kr_KR" ? "성별" :
+                              "Giới tính")
+                        </div>
+                        @{
+                            bool selMale = true;
+                            bool selFemale = false;
+                            if (createModel != null && createModel.GIOITINH.HasValue)
+                            {
+                                selMale = createModel.GIOITINH.Value;
+                                selFemale = !createModel.GIOITINH.Value;
+                            }
+                        }
+                        <select name="GIOITINH" class="emp-field-select">
+                            <option value="true" @(selMale ? "selected" : "")>
+                                @(currentLang == "en_US" ? "Male" :
+                                  currentLang == "jp_JP" ? "男性" :
+                                  currentLang == "cn_CN" ? "男" :
+                                  currentLang == "kr_KR" ? "남" :
+                                  "Nam")
+                            </option>
+                            <option value="false" @(selFemale ? "selected" : "")>
+                                @(currentLang == "en_US" ? "Female" :
+                                  currentLang == "jp_JP" ? "女性" :
+                                  currentLang == "cn_CN" ? "女" :
+                                  currentLang == "kr_KR" ? "여" :
+                                  "Nữ")
+                            </option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <div class="emp-label">
+                            @(currentLang == "en_US" ? "Birth year" :
+                              currentLang == "jp_JP" ? "生年" :
+                              currentLang == "cn_CN" ? "出生年份" :
+                              currentLang == "kr_KR" ? "출생 연도" :
+                              "Năm sinh")
+                        </div>
+                        <input type="number"
+                               name="NAMSINH"
+                               class="emp-field"
+                               min="1950"
+                               max="2100"
+                               value="@(createModel != null && createModel.NAMSINH.HasValue ? createModel.NAMSINH.Value.ToString() : "")" />
+                    </div>
+
+                    <div>
+                        <div class="emp-label">
+                            @(currentLang == "en_US" ? "Department" :
+                              currentLang == "jp_JP" ? "部署" :
+                              currentLang == "cn_CN" ? "部门" :
+                              currentLang == "kr_KR" ? "부서" :
+                              "Phòng ban")
+                        </div>
+                        <select name="MAPB" class="emp-field-select">
+                            @if (departments != null)
+                            {
+                                foreach (var pb in departments)
+                                {
+                                    var selected = createModel != null && createModel.MAPB == pb.MAPB ? "selected" : "";
+                                    <option value="@pb.MAPB" @selected>@pb.TENPB</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div>
+                        <div class="emp-label">
+                            @(currentLang == "en_US" ? "Position" :
+                              currentLang == "jp_JP" ? "役職" :
+                              currentLang == "cn_CN" ? "职位" :
+                              currentLang == "kr_KR" ? "직책" :
+                              "Chức vụ")
+                        </div>
+                        <select name="MACV" class="emp-field-select">
+                            @if (positions != null)
+                            {
+                                foreach (var cv in positions)
+                                {
+                                    var selected = createModel != null && createModel.MACV == cv.MACV ? "selected" : "";
+                                    <option value="@cv.MACV" @selected>@cv.TENCV</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="emp-modal-footer">
+                <button type="button"
+                        class="emp-btn emp-btn-ghost"
+                        onclick="closeCreateModal()">
+                    @lblModalCancel
+                </button>
+                <button type="submit"
+                        class="emp-btn emp-btn-primary">
+                    @lblModalSave
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="emp-modal-backdrop" id="deleteModal">
+    <div class="emp-modal">
+        <div class="emp-modal-header">
+            <div class="emp-modal-title">@lblConfirmDelete</div>
+            <button type="button" class="emp-modal-close" onclick="closeDeleteModal()">×</button>
+        </div>
+        <div class="emp-modal-body">
+            <p style="font-size:13px;color:#e5e7eb;margin-bottom:6px;">
+                @lblConfirmDelete
+            </p>
+            <p style="font-size:13px;color:#e5e7eb;">
+                @lblEmployeeCodeLabel:
+                <span id="deleteEmpId" style="font-weight:600;"></span>
+            </p>
+        </div>
+        <div class="emp-modal-footer">
+            <button type="button" class="emp-btn emp-btn-ghost" onclick="closeDeleteModal()">
+                @lblModalCancel
+            </button>
+            <button type="button" class="emp-btn emp-btn-primary" onclick="confirmDelete()">
+                @lblModalSave
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="emp-toast" id="empToast"></div>
+
+<script>
+    const deleteUrl = '@Url.Action("Delete", "Employee", new { area = "HR" })';
+    const rewardUrl = '@Url.Action("AddReward", "Employee", new { area = "HR" })';
+    const penaltyUrl = '@Url.Action("AddPenalty", "Employee", new { area = "HR" })';
+    const positionUrl = '@Url.Action("UpdatePosition", "Employee", new { area = "HR" })';
+    const deleteConfirmText = '@lblConfirmDelete';
+
+    const msgDeleteSuccess = '@msgDeleteSuccess.Replace("'", "\\'")';
+    const msgDeleteFailed = '@msgDeleteFailed.Replace("'", "\\'")';
+    const msgDeleteSystemError = '@msgDeleteSystemError.Replace("'", "\\'")';
+    const msgRewardSaved = '@msgRewardSaved.Replace("'", "\\'")';
+    const msgPenaltySaved = '@msgPenaltySaved.Replace("'", "\\'")';
+    const msgRewardPenaltyFailed = '@msgRewardPenaltyFailed.Replace("'", "\\'")';
+    const msgSystemError = '@msgSystemError.Replace("'", "\\'")';
+    const msgAmountGreaterZero = '@msgAmountGreaterZero.Replace("'", "\\'")';
+    const msgPositionUpdated = '@msgPositionUpdated.Replace("'", "\\'")';
+    const msgPositionUpdateFailed = '@msgPositionUpdateFailed.Replace("'", "\\'")';
+    const msgPositionUpdateSystemError = '@msgPositionUpdateSystemError.Replace("'", "\\'")';
+
+    const createErrorMsg = '@createError.Replace("'", "\\'")';
+    const createSuccessMsg = '@createSuccess.Replace("'", "\\'")';
+    const shouldOpenCreate = @(openCreateModal ? "true" : "false");
+
+    let pendingDeleteId = null;
+
+    function getToken() {
+        const el = document.querySelector('input[name="__RequestVerificationToken"]');
+        return el ? el.value : "";
+    }
+
+    function showToast(message, type) {
+        const toast = document.getElementById("empToast");
+        if (!toast) return;
+        toast.textContent = message;
+        toast.className = "emp-toast";
+        if (type === "error") {
+            toast.classList.add("error");
+        } else if (type === "warning") {
+            toast.classList.add("warning");
+        } else {
+            toast.classList.add("success");
+        }
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 2500);
+    }
+
+    (function () {
+        const cards = document.querySelectorAll(".emp-card");
+        const trash = document.getElementById("empTrash");
+
+        cards.forEach(card => {
+            card.addEventListener("dragstart", function (e) {
+                e.dataTransfer.setData("text/plain", this.dataset.id);
+                this.classList.add("dragging");
+            });
+            card.addEventListener("dragend", function () {
+                this.classList.remove("dragging");
+            });
+        });
+
+        if (trash) {
+            trash.addEventListener("dragover", function (e) {
+                e.preventDefault();
+                trash.classList.add("over");
+            });
+
+            trash.addEventListener("dragleave", function () {
+                trash.classList.remove("over");
+            });
+
+            trash.addEventListener("drop", function (e) {
+                e.preventDefault();
+                trash.classList.remove("over");
+                const id = e.dataTransfer.getData("text/plain");
+                if (!id) return;
+
+                pendingDeleteId = id;
+                const span = document.getElementById("deleteEmpId");
+                if (span) span.textContent = id;
+
+                const modal = document.getElementById("deleteModal");
+                if (modal) modal.classList.add("show");
+            });
+        }
+    })();
+
+    function closeDeleteModal() {
+        pendingDeleteId = null;
+        const modal = document.getElementById("deleteModal");
+        if (modal) modal.classList.remove("show");
+    }
+
+    function confirmDelete() {
+        if (!pendingDeleteId) {
+            closeDeleteModal();
+            return;
+        }
+
+        const token = getToken();
+        const formData = new FormData();
+        formData.append("__RequestVerificationToken", token);
+        formData.append("id", pendingDeleteId);
+
+        fetch(deleteUrl, {
+            method: "POST",
+            body: formData
+        }).then(r => r.json())
+          .then(res => {
+              if (res.success) {
+                  const card = document.querySelector('.emp-card[data-id="' + pendingDeleteId + '"]');
+                  if (card) card.remove();
+                  showToast(msgDeleteSuccess, "success");
+              } else {
+                  showToast(res.message || msgDeleteFailed, "error");
+              }
+              closeDeleteModal();
+          })
+          .catch(() => {
+              showToast(msgDeleteSystemError, "error");
+              closeDeleteModal();
+          });
+    }
+
+    function openRewardPenalty(empId, name, isReward) {
+        const modal = document.getElementById("rewardModal");
+        const title = document.getElementById("rewardModalTitle");
+        const empIdInput = document.getElementById("rewardEmpId");
+        const empName = document.getElementById("rewardEmpName");
+        const amount = document.getElementById("rewardAmount");
+        const note = document.getElementById("rewardNote");
+
+        if (!modal) return;
+
+        title.textContent = isReward ? "@lblReward" : "@lblPenalty";
+        empIdInput.value = empId;
+        empName.textContent = name;
+        amount.value = "";
+        note.value = "";
+
+        modal.dataset.reward = isReward ? "1" : "0";
+        modal.classList.add("show");
+    }
+
+    function closeRewardPenalty() {
+        const modal = document.getElementById("rewardModal");
+        if (modal) modal.classList.remove("show");
+    }
+
+    function submitRewardPenalty() {
+        const modal = document.getElementById("rewardModal");
+        if (!modal) return;
+
+        const isReward = modal.dataset.reward === "1";
+        const empId = document.getElementById("rewardEmpId").value;
+        const amountEl = document.getElementById("rewardAmount");
+        const noteEl = document.getElementById("rewardNote");
+        const amount = parseFloat(amountEl.value || "0");
+
+        if (!empId) return;
+
+        if (amount <= 0) {
+            showToast(msgAmountGreaterZero, "error");
+            return;
+        }
+
+        const token = getToken();
+        const formData = new FormData();
+        formData.append("__RequestVerificationToken", token);
+        formData.append("id", empId);
+        formData.append("amount", amount);
+        formData.append("note", noteEl.value || "");
+
+        const url = isReward ? rewardUrl : penaltyUrl;
+
+        fetch(url, {
+            method: "POST",
+            body: formData
+        }).then(r => r.json())
+          .then(res => {
+              if (res.success) {
+                  showToast(isReward ? msgRewardSaved : msgPenaltySaved,
+                            isReward ? "success" : "warning");
+                  closeRewardPenalty();
+              } else {
+                  showToast(res.message || msgRewardPenaltyFailed, "error");
+              }
+          })
+          .catch(() => showToast(msgSystemError, "error"));
+    }
+
+    function openChangePosition(empId, maPB, maCV) {
+        const modal = document.getElementById("positionModal");
+        if (!modal) return;
+        document.getElementById("posEmpId").value = empId;
+        const selPB = document.getElementById("posMaPB");
+        const selCV = document.getElementById("posMaCV");
+
+        if (selPB && maPB) selPB.value = maPB;
+        if (selCV && maCV) selCV.value = maCV;
+
+        modal.classList.add("show");
+    }
+
+    function closePositionModal() {
+        const modal = document.getElementById("positionModal");
+        if (modal) modal.classList.remove("show");
+    }
+
+    function submitChangePosition() {
+        const empId = document.getElementById("posEmpId").value;
+        const maPB = document.getElementById("posMaPB").value;
+        const maCV = document.getElementById("posMaCV").value;
+
+        if (!empId) return;
+
+        const token = getToken();
+        const formData = new FormData();
+        formData.append("__RequestVerificationToken", token);
+        formData.append("id", empId);
+        formData.append("maPB", maPB);
+        formData.append("maCV", maCV);
+
+        fetch(positionUrl, {
+            method: "POST",
+            body: formData
+        }).then(r => r.json())
+          .then(res => {
+              if (res.success) {
+                  showToast(msgPositionUpdated, "success");
+                  closePositionModal();
+                  setTimeout(() => window.location.reload(), 600);
+              } else {
+                  showToast(res.message || msgPositionUpdateFailed, "error");
+              }
+          })
+          .catch(() => showToast(msgPositionUpdateSystemError, "error"));
+    }
+
+    const btnOpenCreate = document.getElementById("btnOpenCreate");
+    if (btnOpenCreate) {
+        btnOpenCreate.addEventListener("click", () => {
+            const modal = document.getElementById("createModal");
+            if (modal) modal.classList.add("show");
+        });
+    }
+
+    function closeCreateModal() {
+        const modal = document.getElementById("createModal");
+        if (modal) modal.classList.remove("show");
+    }
+
+    (function () {
+        const frame = document.getElementById("createPhotoFrame");
+        const input = document.getElementById("createPhotoInput");
+        const preview = document.getElementById("createPhotoPreview");
+
+        if (!frame || !input || !preview) return;
+
+        frame.addEventListener("click", function () {
+            input.click();
+        });
+
+        input.addEventListener("change", function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (ev) {
+                preview.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    })();
+
+    document.addEventListener("DOMContentLoaded", function () {
+        if (shouldOpenCreate === true) {
+            const modal = document.getElementById("createModal");
+            if (modal) modal.classList.add("show");
+        }
+
+        if (createErrorMsg) {
+            showToast(createErrorMsg, "error");
+        } else if (createSuccessMsg) {
+            showToast(createSuccessMsg, "success");
+        }
+    });
+</script>

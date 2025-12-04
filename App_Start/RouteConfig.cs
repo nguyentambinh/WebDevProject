@@ -12,7 +12,11 @@ namespace QLNSVATC
         public static void RegisterRoutes(RouteCollection routes)
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
+<<<<<<< HEAD
 
+=======
+            //default
+>>>>>>> edefa0b (information & personal HR)
             routes.MapRoute(
                 name: "Trang chu",
                 url: "trang-chu",

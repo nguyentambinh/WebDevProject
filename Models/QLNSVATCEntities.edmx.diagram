@@ -16,7 +16,7 @@
         <EntityTypeShape EntityType="QLNSVATCModel.DSKYNANG" Width="1.5" PointX="1.5" PointY="6.625" IsExpanded="true" />
         <EntityTypeShape EntityType="QLNSVATCModel.DSNGAYLE" Width="1.5" PointX="4.75" PointY="3.75" IsExpanded="true" />
         <EntityTypeShape EntityType="QLNSVATCModel.DSNGONNGU" Width="1.5" PointX="1.5" PointY="21" IsExpanded="true" />
-        <EntityTypeShape EntityType="QLNSVATCModel.DSTHUONGPHAT" Width="1.5" PointX="8.25" PointY="8.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLNSVATCModel.DSTHUONGPHAT" Width="1.5" PointX="8.25" PointY="8.5" IsExpanded="true" />
         <EntityTypeShape EntityType="QLNSVATCModel.DTDICHVU" Width="1.5" PointX="3.75" PointY="30.75" IsExpanded="true" />
         <EntityTypeShape EntityType="QLNSVATCModel.DTDUAN" Width="1.5" PointX="11" PointY="23.5" IsExpanded="true" />
         <EntityTypeShape EntityType="QLNSVATCModel.DTTHEOKV" Width="1.5" PointX="8.75" PointY="35.625" IsExpanded="true" />

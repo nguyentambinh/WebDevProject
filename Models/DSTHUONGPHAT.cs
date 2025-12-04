@@ -20,6 +20,8 @@ namespace QLNSVATC.Models
         public Nullable<decimal> SOTIEN { get; set; }
         public Nullable<double> HESOTIEN { get; set; }
         public Nullable<decimal> TONG { get; set; }
+        public string NOTE { get; set; }
+        public int STT { get; set; }
     
         public virtual NHANVIEN NHANVIEN { get; set; }
     }

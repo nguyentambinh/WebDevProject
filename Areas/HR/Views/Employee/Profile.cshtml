@@ -1,0 +1,1354 @@
+﻿@model QLNSVATC.Models.HREmployeeInformationViewModel
+@using QLNSVATC.Models
+
+@{
+    Layout = "~/Areas/HR/Views/Shared/_LayoutHR.cshtml";
+
+    var settings = ViewBag.Settings as UserViewBagModel;
+
+    string themeColor = (settings != null && !string.IsNullOrEmpty(settings.ThemeHex))
+                        ? settings.ThemeHex
+                        : "#2563eb";
+
+    string fontFamily = (settings != null && !string.IsNullOrEmpty(settings.FontFamily))
+                        ? settings.FontFamily
+                        : "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
+    int fontSize = (settings != null && settings.FontSize > 0)
+                    ? settings.FontSize
+                    : 18;
+    if (fontSize < 16) { fontSize = 16; }
+    if (fontSize > 24) { fontSize = 24; }
+
+    bool isDarkMode = settings != null ? settings.DarkMode : true;
+
+    string pageBg = isDarkMode ? "#020617" : "#f5f5f5";
+    string cardBg = isDarkMode ? "#0f172a" : "#ffffff";
+    string borderColor = isDarkMode ? "#1f2937" : "#e5e7eb";
+    string mainTextColor = isDarkMode ? "#e5e7eb" : "#111827";
+    string subTextColor = isDarkMode ? "#9ca3af" : "#6b7280";
+    string lightText = isDarkMode ? "#cbd5f5" : "#4b5563";
+
+    string currentLang = (settings != null && !string.IsNullOrEmpty(settings.Lang))
+        ? settings.Lang
+        : "vi_VN";
+
+    Func<string, string, string, string, string, string> L = (vi, en, jp, zh, ko) =>
+    {
+        switch (currentLang)
+        {
+            case "en_US": return en;
+            case "jp_JP": return jp;
+            case "ch_CN": return zh;
+            case "kr_KR": return ko;
+            default: return vi; //
+        }
+    };
+
+    ViewBag.Title = L(
+        "Hồ sơ nhân viên",
+        "Employee profile",
+        "従業員プロフィール",
+        "员工档案",
+        "직원 프로필"
+    );
+
+    var fullName = (Model != null ? ((Model.HoLot ?? "") + " " + (Model.TenNV ?? "")).Trim() : "");
+    if (string.IsNullOrWhiteSpace(fullName) && Model != null)
+    {
+        fullName = Model.MaNV;
+    }
+
+    string initials = "";
+    if (!string.IsNullOrWhiteSpace(Model?.TenNV))
+    {
+        initials = Model.TenNV.Substring(0, 1).ToUpper();
+    }
+
+    var avatarPath = Url.Content("~/Content/Images/Home/NhanVien/" + (Model?.MaNV ?? "default") + ".jpg");
+    var avatarDefault = Url.Content("~/Content/Images/Home/NhanVien/default.jpg");
+
+    var departments = ViewBag.Departments as List<PHONGBAN>;
+    var positions = ViewBag.Positions as List<VITRICONGVIEC>;
+}
+
+<style>
+    .hr-info-page {
+        padding: 24px;
+        font-family: @fontFamily;
+        font-size: @(fontSize);
+        color: @mainTextColor;
+        @*background: radial-gradient(circle at top left, rgba(148, 163, 255, 0.16), transparent 60%),
+                    radial-gradient(circle at bottom right, rgba(45, 212, 191, 0.14), transparent 55%),
+                    @pageBg;*@
+        min-height: calc(100vh - 80px);
+    }
+
+    .hr-info-header {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .hr-info-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 999px;
+        position: relative;
+        overflow: hidden;
+        flex-shrink: 0;
+        border: 2px solid rgba(248, 250, 252, 0.6);
+        box-shadow: 0 0 16px rgba(15, 23, 42, 0.7);
+        background: radial-gradient(circle at 30% 20%, #ffffff 0, #d1d5db 40%, #6b7280 100%);
+    }
+
+    .hr-info-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .hr-info-avatar-initials {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 28px;
+        color: #111827;
+        text-shadow: 0 2px 6px rgba(0,0,0,0.45);
+        pointer-events: none;
+    }
+
+    .hr-info-title-block {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .hr-info-name {
+        font-size: 26px;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        color: @themeColor;
+    }
+
+    .hr-info-meta-line {
+        font-size: 14px;
+        color: @subTextColor;
+    }
+
+    .hr-tag-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 4px;
+    }
+
+    .hr-tag {
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        border: 1px solid rgba(148,163,184,.5);
+        background: rgba(15,23,42,0.3);
+        color: @lightText;
+    }
+
+    .hr-tag-primary {
+        border-color: @themeColor;
+        color: @themeColor;
+        background: rgba(37,99,235,0.08);
+    }
+
+    .hr-info-grid {
+        margin-top: 12px;
+        display: grid;
+        grid-template-columns: minmax(0, 4fr) minmax(0, 6fr);
+        gap: 18px;
+    }
+
+    @@media (max-width: 992px) {
+        .hr-info-grid {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
+
+    .hr-info-card {
+        background: @cardBg;
+        border-radius: 18px;
+        border: 1px solid @borderColor;
+        padding: 16px 18px;
+        box-shadow: 0 18px 40px rgba(15,23,42,0.35);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hr-info-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at top left, rgba(255,255,255,0.08), transparent 55%);
+        pointer-events: none;
+    }
+
+    .hr-info-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 10px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .hr-info-card-title {
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: .09em;
+        font-weight: 600;
+        color: @themeColor;
+    }
+
+    .hr-info-card-note {
+        font-size: 12px;
+        color: @subTextColor;
+    }
+
+    .hr-info-rows {
+        margin-top: 8px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .hr-info-row {
+        display: grid;
+        grid-template-columns: minmax(0, 40%) minmax(0, 60%);
+        padding: 6px 0;
+        font-size: 13px;
+        border-bottom: 1px dashed rgba(148, 163, 184, 0.28);
+    }
+
+    .hr-info-row:last-child {
+        border-bottom: none;
+    }
+
+    .hr-info-label {
+        color: @subTextColor;
+        padding-right: 10px;
+    }
+
+    .hr-info-value {
+        color: @mainTextColor;
+        word-wrap: break-word;
+    }
+
+    .hr-info-two-col {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 8px;
+    }
+
+    @@media (max-width: 768px) {
+        .hr-info-two-col {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
+
+    .hr-stat-chip {
+        display: flex;
+        flex-direction: column;
+        padding: 10px 12px;
+        border-radius: 14px;
+        border: 1px solid rgba(148,163,184,.4);
+        font-size: 12px;
+        color: @lightText;
+    }
+
+    .hr-stat-chip-value {
+        font-size: 18px;
+        font-weight: 600;
+        color: @themeColor;
+        margin-top: 2px;
+    }
+
+    .hr-info-right > .hr-info-card + .hr-info-card,
+    .hr-info-left  > .hr-info-card + .hr-info-card {
+        margin-top: 16px;
+    }
+
+    .hr-copy-btn {
+        border: none;
+        background: transparent;
+        color: @subTextColor;
+        cursor: pointer;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .1em;
+        margin-left: 10px;
+    }
+
+    .hr-copy-btn:hover {
+        color: @themeColor;
+    }
+
+    .hr-toast {
+        position: fixed;
+        right: 24px;
+        bottom: -60px;
+        padding: 10px 14px;
+        background: rgba(15,23,42,0.92);
+        border-radius: 999px;
+        border: 1px solid @themeColor;
+        color: #e5e7eb;
+        font-size: 13px;
+        box-shadow: 0 12px 30px rgba(15,23,42,0.6);
+        opacity: 0;
+        transition: all .3s ease;
+        z-index: 9999;
+    }
+
+    .hr-toast.show {
+        bottom: 24px;
+        opacity: 1;
+    }
+
+    /* Edit button + modal */
+
+    .hr-edit-btn {
+        position: absolute;
+        right: 14px;
+        bottom: 12px;
+        width: 32px;
+        height: 32px;
+        border-radius: 999px;
+        border: none;
+        background: @themeColor;
+        color: #0b1120;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        cursor: pointer;
+        box-shadow: 0 0 14px rgba(37,99,235,0.65);
+        transition: transform .18s, box-shadow .18s, opacity .18s;
+        z-index: 3;
+    }
+
+    .hr-edit-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 0 20px rgba(37,99,235,0.9);
+    }
+
+    .hr-edit-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(15,23,42,0.75);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9998;
+    }
+
+    .hr-edit-backdrop.show {
+        display: flex;
+    }
+
+    .hr-edit-modal {
+        width: 600px;
+        max-width: 95vw;
+        border-radius: 18px;
+        background: #020617;
+        border: 1px solid rgba(148,163,184,0.6);
+        padding: 18px 20px 16px;
+        color: #e5e7eb;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.85);
+    }
+
+    .hr-edit-header {
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        margin-bottom:10px;
+    }
+
+    .hr-edit-title {
+        font-size:16px;
+        font-weight:600;
+    }
+
+    .hr-edit-close {
+        border:none;
+        background:transparent;
+        color:#9ca3af;
+        font-size:20px;
+        cursor:pointer;
+    }
+
+    .hr-edit-footer {
+        margin-top:12px;
+        display:flex;
+        justify-content:flex-end;
+        gap:8px;
+    }
+
+    .hr-edit-cancel,
+    .hr-edit-save {
+        padding:8px 14px;
+        border-radius:999px;
+        font-size:13px;
+        cursor:pointer;
+        border:1px solid transparent;
+    }
+
+    .hr-edit-cancel {
+        background:transparent;
+        border-color:rgba(148,163,184,0.7);
+        color:@subTextColor;
+    }
+
+    .hr-edit-save {
+        background:@themeColor;
+        color:#0b1120;
+        font-weight:600;
+        box-shadow:0 0 14px rgba(37,99,235,0.8);
+    }
+
+    .hr-edit-save:hover {
+        box-shadow:0 0 20px rgba(37,99,235,1);
+    }
+
+    .hr-edit-label {
+        font-size: 13px;
+        margin-bottom: 4px;
+        color: @subTextColor;
+    }
+
+    .hr-edit-input,
+    .hr-edit-textarea {
+        width: 100%;
+        padding: 7px 10px;
+        border-radius: 10px;
+        border: 1px solid rgba(148,163,184,0.7);
+        background: #020617;
+        color: #e5e7eb;
+        font-size: 13px;
+        box-sizing: border-box;
+        outline: none;
+    }
+
+    .hr-edit-textarea {
+        resize: vertical;
+        min-height: 70px;
+    }
+
+    .hr-info-left, .hr-info-right {
+        position: relative;
+    }
+</style>
+
+<div class="hr-info-page">
+    <div class="hr-info-header">
+        <div class="hr-info-avatar">
+            <img src="@avatarPath"
+                 alt="@fullName"
+                 onerror="this.onerror=null;this.src='@avatarDefault';" />
+            <div class="hr-info-avatar-initials">@initials</div>
+        </div>
+
+        <div class="hr-info-title-block">
+            <div class="hr-info-name">@fullName</div>
+            <div class="hr-info-meta-line">
+                @Model.MaNV
+                <button type="button"
+                        class="hr-copy-btn"
+                        data-copy="@Model.MaNV">
+                    @L("COPY MÃ", "COPY ID", "IDコピー", "复制编号", "ID 복사")
+                </button>
+            </div>
+            <div class="hr-tag-list">
+                <span class="hr-tag hr-tag-primary">@Model.TenPhongBan</span>
+                <span class="hr-tag">@Model.TenChucVu</span>
+                <span class="hr-tag">
+                    @(Model.GioiTinh
+                        ? L("Nam", "Male", "男性", "男", "남성")
+                        : L("Nữ", "Female", "女性", "女", "여성"))
+                    &nbsp;•&nbsp;
+                    @Model.NamSinh
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="hr-info-grid">
+        <!-- LEFT -->
+        <div class="hr-info-left">
+            <!-- Personal info -->
+            <div class="hr-info-card">
+                <div class="hr-info-card-header">
+                    <div class="hr-info-card-title">
+                        @L("THÔNG TIN CÁ NHÂN", "PERSONAL INFORMATION", "個人情報", "个人信息", "개인 정보")
+                    </div>
+                    <div class="hr-info-card-note">
+                        @L("Thông tin cơ bản của nhân viên",
+                           "Basic employee information",
+                           "従業員の基本情報",
+                           "员工基本信息",
+                           "직원 기본 정보")
+                    </div>
+                </div>
+
+                <div class="hr-info-rows">
+                    <div class="hr-info-row">
+                        <div class="hr-info-label">
+                            @L("Mã nhân viên", "Employee ID", "従業員ID", "员工编号", "사원 번호")
+                        </div>
+                        <div class="hr-info-value">@Model.MaNV</div>
+                    </div>
+                    <div class="hr-info-row">
+                        <div class="hr-info-label">
+                            @L("Họ và tên", "Full name", "氏名", "姓名", "성명")
+                        </div>
+                        <div class="hr-info-value">@fullName</div>
+                    </div>
+                    <div class="hr-info-row">
+                        <div class="hr-info-label">
+                            @L("Giới tính", "Gender", "性別", "性别", "성별")
+                        </div>
+                        <div class="hr-info-value">
+                            @(Model.GioiTinh
+                                ? L("Nam", "Male", "男性", "男", "남성")
+                                : L("Nữ", "Female", "女性", "女", "여성"))
+                        </div>
+                    </div>
+                    <div class="hr-info-row">
+                        <div class="hr-info-label">
+                            @L("Năm sinh", "Year of birth", "生年", "出生年份", "출생 연도")
+                        </div>
+                        <div class="hr-info-value">
+                            @Model.NamSinh
+                            @if (Model.Tuoi.HasValue)
+                            {
+                                <span style="color:@subTextColor;">
+                                    (@Model.Tuoi @L("tuổi", "years old", "歳", "岁", "살"))
+                                </span>
+                            }
+                        </div>
+                    </div>
+                    <div class="hr-info-row">
+                        <div class="hr-info-label">
+                            @L("Ngày vào làm", "Start date", "入社日", "入职日期", "입사일")
+                        </div>
+                        <div class="hr-info-value">
+                            @(Model.NgayBatDau.HasValue
+                                ? Model.NgayBatDau.Value.ToString("dd/MM/yyyy")
+                                : "-")
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button"
+                        class="hr-edit-btn"
+                        data-section="personal">
+                    ✎
+                </button>
+            </div>
+
+            <!-- Contact -->
+            <div class="hr-info-card">
+                <div class="hr-info-card-header">
+                    <div class="hr-info-card-title">
+                        @L("LIÊN HỆ", "CONTACT", "連絡先", "联系信息", "연락처")
+                    </div>
+                    <div class="hr-info-card-note">
+                        @L("Thông tin liên lạc hiện tại",
+                           "Current contact information",
+                           "現在の連絡先情報",
+                           "当前联系信息",
+                           "현재 연락처 정보")
+                    </div>
+                </div>
+
+                <div class="hr-info-rows">
+                    <div class="hr-info-row">
+                        <div class="hr-info-label">
+                            @L("Số điện thoại", "Phone number", "電話番号", "电话号码", "전화번호")
+                        </div>
+                        <div class="hr-info-value">@Model.SDT</div>
+                    </div>
+                    <div class="hr-info-row">
+                        <div class="hr-info-label">
+                            @L("Email", "Email", "メール", "邮箱", "이메일")
+                        </div>
+                        <div class="hr-info-value">@Model.Email</div>
+                    </div>
+                    <div class="hr-info-row">
+                        <div class="hr-info-label">
+                            @L("Địa chỉ", "Address", "住所", "地址", "주소")
+                        </div>
+                        <div class="hr-info-value">@Model.DiaChi</div>
+                    </div>
+                    <div class="hr-info-row">
+                        <div class="hr-info-label">
+                            @L("Facebook", "Facebook", "Facebook", "Facebook", "Facebook")
+                        </div>
+                        <div class="hr-info-value">
+                            @if (!string.IsNullOrWhiteSpace(Model.Facebook))
+                            {
+                                <a href="@Model.Facebook" target="_blank" style="color:@themeColor;text-decoration:underline;">
+                                    @Model.Facebook
+                                </a>
+                            }
+                            else
+                            {
+                                @:-
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button"
+                        class="hr-edit-btn"
+                        data-section="contact">
+                    ✎
+                </button>
+            </div>
+
+            <div class="hr-info-card">
+                <div class="hr-info-card-header">
+                    <div class="hr-info-card-title">
+                        @L("THỐNG KÊ NHANH", "QUICK STATS", "クイック統計", "快速统计", "빠른 통계")
+                    </div>
+                    <div class="hr-info-card-note">
+                        @L("Dựa trên chấm công & thưởng phạt",
+                           "Based on attendance & rewards/penalties",
+                           "勤怠と賞罰に基づく",
+                           "根据考勤及奖惩",
+                           "근태 및 상벌 기준")
+                    </div>
+                </div>
+
+                <div class="hr-info-two-col">
+                    <div class="hr-stat-chip">
+                        <span>
+                            @L("Tổng ca 3 tháng gần nhất",
+                               "Total shifts in last 3 months",
+                               "直近3か月の総シフト数",
+                               "最近3个月总班次",
+                               "최근 3개월 총 근무조")
+                        </span>
+                        <span class="hr-stat-chip-value">
+                            @(Model.TongCa3Thang?.ToString("0.##") ?? "0")
+                            @L("ca", "shifts", "シフト", "班", "교대")
+                        </span>
+                    </div>
+                    <div class="hr-stat-chip">
+                        <span>
+                            @L("Thưởng / Phạt",
+                               "Rewards / Penalties",
+                               "賞与 / 罰則",
+                               "奖励 / 处罚",
+                               "포상 / 벌점")
+                        </span>
+                        <span class="hr-stat-chip-value">
+                            @(Model.TongThuong?.ToString("#,0") ?? "0") /
+                            @(Model.TongPhat?.ToString("#,0") ?? "0")
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hr-info-right">
+            <!-- Department & Salary -->
+            <div class="hr-info-card">
+                <div class="hr-info-card-header">
+                    <div class="hr-info-card-title">
+                        @L("PHÒNG BAN & VỊ TRÍ", "DEPARTMENT & POSITION", "部署と役職", "部门与职位", "부서 및 직책")
+                    </div>
+                    <div class="hr-info-card-note">
+                        @L("Thông tin tổ chức & doanh nghiệp",
+                           "Organization & company information",
+                           "組織と会社情報",
+                           "组织与公司信息",
+                           "조직 및 회사 정보")
+                    </div>
+                </div>
+
+                <div class="hr-info-rows">
+                    <div class="hr-info-row">
+                        <div class="hr-info-label">
+                            @L("Phòng ban", "Department", "部署", "部门", "부서")
+                        </div>
+                        <div class="hr-info-value">@Model.TenPhongBan (@Model.MaPB)</div>
+                    </div>
+                    <div class="hr-info-row">
+                        <div class="hr-info-label">
+                            @L("Chức vụ", "Position", "役職", "职务", "직책")
+                        </div>
+                        <div class="hr-info-value">@Model.TenChucVu (@Model.MaCV)</div>
+                    </div>
+                    <div class="hr-info-row">
+                        <div class="hr-info-label">
+                            @L("Doanh nghiệp", "Company", "会社", "公司", "회사")
+                        </div>
+                        <div class="hr-info-value">@Model.TenDoanhNghiep (@Model.MaDN)</div>
+                    </div>
+                    <div class="hr-info-row">
+                        <div class="hr-info-label">
+                            @L("Địa chỉ DN", "Company address", "会社住所", "公司地址", "회사 주소")
+                        </div>
+                        <div class="hr-info-value">@Model.DiaChiDoanhNghiep</div>
+                    </div>
+                </div>
+
+                <div style="margin-top:18px;">
+                    <div class="hr-info-card-header">
+                        <div class="hr-info-card-title">
+                            @L("LƯƠNG & HỢP ĐỒNG", "SALARY & CONTRACT", "給与と契約", "薪资与合同", "급여 및 계약")
+                        </div>
+                        <div class="hr-info-card-note">
+                            @L("Thông tin lương cơ bản",
+                               "Basic salary information",
+                               "基本給与情報",
+                               "基本薪资信息",
+                               "기본 급여 정보")
+                        </div>
+                    </div>
+
+                    <div class="hr-info-rows">
+                        <div class="hr-info-row">
+                            <div class="hr-info-label">
+                                @L("Loại nhân viên", "Employee type", "従業員種別", "员工类型", "직원 유형")
+                            </div>
+                            <div class="hr-info-value">@Model.LoaiNV</div>
+                        </div>
+                        <div class="hr-info-row">
+                            <div class="hr-info-label">
+                                @L("Hệ số lương", "Salary coefficient", "給与係数", "工资系数", "급여 계수")
+                            </div>
+                            <div class="hr-info-value">
+                                @(Model.HeSoLuong?.ToString("0.##") ?? "-")
+                            </div>
+                        </div>
+                        <div class="hr-info-row">
+                            <div class="hr-info-label">
+                                @L("Lương cơ bản", "Base salary", "基本給", "基本工资", "기본 급여")
+                            </div>
+                            <div class="hr-info-value">
+                                @(Model.LuongCoBan.HasValue
+                                    ? Model.LuongCoBan.Value.ToString("#,0") + " VND"
+                                    : "-")
+                            </div>
+                        </div>
+                        <div class="hr-info-row">
+                            <div class="hr-info-label">
+                                @L("Ngày ký HĐLĐ", "Contract date", "契約日", "签约日期", "계약일")
+                            </div>
+                            <div class="hr-info-value">
+                                @(Model.NgayHDLD.HasValue
+                                    ? Model.NgayHDLD.Value.ToString("dd/MM/yyyy")
+                                    : "-")
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button"
+                        class="hr-edit-btn"
+                        data-section="orgsalary">
+                    ✎
+                </button>
+            </div>
+
+            <!-- Relative-->
+            <div class="hr-info-card">
+                <div class="hr-info-card-header">
+                    <div class="hr-info-card-title">
+                        @L("NGƯỜI THÂN LIÊN HỆ KHẨN",
+                           "EMERGENCY CONTACT",
+                           "緊急連絡先",
+                           "紧急联系人",
+                           "비상 연락처")
+                    </div>
+                    <div class="hr-info-card-note">
+                        @L("Lưu trong bảng NHANTHAN",
+                           "Stored in NHANTHAN table",
+                           "NHANTHANテーブルに保存",
+                           "存于 NHANTHAN 表",
+                           "NHANTHAN 테이블에 저장")
+                    </div>
+                </div>
+
+                <div class="hr-info-rows">
+                    <div class="hr-info-row">
+                        <div class="hr-info-label">
+                            @L("Họ tên", "Full name", "氏名", "姓名", "성명")
+                        </div>
+                        <div class="hr-info-value">@Model.NguoiThanTen</div>
+                    </div>
+                    <div class="hr-info-row">
+                        <div class="hr-info-label">
+                            @L("Quan hệ", "Relationship", "続柄", "关系", "관계")
+                        </div>
+                        <div class="hr-info-value">@Model.NguoiThanQuanHe</div>
+                    </div>
+                    <div class="hr-info-row">
+                        <div class="hr-info-label">
+                            @L("Số điện thoại", "Phone number", "電話番号", "电话号码", "전화번호")
+                        </div>
+                        <div class="hr-info-value">@Model.NguoiThanSDT</div>
+                    </div>
+                    <div class="hr-info-row">
+                        <div class="hr-info-label">
+                            @L("Địa chỉ", "Address", "住所", "地址", "주소")
+                        </div>
+                        <div class="hr-info-value">@Model.NguoiThanDiaChi</div>
+                    </div>
+                </div>
+
+                <button type="button"
+                        class="hr-edit-btn"
+                        data-section="relative">
+                    ✎
+                </button>
+            </div>
+
+            <!-- Health & Insurance -->
+            <div class="hr-info-card">
+                <div class="hr-info-card-header">
+                    <div class="hr-info-card-title">
+                        @L("SỨC KHOẺ & BẢO HIỂM",
+                           "HEALTH & INSURANCE",
+                           "健康と保険",
+                           "健康与保险",
+                           "건강 및 보험")
+                    </div>
+                    <div class="hr-info-card-note">
+                        @L("Tóm tắt từ THONGTINSUCKHOE & THONGTINBAOHIEM",
+                           "Summary from THONGTINSUCKHOE & THONGTINBAOHIEM",
+                           "THONGTINSUCKHOE と THONGTINBAOHIEM からのサマリ",
+                           "来自 THONGTINSUCKHOE 和 THONGTINBAOHIEM 的汇总",
+                           "THONGTINSUCKHOE 및 THONGTINBAOHIEM 요약")
+                    </div>
+                </div>
+
+                <div class="hr-info-rows">
+                    <div class="hr-info-row">
+                        <div class="hr-info-label">
+                            @L("Chiều cao / Cân nặng",
+                               "Height / Weight",
+                               "身長 / 体重",
+                               "身高 / 体重",
+                               "키 / 몸무게")
+                        </div>
+                        <div class="hr-info-value">
+                            @((Model.ChieuCao.HasValue ? Model.ChieuCao.Value.ToString("0") + " cm" : "-"))
+                            /
+                            @((Model.CanNang.HasValue ? Model.CanNang.Value.ToString("0") + " kg" : "-"))
+                        </div>
+                    </div>
+                    <div class="hr-info-row">
+                        <div class="hr-info-label">
+                            @L("Tiền sử bệnh", "Medical history", "既往歴", "病史", "병력")
+                        </div>
+                        <div class="hr-info-value">
+                            @(string.IsNullOrWhiteSpace(Model.TienSuBenh) ? "-" : Model.TienSuBenh)
+                        </div>
+                    </div>
+                    <div class="hr-info-row">
+                        <div class="hr-info-label">
+                            @L("Thị lực (trên 10)", "Vision (over 10)", "視力（10段階）", "视力（满分10）", "시력(10 기준)")
+                        </div>
+                        <div class="hr-info-value">
+                            @(Model.ThiLucTren10.HasValue ? Model.ThiLucTren10.Value.ToString() : "-")
+                        </div>
+                    </div>
+                    <div class="hr-info-row">
+                        <div class="hr-info-label">
+                            @L("Ngày cập nhật SK", "Health updated date", "健康更新日", "健康信息更新日期", "건강 정보 갱신일")
+                        </div>
+                        <div class="hr-info-value">
+                            @(Model.NgayCapNhatSucKhoe.HasValue
+                                ? Model.NgayCapNhatSucKhoe.Value.ToString("dd/MM/yyyy")
+                                : "-")
+                        </div>
+                    </div>
+                    <div class="hr-info-row">
+                        <div class="hr-info-label">
+                            @L("Loại bảo hiểm", "Insurance type", "保険種別", "保险类型", "보험 종류")
+                        </div>
+                        <div class="hr-info-value">
+                            @(string.IsNullOrWhiteSpace(Model.LoaiBaoHiem) ? "-" : Model.LoaiBaoHiem)
+                        </div>
+                    </div>
+                    <div class="hr-info-row">
+                        <div class="hr-info-label">
+                            @L("Số bảo hiểm", "Insurance number", "保険番号", "保险号码", "보험 번호")
+                        </div>
+                        <div class="hr-info-value">
+                            @(string.IsNullOrWhiteSpace(Model.SoBaoHiem) ? "-" : Model.SoBaoHiem)
+                        </div>
+                    </div>
+                    <div class="hr-info-row" style="border-bottom:none;">
+                        <div class="hr-info-label">
+                            @L("Thời hạn bảo hiểm", "Insurance expiry", "保険期限", "保险到期日", "보험 만료일")
+                        </div>
+                        <div class="hr-info-value">
+                            @(Model.ThoiHanBaoHiem.HasValue
+                                ? Model.ThoiHanBaoHiem.Value.ToString("dd/MM/yyyy")
+                                : "-")
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button"
+                        class="hr-edit-btn"
+                        data-section="health_insurance">
+                    ✎
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDIT TEMPLATES -->
+
+    <div id="tpl-personal" style="display:none;">
+        <div class="hr-edit-group">
+            <div class="hr-edit-label">
+                @L("Họ lót", "Last / middle name", "姓・ミドルネーム", "姓与中间名", "성(성과 중간 이름)")
+            </div>
+            <input type="text" name="HoLot" class="hr-edit-input" value="@Model.HoLot" />
+        </div>
+        <div class="hr-edit-group" style="margin-top:8px;">
+            <div class="hr-edit-label">
+                @L("Tên nhân viên", "First name", "名", "名字", "이름")
+            </div>
+            <input type="text" name="TenNV" class="hr-edit-input" value="@Model.TenNV" />
+        </div>
+        <div class="hr-edit-group" style="margin-top:8px;">
+            <div class="hr-edit-label">
+                @L("Giới tính", "Gender", "性別", "性别", "성별")
+            </div>
+            <select name="GioiTinh" class="hr-edit-input">
+                <option value="true" @(Model.GioiTinh ? "selected" : "")>
+                    @L("Nam", "Male", "男性", "男", "남성")
+                </option>
+                <option value="false" @(!Model.GioiTinh ? "selected" : "")>
+                    @L("Nữ", "Female", "女性", "女", "여성")
+                </option>
+            </select>
+        </div>
+        <div class="hr-edit-group" style="margin-top:8px;">
+            <div class="hr-edit-label">
+                @L("Năm sinh", "Year of birth", "生年", "出生年份", "출생 연도")
+            </div>
+            <input type="number" name="NamSinh" class="hr-edit-input"
+                   value="@(Model.NamSinh.HasValue ? Model.NamSinh.Value.ToString() : "")" />
+        </div>
+        <div class="hr-edit-group" style="margin-top:8px;">
+            <div class="hr-edit-label">
+                @L("Ngày vào làm", "Start date", "入社日", "入职日期", "입사일")
+            </div>
+            <input type="date" name="NgayBatDau" class="hr-edit-input"
+                   value="@(Model.NgayBatDau.HasValue ? Model.NgayBatDau.Value.ToString("yyyy-MM-dd") : "")" />
+        </div>
+    </div>
+
+    <div id="tpl-contact" style="display:none;">
+        <div class="hr-edit-group">
+            <div class="hr-edit-label">
+                @L("Số điện thoại", "Phone number", "電話番号", "电话号码", "전화번호")
+            </div>
+            <input type="text" name="SDT" class="hr-edit-input" value="@Model.SDT" />
+        </div>
+        <div class="hr-edit-group" style="margin-top:8px;">
+            <div class="hr-edit-label">
+                @L("Email", "Email", "メール", "邮箱", "이메일")
+            </div>
+            <input type="email" name="Email" class="hr-edit-input" value="@Model.Email" />
+        </div>
+        <div class="hr-edit-group" style="margin-top:8px;">
+            <div class="hr-edit-label">
+                @L("Địa chỉ", "Address", "住所", "地址", "주소")
+            </div>
+            <input type="text" name="DiaChi" class="hr-edit-input" value="@Model.DiaChi" />
+        </div>
+        <div class="hr-edit-group" style="margin-top:8px;">
+            <div class="hr-edit-label">
+                @L("Facebook", "Facebook", "Facebook", "Facebook", "Facebook")
+            </div>
+            <input type="text" name="Facebook" class="hr-edit-input" value="@Model.Facebook" />
+        </div>
+    </div>
+
+    <div id="tpl-orgsalary" style="display:none;">
+        <div class="hr-edit-group">
+            <div class="hr-edit-label">
+                @L("Phòng ban", "Department", "部署", "部门", "부서")
+            </div>
+            <select name="MaPB" class="hr-edit-input">
+                <option value="">
+                    @L("-- Chọn phòng ban --",
+                       "-- Select department --",
+                       "-- 部署を選択 --",
+                       "-- 选择部门 --",
+                       "-- 부서를 선택 --")
+                </option>
+                @if (departments != null)
+                {
+                    foreach (var pb in departments)
+                    {
+                        <option value="@pb.MAPB" @(Model.MaPB == pb.MAPB ? "selected" : "")>
+                            @pb.TENPB (@pb.MAPB)
+                        </option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="hr-edit-group" style="margin-top:8px;">
+            <div class="hr-edit-label">
+                @L("Chức vụ", "Position", "役職", "职务", "직책")
+            </div>
+            <select name="MaCV" class="hr-edit-input">
+                <option value="">
+                    @L("-- Chọn chức vụ --",
+                       "-- Select position --",
+                       "-- 役職を選択 --",
+                       "-- 选择职务 --",
+                       "-- 직책을 선택 --")
+                </option>
+                @if (positions != null)
+                {
+                    foreach (var cv in positions)
+                    {
+                        <option value="@cv.MACV" @(Model.MaCV == cv.MACV ? "selected" : "")>
+                            @cv.TENCV (@cv.MACV)
+                        </option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="hr-edit-group" style="margin-top:8px;">
+            <div class="hr-edit-label">
+                @L("Loại nhân viên", "Employee type", "従業員種別", "员工类型", "직원 유형")
+            </div>
+            <input type="text" name="LoaiNV" class="hr-edit-input" value="@Model.LoaiNV" />
+        </div>
+        <div class="hr-edit-group" style="margin-top:8px;">
+            <div class="hr-edit-label">
+                @L("Lương cơ bản (VND)", "Base salary (VND)", "基本給 (VND)", "基本工资 (VND)", "기본 급여 (VND)")
+            </div>
+            <input type="number" name="LuongCoBan" step="1000" class="hr-edit-input"
+                   value="@(Model.LuongCoBan.HasValue ? Model.LuongCoBan.Value.ToString("0") : "")" />
+        </div>
+    </div>
+
+    <div id="tpl-relative" style="display:none;">
+        <div class="hr-edit-group">
+            <div class="hr-edit-label">
+                @L("Họ tên người thân",
+                   "Relative full name",
+                   "親族氏名",
+                   "亲属姓名",
+                   "가족 성명")
+            </div>
+            <input type="text" name="NguoiThanTen" class="hr-edit-input" value="@Model.NguoiThanTen" />
+        </div>
+        <div class="hr-edit-group" style="margin-top:8px;">
+            <div class="hr-edit-label">
+                @L("Quan hệ", "Relationship", "続柄", "关系", "관계")
+            </div>
+            <input type="text" name="NguoiThanQuanHe" class="hr-edit-input" value="@Model.NguoiThanQuanHe" />
+        </div>
+        <div class="hr-edit-group" style="margin-top:8px;">
+            <div class="hr-edit-label">
+                @L("Số điện thoại", "Phone number", "電話番号", "电话号码", "전화번호")
+            </div>
+            <input type="text" name="NguoiThanSDT" class="hr-edit-input" value="@Model.NguoiThanSDT" />
+        </div>
+        <div class="hr-edit-group" style="margin-top:8px;">
+            <div class="hr-edit-label">
+                @L("Địa chỉ", "Address", "住所", "地址", "주소")
+            </div>
+            <input type="text" name="NguoiThanDiaChi" class="hr-edit-input" value="@Model.NguoiThanDiaChi" />
+        </div>
+    </div>
+
+    <div id="tpl-health-insurance" style="display:none;">
+        <div class="hr-edit-group">
+            <div class="hr-edit-label">
+                @L("Chiều cao (cm)", "Height (cm)", "身長 (cm)", "身高 (cm)", "키 (cm)")
+            </div>
+            <input type="number" name="ChieuCao" class="hr-edit-input"
+                   value="@(Model.ChieuCao.HasValue ? Model.ChieuCao.Value.ToString() : "")" />
+        </div>
+        <div class="hr-edit-group" style="margin-top:8px;">
+            <div class="hr-edit-label">
+                @L("Cân nặng (kg)", "Weight (kg)", "体重 (kg)", "体重 (kg)", "몸무게 (kg)")
+            </div>
+            <input type="number" name="CanNang" class="hr-edit-input"
+                   value="@(Model.CanNang.HasValue ? Model.CanNang.Value.ToString() : "")" />
+        </div>
+        <div class="hr-edit-group" style="margin-top:8px;">
+            <div class="hr-edit-label">
+                @L("Tiền sử bệnh", "Medical history", "既往歴", "病史", "병력")
+            </div>
+            <textarea name="TienSuBenh" class="hr-edit-textarea">@Model.TienSuBenh</textarea>
+        </div>
+        <div class="hr-edit-group" style="margin-top:8px;">
+            <div class="hr-edit-label">
+                @L("Thị lực (trên 10)", "Vision (over 10)", "視力（10段階）", "视力（满分10）", "시력(10 기준)")
+            </div>
+            <input type="number" name="ThiLucTren10" class="hr-edit-input"
+                   value="@(Model.ThiLucTren10.HasValue ? Model.ThiLucTren10.Value.ToString() : "")" />
+        </div>
+        <div class="hr-edit-group" style="margin-top:8px;">
+            <div class="hr-edit-label">
+                @L("Ngày cập nhật sức khoẻ",
+                   "Health updated date",
+                   "健康更新日",
+                   "健康信息更新日期",
+                   "건강 정보 갱신일")
+            </div>
+            <input type="date" name="NgayCapNhatSucKhoe" class="hr-edit-input"
+                   value="@(Model.NgayCapNhatSucKhoe.HasValue ? Model.NgayCapNhatSucKhoe.Value.ToString("yyyy-MM-dd") : "")" />
+        </div>
+        <div class="hr-edit-group" style="margin-top:8px;">
+            <div class="hr-edit-label">
+                @L("Loại bảo hiểm", "Insurance type", "保険種別", "保险类型", "보험 종류")
+            </div>
+            <input type="text" name="LoaiBaoHiem" class="hr-edit-input" value="@Model.LoaiBaoHiem" />
+        </div>
+        <div class="hr-edit-group" style="margin-top:8px;">
+            <div class="hr-edit-label">
+                @L("Số bảo hiểm", "Insurance number", "保険番号", "保险号码", "보험 번호")
+            </div>
+            <input type="text" name="SoBaoHiem" class="hr-edit-input" value="@Model.SoBaoHiem" />
+        </div>
+        <div class="hr-edit-group" style="margin-top:8px;">
+            <div class="hr-edit-label">
+                @L("Thời hạn bảo hiểm", "Insurance expiry", "保険期限", "保险到期日", "보험 만료일")
+            </div>
+            <input type="date" name="ThoiHanBaoHiem" class="hr-edit-input"
+                   value="@(Model.ThoiHanBaoHiem.HasValue ? Model.ThoiHanBaoHiem.Value.ToString("yyyy-MM-dd") : "")" />
+        </div>
+    </div>
+
+    <!-- MODAL EDIT -->
+    <div class="hr-edit-backdrop" id="hrEditBackdrop">
+        <div class="hr-edit-modal">
+            <div class="hr-edit-header">
+                <div class="hr-edit-title" id="hrEditTitle">
+                    @L("Chỉnh sửa", "Edit", "編集", "编辑", "편집")
+                </div>
+                <button type="button" class="hr-edit-close" onclick="closeEditModal()">×</button>
+            </div>
+            <form id="hrEditForm" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="MaNV" value="@Model.MaNV" />
+                <div id="hrEditBody"></div>
+                <div class="hr-edit-footer">
+                    <button type="button" class="hr-edit-cancel" onclick="closeEditModal()">
+                        @L("Hủy", "Cancel", "キャンセル", "取消", "취소")
+                    </button>
+                    <button type="submit" class="hr-edit-save">
+                        @L("Lưu", "Save", "保存", "保存", "저장")
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="hrToast" class="hr-toast">
+        @L("Đã copy mã nhân viên", "Employee ID has been copied",
+           "従業員IDをコピーしました", "员工编号已复制", "사원 번호가 복사되었습니다")
+    </div>
+</div>
+
+<script>
+    (function () {
+        var toast = document.getElementById("hrToast");
+
+        function showToast(msg) {
+            if (!toast) return;
+            toast.textContent = msg;
+            toast.classList.add("show");
+            setTimeout(function () {
+                toast.classList.remove("show");
+            }, 2200);
+        }
+
+        var msgCopyPrefix = '@L(
+            "Đã copy mã nhân viên: ",
+            "Employee ID has been copied: ",
+            "従業員IDをコピーしました: ",
+            "员工编号已复制: ",
+            "사원 번호가 복사되었습니다: "
+        )';
+
+        var msgSaveSuccess = '@L(
+            "Đã lưu thành công.",
+            "Saved successfully.",
+            "保存しました。",
+            "保存成功。",
+            "성공적으로 저장되었습니다."
+        )';
+
+        var msgSaveFailed = '@L(
+            "Lưu thất bại.",
+            "Save failed.",
+            "保存に失敗しました。",
+            "保存失败。",
+            "저장에 실패했습니다."
+        )';
+
+        var msgSystemError = '@L(
+            "Lỗi hệ thống.",
+            "System error.",
+            "システムエラー。",
+            "系统错误。",
+            "시스템 오류입니다."
+        )';
+
+        var copyBtn = document.querySelector(".hr-copy-btn");
+        if (copyBtn) {
+            copyBtn.addEventListener("click", function () {
+                var text = this.getAttribute("data-copy") || "";
+                if (!navigator.clipboard) {
+                    var temp = document.createElement("textarea");
+                    temp.value = text;
+                    document.body.appendChild(temp);
+                    temp.select();
+                    document.execCommand("copy");
+                    document.body.removeChild(temp);
+                } else {
+                    navigator.clipboard.writeText(text);
+                }
+                showToast(msgCopyPrefix + text);
+            });
+        }
+
+        var backdrop = document.getElementById("hrEditBackdrop");
+        var form = document.getElementById("hrEditForm");
+        var body = document.getElementById("hrEditBody");
+        var titleEl = document.getElementById("hrEditTitle");
+
+        var urls = {
+            personal: '@Url.Action("UpdatePersonal", "Employee", new { area = "HR" })',
+            contact: '@Url.Action("UpdateContact", "Employee", new { area = "HR" })',
+            orgsalary: '@Url.Action("UpdateOrgSalary", "Employee", new { area = "HR" })',
+            relative: '@Url.Action("UpdateRelative", "Employee", new { area = "HR" })',
+            health_insurance: '@Url.Action("UpdateHealthInsurance", "Employee", new { area = "HR" })'
+        };
+
+        var titles = {
+            personal: '@L("Chỉnh sửa thông tin cá nhân", "Edit personal information",
+                         "個人情報を編集", "编辑个人信息", "개인 정보 수정")',
+            contact: '@L("Chỉnh sửa thông tin liên hệ", "Edit contact information",
+                        "連絡先情報を編集", "编辑联系信息", "연락처 정보 수정")',
+            orgsalary: '@L("Chỉnh sửa phòng ban, vị trí & lương",
+                           "Edit department, position & salary",
+                           "部署・役職・給与を編集",
+                           "编辑部门、职位与薪资",
+                           "부서·직책·급여 수정")',
+            relative: '@L("Chỉnh sửa thông tin người thân", "Edit emergency contact",
+                           "緊急連絡先を編集", "编辑紧急联系人信息", "비상 연락처 수정")',
+            health_insurance: '@L("Chỉnh sửa sức khoẻ & bảo hiểm",
+                                  "Edit health & insurance information",
+                                  "健康と保険情報を編集",
+                                  "编辑健康与保险信息",
+                                  "건강 및 보험 정보 수정")'
+        };
+
+        function openEdit(section) {
+            if (!backdrop || !body || !form) return;
+            var tplId = "";
+            switch (section) {
+                case "personal":
+                    tplId = "tpl-personal";
+                    break;
+                case "contact":
+                    tplId = "tpl-contact";
+                    break;
+                case "orgsalary":
+                    tplId = "tpl-orgsalary";
+                    break;
+                case "relative":
+                    tplId = "tpl-relative";
+                    break;
+                case "health_insurance":
+                    tplId = "tpl-health-insurance";
+                    break;
+                default:
+                    return;
+            }
+
+            var tpl = document.getElementById(tplId);
+            if (!tpl) return;
+
+            body.innerHTML = tpl.innerHTML;
+            form.setAttribute("data-section", section);
+            if (titleEl && titles[section]) {
+                titleEl.textContent = titles[section];
+            }
+            backdrop.classList.add("show");
+        }
+
+        window.closeEditModal = function () {
+            if (backdrop) {
+                backdrop.classList.remove("show");
+            }
+        };
+
+        var editButtons = document.querySelectorAll(".hr-edit-btn");
+        editButtons.forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                var section = this.getAttribute("data-section");
+                openEdit(section);
+            });
+        });
+
+        if (form) {
+            form.addEventListener("submit", function (e) {
+                e.preventDefault();
+                var section = form.getAttribute("data-section");
+                if (!section || !urls[section]) return;
+                var url = urls[section];
+                var formData = new FormData(form);
+
+                fetch(url, {
+                    method: "POST",
+                    body: formData
+                })
+                    .then(function (r) { return r.json(); })
+                    .then(function (res) {
+                        if (res && res.success) {
+                            showToast(res.message || msgSaveSuccess);
+                            closeEditModal();
+                            setTimeout(function () { window.location.reload(); }, 700);
+                        } else {
+                            showToast((res && res.message) || msgSaveFailed);
+                        }
+                    })
+                    .catch(function () {
+                        showToast(msgSystemError);
+                    });
+            });
+        }
+
+        if (backdrop) {
+            backdrop.addEventListener("click", function (e) {
+                if (e.target === backdrop) {
+                    closeEditModal();
+                }
+            });
+        }
+    })();
+</script>
