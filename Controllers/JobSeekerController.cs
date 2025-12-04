@@ -5,6 +5,9 @@ using System.Web.Mvc;
 using QLNSVATC.Models;
 using QLNSVATC.Helpers;
 using System.Linq;
+using System.Net.Mail;
+using System.Net;
+using System.Text.RegularExpressions;
 
 namespace QLNSVATC.Controllers
 {
@@ -22,22 +25,17 @@ namespace QLNSVATC.Controllers
         [HttpGet]
         public ActionResult SubmitCV()
         {
-            var st = SettingsHelper.BuildViewBagData(db, null); // null => dùng GUEST
+            var st = SettingsHelper.BuildViewBagData(db, null);
             ViewBag.Settings = st;
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult SubmitCV(
-    HOSOVIECLAM model,
-    HttpPostedFileBase fileThongTin,
-    HttpPostedFileBase fileBangCap,
-    HttpPostedFileBase fileKhac)
+        public ActionResult SubmitCV(HOSOVIECLAM model, HttpPostedFileBase fileThongTin, HttpPostedFileBase fileBangCap, HttpPostedFileBase fileKhac)
         {
             try
             {
-                // Validate Name
                 if (string.IsNullOrWhiteSpace(model.TENUNGVIEN))
                 {
                     ModelState.AddModelError("TENUNGVIEN", "Please fill in your name.");
@@ -54,7 +52,23 @@ namespace QLNSVATC.Controllers
                     return View(model);
                 }
 
-                // Validate Info File
+                if (string.IsNullOrWhiteSpace(model.EMAIL))
+                {
+                    ModelState.AddModelError("EMAIL", "Please fill in your email.");
+                    var stEmail = SettingsHelper.BuildViewBagData(db, null);
+                    ViewBag.Settings = stEmail;
+                    return View(model);
+                }
+
+                if (model.EMAIL.Length > 150 ||
+                    !Regex.IsMatch(model.EMAIL, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+                {
+                    ModelState.AddModelError("EMAIL", "Invalid email format.");
+                    var stEmail2 = SettingsHelper.BuildViewBagData(db, null);
+                    ViewBag.Settings = stEmail2;
+                    return View(model);
+                }
+
                 if (fileThongTin == null || fileThongTin.ContentLength == 0)
                 {
                     ModelState.AddModelError("fileThongTin", "Please upload your personal information file.");
@@ -71,7 +85,6 @@ namespace QLNSVATC.Controllers
                     return View(model);
                 }
 
-                // Validate Degree File
                 if (fileBangCap == null || fileBangCap.ContentLength == 0)
                 {
                     ModelState.AddModelError("fileBangCap", "Please upload your degree file.");
@@ -87,7 +100,7 @@ namespace QLNSVATC.Controllers
                     ViewBag.Settings = st5;
                     return View(model);
                 }
-                // Validate Other File
+
                 if (fileKhac != null && fileKhac.ContentLength > 0)
                 {
                     if (!IsValid(fileKhac.FileName, new[] { ".pdf", ".doc", ".docx", ".zip" }))
@@ -99,7 +112,6 @@ namespace QLNSVATC.Controllers
                     }
                 }
 
-                // === CHỈ LÚC NÀY MỚI LÀM VIỆC VỚI FILE ===
                 string rootFolder = Server.MapPath("~/Uploads/HoSoUngVien/");
                 if (!Directory.Exists(rootFolder))
                     Directory.CreateDirectory(rootFolder);
@@ -111,7 +123,6 @@ namespace QLNSVATC.Controllers
                 if (!Directory.Exists(fullFolderPath))
                     Directory.CreateDirectory(fullFolderPath);
 
-                // Lưu file thông tin
                 if (fileThongTin != null && fileThongTin.ContentLength > 0)
                 {
                     string ext = Path.GetExtension(fileThongTin.FileName);
@@ -127,7 +138,6 @@ namespace QLNSVATC.Controllers
                     model.FILETHONGTIN = newFileName;
                 }
 
-                // Lưu file bằng cấp
                 if (fileBangCap != null && fileBangCap.ContentLength > 0)
                 {
                     string ext = Path.GetExtension(fileBangCap.FileName);
@@ -143,7 +153,6 @@ namespace QLNSVATC.Controllers
                     model.FILEBANGCAP = newFileName;
                 }
 
-                // Lưu file khác
                 if (fileKhac != null && fileKhac.ContentLength > 0)
                 {
                     string ext = Path.GetExtension(fileKhac.FileName);
@@ -159,11 +168,133 @@ namespace QLNSVATC.Controllers
                     model.FILEKHAC = newFileName;
                 }
 
-                // Lưu vào DB
                 db.HOSOVIECLAMs.Add(model);
                 db.SaveChanges();
 
-                // Set success message và redirect
+                try
+                {
+                    var from = "httbworkstation@gmail.com";
+                    var pass = "cotu wurg gbve crbk";  
+
+                    var fromAddress = new MailAddress(from, "TBT Center HR");
+                    var toAddress = new MailAddress(model.EMAIL, model.TENUNGVIEN);
+
+                    string subject = "TBT Center - Application received";
+
+                    string body = $@"
+                    <html>
+                    <head>
+                        <meta charset='UTF-8' />
+                        <style>
+                            @media only screen and (max-width: 600px) {{
+                                .container {{ width: 94% !important; }}
+                                .section {{ padding: 20px 18px !important; }}
+                                .files-box {{ padding: 14px 16px !important; }}
+                            }}
+                        </style>
+                    </head>
+
+                    <body style='font-family:Segoe UI, Arial, sans-serif;background:#f4f4f4;margin:0;padding:20px;'>
+
+                        <div class='container' style='max-width:600px;margin:auto;background:#111827;
+                                    color:#f5f5f5;border-radius:12px;overflow:hidden;
+                                    box-shadow:0 10px 25px rgba(0,0,0,0.35);'>
+
+                            <!-- HEADER -->
+                            <div style='background:linear-gradient(135deg,#fceabb,#F9C12A,#f8b500);padding:20px 26px;'>
+                                <h2 style='margin:0;color:#1f2933;'>TBT Center</h2>
+                                <p style='margin:4px 0 0;font-size:13px;color:#4b5563;'>Application confirmation</p>
+                            </div>
+
+                            <!-- BODY -->
+                            <div class='section' style='padding:26px 32px;'>
+
+                                <p style='font-size:14px;line-height:1.6;margin-top:0;'>
+                                    Dear <b>{model.TENUNGVIEN}</b>,<br />
+                                    We have received your application. Below is a quick summary:
+                                </p>
+
+                                <div class='info-box' style='margin:18px 0 16px;padding:12px 16px;border-radius:12px;
+                                        background:#020617;border:1px solid rgba(148,163,184,0.55);'>
+                                    <p style='margin:0;font-size:14px;'><strong>Name:</strong> {model.TENUNGVIEN}</p>
+                                    <p style='margin:4px 0;font-size:14px;'><strong>Email:</strong> {model.EMAIL}</p>
+                                    <p style='margin:4px 0;font-size:14px;'><strong>Time:</strong> {now:dd/MM/yyyy HH:mm}</p>
+                                </div>
+
+                                <p style='margin:0 0 8px;font-size:13px;color:#e5e7eb;font-weight:600;'>
+                                    Files sent to us:
+                                </p>
+
+                                <div class='files-box' style='margin-bottom:18px;padding:10px 14px;border-radius:10px;
+                                        background:#020617;border:1px dashed rgba(249,193,42,0.6);'>
+                                    <ul style='margin:0;padding-left:18px;font-size:13px;'>
+                                        {(string.IsNullOrEmpty(model.FILETHONGTIN) ? "" : $"<li>Personal Information: {model.FILETHONGTIN}</li>")}
+                                        {(string.IsNullOrEmpty(model.FILEBANGCAP) ? "" : $"<li>Degree: {model.FILEBANGCAP}</li>")}
+                                        {(string.IsNullOrEmpty(model.FILEKHAC) ? "" : $"<li>Others: {model.FILEKHAC}</li>")}
+                                    </ul>
+                                    <p style='margin:10px 0 0;font-size:12px;color:#9ca3af;'>
+                                        These files are also attached to this email for your reference.
+                                    </p>
+                                </div>
+
+                                <p style='font-size:13px;line-height:1.6;margin:0;color:#d1d5db;'>
+                                    Our team will review your application and contact you as soon as possible.<br />
+                                    Best regards,<br />
+                                    <span style='color:#F9C12A;font-weight:600;'>TBT Center HR</span>
+                                </p>
+
+                            </div>
+
+                            <!-- FOOTER -->
+                            <div style='padding:14px 22px;border-top:1px solid #1f2937;font-size:11px;color:#6b7280;
+                                        background:#020617;'>
+                                © {DateTime.Now.Year} TBT Center. All rights reserved.
+                            </div>
+                        </div>
+
+                    </body>
+                    </html>";
+
+
+                    using (var smtp = new SmtpClient("smtp.gmail.com", 587))
+                    {
+                        smtp.EnableSsl = true;
+                        smtp.UseDefaultCredentials = false;
+                        smtp.Credentials = new NetworkCredential(from, pass);
+
+                        using (var message = new MailMessage(fromAddress, toAddress))
+                        {
+                            message.Subject = subject;
+                            message.Body = body;
+                            message.IsBodyHtml = true;
+
+                            if (!string.IsNullOrEmpty(model.FILETHONGTIN))
+                            {
+                                string path = Path.Combine(fullFolderPath, model.FILETHONGTIN);
+                                if (System.IO.File.Exists(path))
+                                    message.Attachments.Add(new Attachment(path));
+                            }
+                            if (!string.IsNullOrEmpty(model.FILEBANGCAP))
+                            {
+                                string path = Path.Combine(fullFolderPath, model.FILEBANGCAP);
+                                if (System.IO.File.Exists(path))
+                                    message.Attachments.Add(new Attachment(path));
+                            }
+                            if (!string.IsNullOrEmpty(model.FILEKHAC))
+                            {
+                                string path = Path.Combine(fullFolderPath, model.FILEKHAC);
+                                if (System.IO.File.Exists(path))
+                                    message.Attachments.Add(new Attachment(path));
+                            }
+
+                            smtp.Send(message);
+                        }
+                    }
+                }
+                catch
+                {
+                }
+
                 TempData["SuccessMsg"] = "File sent, we'll contact you later!";
                 return RedirectToAction("SubmitCV");
             }
@@ -174,7 +305,7 @@ namespace QLNSVATC.Controllers
                 ViewBag.Settings = st;
                 return View(model);
             }
-
         }
+
     }
 }

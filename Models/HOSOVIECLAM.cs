@@ -19,5 +19,6 @@ namespace QLNSVATC.Models
         public string FILETHONGTIN { get; set; }
         public string FILEBANGCAP { get; set; }
         public string FILEKHAC { get; set; }
+        public string EMAIL { get; set; }
     }
 }

@@ -61,17 +61,50 @@
     .slider-item .slider-content {
         position: absolute;
         top: 50%;
-        left: 100px;
-        width: 300px;
+        left: 6vw;
+        max-width: min(40vw, 360px); 
         transform: translateY(-50%);
         color: #fff;
         font-family: system-ui;
         display: none;
+        padding: clamp(12px, 2vw, 18px) clamp(14px, 3vw, 22px);
+        border-radius: 18px;
+        border: 2px solid rgba(255, 255, 255, 0.85);
+        background: rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55);
     }
+
+
 
     .slider-track .slider-item:nth-child(2) .slider-content {
         display: block;
     }
+    @@media (max-width: 1024px) {
+        .slider-item .slider-content {
+            left: 5vw;
+            max-width: 50vw;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .slider-item .slider-content {
+            left: 4vw;
+            max-width: 60vw;
+            padding: 12px 14px;
+            border-radius: 14px;
+        }
+
+        .slider-content .name {
+            font-size: 24px;
+        }
+
+        .slider-content .desc {
+            font-size: 14px;
+        }
+    }
+
 
     .slider-content .name {
         font-size: 40px;
@@ -143,7 +176,50 @@
                 box-shadow: 0 0 12px rgba(255,255,255,0.4);
             }
 
+    @@media (max-width: 1024px) {
 
+        .slider-wrapper {
+            height: 300px;
+            border-radius: 0;
+        }
+
+        .slider-track .slider-item {
+            width: 140px;
+            height: 210px;
+        }
+
+        .slider-item .slider-content {
+            left: 5vw;
+            max-width: 65vw;
+            padding: 12px 14px;
+            border-radius: 14px;
+        }
+
+        .slider-content .name {
+            font-size: 24px;
+        }
+
+        .slider-content .desc {
+            font-size: 14px;
+        }
+
+        .slider-track .slider-item:nth-child(3) {
+            left: 75%;
+        }
+
+        .slider-track .slider-item:nth-child(4) {
+            left: calc(75% + 160px);
+        }
+
+        .slider-track .slider-item:nth-child(5) {
+            left: calc(75% + 320px);
+        }
+
+        .slider-track .slider-item:nth-child(n + 6) {
+            left: 100%;
+            opacity: 0;
+        }
+    }
     @@media (max-width: 768px) {
 
         .slider-wrapper {
@@ -157,28 +233,29 @@
         }
 
         .slider-item .slider-content {
-            left: 24px;
-            width: 220px;
+            left: 5vw;
+            max-width: 55vw; 
+            padding: 12px 14px;
+            border-radius: 14px;
         }
 
         .slider-content .name {
-            font-size: 26px;
+            font-size: 24px;
         }
 
         .slider-content .desc {
             font-size: 14px;
         }
-
         .slider-track .slider-item:nth-child(3) {
-            left: 55%;
+            left: 75%;
         }
 
         .slider-track .slider-item:nth-child(4) {
-            left: calc(55% + 160px);
+            left: calc(75% + 160px);
         }
 
         .slider-track .slider-item:nth-child(5) {
-            left: calc(55% + 320px);
+            left: calc(75% + 320px);
         }
 
         .slider-track .slider-item:nth-child(n + 6) {
@@ -186,6 +263,7 @@
             opacity: 0;
         }
     }
+
     .slider-content button {
         padding: 10px 20px;
         border: none;
@@ -221,53 +299,54 @@
 <div class="slider-wrapper">
     <div class="slider-track">
 
-        <div class="slider-item" style="background-image: url('@Url.Content("~/Content/Images/slider1.jpg")')">
+        <div class="slider-item" style="background-image: url('@Url.Content("~/Content/Images/Slider/Slider1.png")')">
             <div class="slider-content">
-                <div class="name">Switzerland</div>
-                <div class="desc">Lorem ipsum dolor sit amet.</div>
-                <button>See More</button>
+                <div class="name">Building the Future, Together</div>
+                <div class="desc">TBT Center – united team, delivering quality since 2003.</div>
+                <button>About TBT Center</button>
             </div>
         </div>
 
-        <div class="slider-item" style="background-image: url('@Url.Content("~/Content/Images/slider2.jpg")')">
+        <div class="slider-item" style="background-image: url('@Url.Content("~/Content/Images/Slider/Slider2.png")')">
             <div class="slider-content">
-                <div class="name">Finland</div>
-                <div class="desc">Lorem ipsum dolor sit amet.</div>
-                <button>See More</button>
+                <div class="name">On-site Excellence</div>
+                <div class="desc">Building the future, restoring the past with professional engineering.</div>
+                <button>View Our Projects</button>
             </div>
         </div>
 
-        <div class="slider-item" style="background-image: url('@Url.Content("~/Content/Images/slider3.jpg")')">
+        <div class="slider-item" style="background-image: url('@Url.Content("~/Content/Images/Slider/Slider3.png")')">
             <div class="slider-content">
-                <div class="name">Iceland</div>
-                <div class="desc">Lorem ipsum dolor sit amet.</div>
-                <button>See More</button>
+                <div class="name">Dream Homes by TBT</div>
+                <div class="desc">Building the house of your dreams with modern, elegant design.</div>
+                <button>Explore Home Solutions</button>
             </div>
         </div>
 
-        <div class="slider-item" style="background-image: url('https://i.ibb.co/Bq4Q0M8/img4.jpg')">
+        <div class="slider-item" style="background-image: url('@Url.Content("~/Content/Images/Slider/Slider4.png")')">
             <div class="slider-content">
-                <div class="name">Australia</div>
-                <div class="desc">Lorem ipsum dolor sit amet.</div>
-                <button>See More</button>
+                <div class="name">Professional Construction Services</div>
+                <div class="desc">Comprehensive solutions from residential to large-scale infrastructure.</div>
+                <button>Our Services</button>
             </div>
         </div>
 
-        <div class="slider-item" style="background-image: url('https://i.ibb.co/jTQfmTq/img5.jpg')">
+        <div class="slider-item" style="background-image: url('@Url.Content("~/Content/Images/Slider/Slider5.png")')">
             <div class="slider-content">
-                <div class="name">Netherlands</div>
-                <div class="desc">Lorem ipsum dolor sit amet.</div>
-                <button>See More</button>
+                <div class="name">We Are Hiring</div>
+                <div class="desc">Join TBT Center and build the future with a passionate team.</div>
+                <button>Apply Now</button>
             </div>
         </div>
 
-        <div class="slider-item" style="background-image: url('https://i.ibb.co/RNkk6L0/img6.jpg')">
+        <div class="slider-item" style="background-image: url('@Url.Content("~/Content/Images/Slider/Slider6.png")')">
             <div class="slider-content">
-                <div class="name">Ireland</div>
-                <div class="desc">Lorem ipsum dolor sit amet.</div>
-                <button>See More</button>
+                <div class="name">Contact TBT Center</div>
+                <div class="desc">Let’s discuss your next construction project and bring it to life.</div>
+                <button>Contact Us</button>
             </div>
         </div>
+
 
     </div>
 
