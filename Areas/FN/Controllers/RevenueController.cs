@@ -6,7 +6,9 @@ using QLNSVATC.Models;
 using QLNSVATC.Helpers;
 using System.Data.Entity;
 using System.Text;
-using QLNSVATC.Models.FN_Models;
+using QLNSVATC.Areas.FN.Data.FN_Models;
+using OfficeOpenXml.Style;
+using OfficeOpenXml;
 
 namespace QLNSVATC.Areas.FN.Controllers
 {
@@ -194,5 +196,393 @@ namespace QLNSVATC.Areas.FN.Controllers
             };
             return View(vm);
         }
+
+        #region EXPORT HELPER
+
+        private FileResult ExportRevenueReportExcel(
+            IEnumerable<RevenueReportRowVM> rows,
+            string reportTitle,
+            string downloadFileNamePrefix)
+        {
+            var list = rows?.ToList() ?? new List<RevenueReportRowVM>();
+
+            using (var package = new ExcelPackage())
+            {
+                ExcelWorksheet ws = package.Workbook.Worksheets.Add("BaoCao");
+
+                int row = 1;
+
+                ws.Cells[row, 1, row, 9].Merge = true;
+                ws.Cells[row, 1].Value = reportTitle;
+                ws.Cells[row, 1].Style.Font.Bold = true;
+                ws.Cells[row, 1].Style.Font.Size = 14;
+                ws.Cells[row, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                row += 2;
+
+                ws.Cells[row, 1].Value = "Ngày";
+                ws.Cells[row, 2].Value = "Tên dịch vụ / dự án";
+                ws.Cells[row, 3].Value = "Người phụ trách";
+                ws.Cells[row, 4].Value = "Giá trị hợp đồng";
+                ws.Cells[row, 5].Value = "Tiền thuế";
+                ws.Cells[row, 6].Value = "Đã cọc";
+                ws.Cells[row, 7].Value = "Còn thiếu";
+                ws.Cells[row, 8].Value = "Thành tiền";
+                ws.Cells[row, 9].Value = "Tình trạng";
+
+                using (var range = ws.Cells[row, 1, row, 9])
+                {
+                    range.Style.Font.Bold = true;
+                    range.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                    range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(255, 255, 204));
+                    range.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                }
+
+                row++;
+
+                int dataStartRow = row;
+
+                foreach (var item in list)
+                {
+                    ws.Cells[row, 1].Value = item.Date;
+                    ws.Cells[row, 1].Style.Numberformat.Format = "dd/MM/yyyy";
+
+                    ws.Cells[row, 2].Value = item.Name;
+                    ws.Cells[row, 3].Value = item.PersonInCharge ?? "";
+
+                    ws.Cells[row, 4].Value = item.ContractValue;
+                    ws.Cells[row, 5].Value = item.Tax;
+                    ws.Cells[row, 6].Value = item.Deposit;
+                    ws.Cells[row, 7].Value = item.Remaining;
+                    ws.Cells[row, 8].Value = item.TotalAmount;
+                    ws.Cells[row, 9].Value = item.Status;
+
+                    ws.Cells[row, 4, row, 8].Style.Numberformat.Format = "#,##0";
+
+                    row++;
+                }
+
+                ws.Cells[row, 1].Value = "Tổng";
+                ws.Cells[row, 1, row, 3].Merge = true;
+                ws.Cells[row, 1].Style.Font.Bold = true;
+
+                if (row > dataStartRow)
+                {
+                    ws.Cells[row, 4].Formula = $"SUM(D{dataStartRow}:D{row - 1})";
+                    ws.Cells[row, 5].Formula = $"SUM(E{dataStartRow}:E{row - 1})";
+                    ws.Cells[row, 6].Formula = $"SUM(F{dataStartRow}:F{row - 1})";
+                    ws.Cells[row, 7].Formula = $"SUM(G{dataStartRow}:G{row - 1})";
+                    ws.Cells[row, 8].Formula = $"SUM(H{dataStartRow}:H{row - 1})";
+
+                    ws.Cells[row, 4, row, 8].Style.Numberformat.Format = "#,##0";
+                    ws.Cells[row, 4, row, 8].Style.Font.Bold = true;
+                }
+
+                using (var range = ws.Cells[dataStartRow - 1, 1, row, 9])
+                {
+                    range.Style.Border.BorderAround(ExcelBorderStyle.Thin);
+                    range.Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                    range.Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                    range.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                }
+
+                ws.Cells.AutoFitColumns();
+
+                var bytes = package.GetAsByteArray();
+
+                string area = (string)(RouteData.DataTokens["area"] ?? "FN");
+                string serverFileName = FileHelper.BuildReportFileName(area);
+                FileHelper.SaveReportBytes(bytes, "~/Content/Uploads/BaoCao", serverFileName);
+
+                string downloadFileName = $"{downloadFileNamePrefix}_{DateTime.Now:yyyyMMdd}.xlsx";
+
+                return File(
+                    bytes,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    downloadFileName
+                );
+            }
+        }
+
+        #endregion
+
+        [HttpGet]
+        public ActionResult ExportServiceRevenue(DateTime? from, DateTime? to)
+        {
+            DateTime today = DateTime.Today;
+            DateTime fromDate = from ?? new DateTime(today.Year, 1, 1);
+            DateTime toDate = to ?? today;
+
+            var query = db.DTDICHVUs
+                .Where(x => x.NGAYSDDV.HasValue
+                            && x.NGAYSDDV.Value >= fromDate
+                            && x.NGAYSDDV.Value <= toDate)
+                .ToList();
+
+            var rows = query.Select(x =>
+            {
+                decimal contract = x.GIACATONG ?? 0m;
+
+                decimal tax = Math.Round(contract * 0.10m, 0);
+
+                decimal deposit = 0m;
+
+                decimal total = contract + tax;
+                decimal remaining = total - deposit;
+                if (remaining < 0) remaining = 0;
+
+                string status;
+                if (remaining == 0 && total > 0)
+                    status = "Đã thanh toán";
+                else if (deposit > 0 && remaining > 0)
+                    status = "Đã cọc";
+                else
+                    status = "Chưa cọc";
+
+                return new RevenueReportRowVM
+                {
+                    Date = x.NGAYSDDV,
+                    Name = x.LHDICHVU,
+                    PersonInCharge = null,
+                    ContractValue = contract,
+                    Tax = tax,
+                    Deposit = deposit,
+                    Remaining = remaining,
+                    TotalAmount = total,
+                    Status = status
+                };
+            }).OrderBy(r => r.Date ?? DateTime.MinValue)
+              .ToList();
+
+            string title = "Mẫu báo cáo doanh thu dịch vụ";
+            string prefix = "BaoCao_DichVu";
+
+            return ExportRevenueReportExcel(rows, title, prefix);
+        }
+
+        [HttpGet]
+        public ActionResult ExportProjectRevenue(DateTime? from, DateTime? to)
+        {
+            DateTime today = DateTime.Today;
+            DateTime fromDate = from ?? new DateTime(today.Year, 1, 1);
+            DateTime toDate = to ?? today;
+
+            var personByDa = db.NVTHAMGIADAs
+                .Select(x => new
+                {
+                    x.MADAHD,
+                    x.MANV,
+                    FullName = x.NHANVIEN.HOLOT + " " + x.NHANVIEN.TENNV
+                })
+                .ToList()
+                .GroupBy(x => x.MADAHD)
+                .ToDictionary(
+                    g => g.Key,
+                    g => string.Join(", ",
+                            g.Select(z => z.FullName)
+                             .Where(n => !string.IsNullOrWhiteSpace(n))
+                             .Distinct())
+                );
+
+            var raw = (from dt in db.DTDUANs
+                       join dahd in db.DUANTHEOHOPDONGs
+                            on dt.MADA equals dahd.MADA
+                       join da in db.DUANs
+                            on dt.MADA equals da.MADA
+                       join hd in db.HOPDONGs
+                            on dahd.MAHD equals hd.MAHD
+                       where dt.TIENNGHIEMTHU_TONG != null
+                             && dahd.NGAYKT.HasValue
+                             && dahd.NGAYKT.Value >= fromDate
+                             && dahd.NGAYKT.Value <= toDate
+                       select new
+                       {
+                           Date = dahd.NGAYKT,
+                           ProjectCode = da.MADA,
+                           ProjectName = hd.TENHD,
+                           Deposit = da.TIENCOC,
+                           Amount = dt.TIENNGHIEMTHU_TONG,
+                           MADAHD = dahd.MADAHD
+                       })
+                       .ToList();
+
+            var rows = raw
+                .Select(x =>
+                {
+                    decimal contract = x.Amount ?? 0m;
+                    decimal deposit = x.Deposit ?? 0m;
+                    decimal tax = Math.Round(contract * 0.10m, 0);
+                    decimal total = contract + tax;
+                    decimal remaining = total - deposit;
+                    if (remaining < 0) remaining = 0;
+
+                    string status;
+                    if (total == 0)
+                        status = "Không phát sinh";
+                    else if (remaining == 0)
+                        status = "Đã thanh toán";
+                    else if (deposit > 0 && remaining > 0)
+                        status = "Đã cọc";
+                    else
+                        status = "Chưa cọc";
+
+                    string personInCharge = null;
+                    if (x.MADAHD != null && personByDa.TryGetValue(x.MADAHD, out var names))
+                        personInCharge = names;
+
+                    return new RevenueReportRowVM
+                    {
+                        Date = x.Date,
+                        Name = string.IsNullOrWhiteSpace(x.ProjectName) ? x.ProjectCode : x.ProjectName,
+                        PersonInCharge = personInCharge,
+                        ContractValue = contract,
+                        Tax = tax,
+                        Deposit = deposit,
+                        Remaining = remaining,
+                        TotalAmount = total,
+                        Status = status
+                    };
+                })
+                .OrderBy(r => r.Date ?? DateTime.MinValue)
+                .ToList();
+
+            string title = "Mẫu báo cáo doanh thu dự án";
+            string prefix = "BaoCao_DuAn";
+
+            return ExportRevenueReportExcel(rows, title, prefix);
+        }
+
+
+        [HttpGet]
+        public ActionResult ExportRevenueOverview(DateTime? from, DateTime? to)
+        {
+            DateTime today = DateTime.Today;
+            DateTime fromDate = from ?? new DateTime(today.Year, 1, 1);
+            DateTime toDate = to ?? today;
+
+            var svcQuery = db.DTDICHVUs
+                .Where(x => x.NGAYSDDV.HasValue
+                            && x.NGAYSDDV.Value >= fromDate
+                            && x.NGAYSDDV.Value <= toDate)
+                .ToList();
+
+            var svcRows = svcQuery.Select(x =>
+            {
+                decimal contract = x.GIACATONG ?? 0m;
+                decimal tax = Math.Round(contract * 0.10m, 0);
+                decimal deposit = 0m;
+                decimal total = contract + tax;
+                decimal remaining = total - deposit;
+                if (remaining < 0) remaining = 0;
+
+                string status;
+                if (total == 0)
+                    status = "Không phát sinh";
+                else if (remaining == 0)
+                    status = "Đã thanh toán";
+                else if (deposit > 0 && remaining > 0)
+                    status = "Đã cọc";
+                else
+                    status = "Chưa cọc";
+
+                return new RevenueReportRowVM
+                {
+                    Date = x.NGAYSDDV,
+                    Name = x.LHDICHVU,
+                    PersonInCharge = null,
+                    ContractValue = contract,
+                    Tax = tax,
+                    Deposit = deposit,
+                    Remaining = remaining,
+                    TotalAmount = total,
+                    Status = "[DV] " + status
+                };
+            });
+
+            var personByDa = db.NVTHAMGIADAs
+                .Select(x => new
+                {
+                    x.MADAHD,
+                    x.MANV,
+                    FullName = x.NHANVIEN.HOLOT + " " + x.NHANVIEN.TENNV
+                })
+                .ToList()
+                .GroupBy(x => x.MADAHD)
+                .ToDictionary(
+                    g => g.Key,
+                    g => string.Join(", ",
+                            g.Select(z => z.FullName)
+                             .Where(n => !string.IsNullOrWhiteSpace(n))
+                             .Distinct())
+                );
+
+            var rawProject = (from dt in db.DTDUANs
+                              join dahd in db.DUANTHEOHOPDONGs
+                                   on dt.MADA equals dahd.MADA
+                              join da in db.DUANs
+                                   on dt.MADA equals da.MADA
+                              join hd in db.HOPDONGs
+                                   on dahd.MAHD equals hd.MAHD
+                              where dt.TIENNGHIEMTHU_TONG != null
+                                    && dahd.NGAYKT.HasValue
+                                    && dahd.NGAYKT.Value >= fromDate
+                                    && dahd.NGAYKT.Value <= toDate
+                              select new
+                              {
+                                  Date = dahd.NGAYKT,
+                                  ProjectCode = da.MADA,
+                                  ProjectName = hd.TENHD,
+                                  Deposit = da.TIENCOC,
+                                  Amount = dt.TIENNGHIEMTHU_TONG,
+                                  MADAHD = dahd.MADAHD
+                              })
+                              .ToList();
+
+            var prjRows = rawProject.Select(x =>
+            {
+                decimal contract = x.Amount ?? 0m;
+                decimal deposit = x.Deposit ?? 0m;
+                decimal tax = Math.Round(contract * 0.10m, 0);
+                decimal total = contract + tax;
+                decimal remaining = total - deposit;
+                if (remaining < 0) remaining = 0;
+
+                string status;
+                if (total == 0)
+                    status = "Không phát sinh";
+                else if (remaining == 0)
+                    status = "Đã thanh toán";
+                else if (deposit > 0 && remaining > 0)
+                    status = "Đã cọc";
+                else
+                    status = "Chưa cọc";
+
+                string personInCharge = null;
+                if (x.MADAHD != null && personByDa.TryGetValue(x.MADAHD, out var names))
+                    personInCharge = names;
+
+                return new RevenueReportRowVM
+                {
+                    Date = x.Date,
+                    Name = string.IsNullOrWhiteSpace(x.ProjectName) ? x.ProjectCode : x.ProjectName,
+                    PersonInCharge = personInCharge,
+                    ContractValue = contract,
+                    Tax = tax,
+                    Deposit = deposit,
+                    Remaining = remaining,
+                    TotalAmount = total,
+                    Status = "[DA] " + status
+                };
+            });
+
+            var rows = svcRows.Concat(prjRows)
+                              .OrderBy(r => r.Date ?? DateTime.MinValue)
+                              .ToList();
+
+            string title = "Mẫu báo cáo doanh thu tổng hợp";
+            string prefix = "BaoCao_TongHop";
+
+            return ExportRevenueReportExcel(rows, title, prefix);
+        }
+
     }
 }

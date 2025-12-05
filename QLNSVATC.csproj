@@ -64,6 +64,12 @@
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>packages\EntityFramework.6.5.1\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
+    <Reference Include="EPPlus, Version=8.3.1.0, Culture=neutral, PublicKeyToken=ea159fdaa78159a1, processorArchitecture=MSIL">
+      <HintPath>packages\EPPlus.8.3.1\lib\net462\EPPlus.dll</HintPath>
+    </Reference>
+    <Reference Include="EPPlus.Interfaces, Version=8.1.0.0, Culture=neutral, PublicKeyToken=a694d7f3b0907a61, processorArchitecture=MSIL">
+      <HintPath>packages\EPPlus.Interfaces.8.1.0\lib\net462\EPPlus.Interfaces.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.Bcl.AsyncInterfaces.1.1.1\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>
@@ -95,12 +101,19 @@
     <Reference Include="Microsoft.IdentityModel.Tokens, Version=6.35.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.IdentityModel.Tokens.6.35.0\lib\net472\Microsoft.IdentityModel.Tokens.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.IO.RecyclableMemoryStream, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.IO.RecyclableMemoryStream.3.0.1\lib\netstandard2.0\Microsoft.IO.RecyclableMemoryStream.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
     </Reference>
     <Reference Include="System.ClientModel, Version=1.0.0.0, Culture=neutral, PublicKeyToken=92742159e12e44c8, processorArchitecture=MSIL">
       <HintPath>packages\System.ClientModel.1.0.0\lib\netstandard2.0\System.ClientModel.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ComponentModel.Annotations, Version=4.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.ComponentModel.Annotations.5.0.0\lib\net461\System.ComponentModel.Annotations.dll</HintPath>
     </Reference>
     <Reference Include="System.Configuration.ConfigurationManager, Version=6.0.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\System.Configuration.ConfigurationManager.6.0.1\lib\net461\System.Configuration.ConfigurationManager.dll</HintPath>
@@ -118,8 +131,8 @@
     <Reference Include="System.IO.FileSystem.AccessControl, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>packages\System.IO.FileSystem.AccessControl.5.0.0\lib\net461\System.IO.FileSystem.AccessControl.dll</HintPath>
     </Reference>
-    <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
+    <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
     </Reference>
     <Reference Include="System.Memory.Data, Version=1.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\System.Memory.Data.1.0.2\lib\net461\System.Memory.Data.dll</HintPath>
@@ -144,6 +157,9 @@
     </Reference>
     <Reference Include="System.Security.Cryptography.ProtectedData, Version=4.0.5.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>packages\System.Security.Cryptography.ProtectedData.4.7.0\lib\net461\System.Security.Cryptography.ProtectedData.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.Xml, Version=8.0.0.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Security.Cryptography.Xml.8.0.2\lib\net462\System.Security.Cryptography.Xml.dll</HintPath>
     </Reference>
     <Reference Include="System.Security.Permissions, Version=6.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\System.Security.Permissions.6.0.0\lib\net461\System.Security.Permissions.dll</HintPath>
@@ -244,6 +260,7 @@
     <Compile Include="Areas\Employee\EmployeeAreaRegistration.cs" />
     <Compile Include="Areas\FN\Controllers\ExpenseController.cs" />
     <Compile Include="Areas\FN\Controllers\RevenueController.cs" />
+    <Compile Include="Areas\FN\Data\FN_Models\RevenueReportRowVM.cs" />
     <Compile Include="Areas\FN\FNAreaRegistration.cs" />
     <Compile Include="Areas\HR\Controllers\DepartmentController.cs" />
     <Compile Include="Areas\HR\Controllers\EmployeeController.cs" />
@@ -325,15 +342,16 @@
     <Compile Include="Models\DUANTHEOHOPDONG.cs">
       <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\FN_Models\FNDashboardViewModel.cs" />
-    <Compile Include="Models\FN_Models\FNExpenseViewModel.cs" />
-    <Compile Include="Models\FN_Models\FNRevenueViewModel.cs" />
-    <Compile Include="Models\FN_Models\ProjectExpenseViewModels.cs" />
+    <Compile Include="Areas\FN\Data\FN_Models\FNDashboardViewModel.cs" />
+    <Compile Include="Areas\FN\Data\FN_Models\FNExpenseViewModel.cs" />
+    <Compile Include="Areas\FN\Data\FN_Models\FNRevenueViewModel.cs" />
+    <Compile Include="Areas\FN\Data\FN_Models\NewExpenseViewModel.cs" />
+    <Compile Include="Areas\FN\Data\FN_Models\ProjectExpenseViewModels.cs" />
     <Compile Include="Models\FONT.cs">
       <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\ForgotPasswordViewModel.cs" />
-    <Compile Include="Models\HomeViewModel.cs" />
+    <Compile Include="Areas\FN\Data\FN_Models\HomeViewModel.cs" />
     <Compile Include="Models\HOPDONG.cs">
       <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
     </Compile>
@@ -450,16 +468,16 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
-    <Content Include="Content\CSS\FNManager\Expense\ExpenseMaterial.css" />
-    <Content Include="Content\CSS\FNManager\Expense\ProjectExpense.css" />
-    <Content Include="Content\CSS\FNManager\Highlight.css" />
-    <Content Include="Content\CSS\FNManager\Index.css" />
-    <Content Include="Content\CSS\FNManager\Revenue\ProjectREV.css" />
-    <Content Include="Content\CSS\FNManager\Revenue\ServiceREV.css" />
-    <Content Include="Content\CSS\FNManager\Expense\Index.css" />
-    <Content Include="Content\CSS\FNManager\_TopCards.css" />
+    <Content Include="Areas\FN\Data\CSS\Expense\ExpenseMaterial.css" />
+    <Content Include="Areas\FN\Data\CSS\Expense\ProjectExpense.css" />
+    <Content Include="Areas\FN\Data\CSS\Expense\NewExpense.css" />
+    <Content Include="Areas\FN\Data\CSS\Home\Highlight.css" />
+    <Content Include="Areas\FN\Data\CSS\Home\Index.css" />
+    <Content Include="Areas\FN\Data\CSS\Revenue\ProjectREV.css" />
+    <Content Include="Areas\FN\Data\CSS\Revenue\ServiceREV.css" />
+    <Content Include="Areas\FN\Data\CSS\Expense\Index.css" />
+    <Content Include="Areas\FN\Data\CSS\Home\_TopCards.css" />
     <Content Include="Content\CSS\Slider.css" />
-    <Content Include="Content\CSS\Footer.css" />
     <Content Include="Content\Images\Home\DuAn\1XNN01.jpg" />
     <Content Include="Content\Images\Home\DuAn\1XNN05.jpg" />
     <Content Include="Content\Images\Home\DuAn\1XNN09.jpg" />
@@ -609,6 +627,22 @@
     <Content Include="Content\Images\Slider\Slider4.png" />
     <Content Include="Content\Images\Slider\Slider1.png" />
     <Content Include="Content\Images\Slider\Slider5.png" />
+    <Content Include="Content\Uploads\HoSoUngVien\2025120116_1234cfrfcrcfr\z7279096394342_3cf1075f9429fa3ca961898334721e66.jpg" />
+    <Content Include="Content\Uploads\HoSoUngVien\2025120116_1234cfrfcrcfr\z7279114463625_f449a2205acfa1d86d18b0ab0fd077ea.jpg" />
+    <Content Include="Content\Uploads\HoSoUngVien\2025120116_beo\Untitled Diagram-Đăng ký.drawio.png" />
+    <Content Include="Content\Uploads\HoSoUngVien\2025120116_beo\z7279105512234_df8136f358f605ddd9a46d97861d6acf.jpg" />
+    <Content Include="Content\Uploads\HoSoUngVien\2025120116_con_me_gpt_ngu_vcl\Untitled Diagram-Đăng ký.drawio.png" />
+    <Content Include="Content\Uploads\HoSoUngVien\2025120116_con_me_gpt_ngu_vcl\z7279096394342_3cf1075f9429fa3ca961898334721e66.jpg" />
+    <Content Include="Content\Uploads\HoSoUngVien\2025120121_thien_hoang\thienhoang_filebangcap_20251201212450.png" />
+    <Content Include="Content\Uploads\HoSoUngVien\2025120121_thien_hoang\thienhoang_filethongtin_20251201212450.png" />
+    <Content Include="Content\Uploads\HoSoUngVien\2025120121_toi_yeu_Claude\toiyeuclaude_filebangcap_20251201212629.jpg" />
+    <Content Include="Content\Uploads\HoSoUngVien\2025120121_toi_yeu_Claude\toiyeuclaude_filethongtin_20251201212629.jpg" />
+    <Content Include="Content\Uploads\HoSoUngVien\2025120408_NGUYEN_TAN_SANG\nguyentansang_filebangcap_20251204081612.jpg" />
+    <Content Include="Content\Uploads\HoSoUngVien\2025120408_NGUYEN_TAN_SANG\nguyentansang_filethongtin_20251204081612.jpg" />
+    <Content Include="Content\Uploads\HoSoUngVien\2025120409_NGUYEN_TAN_LOC\nguyentanloc_filebangcap_20251204092208.jpg" />
+    <Content Include="Content\Uploads\HoSoUngVien\2025120409_NGUYEN_TAN_LOC\nguyentanloc_filethongtin_20251204092208.jpg" />
+    <Content Include="Content\Uploads\HoSoUngVien\2025120409_NGUYEN_TAN_SANG\nguyentansang_filebangcap_20251204091433.jpg" />
+    <Content Include="Content\Uploads\HoSoUngVien\2025120409_NGUYEN_TAN_SANG\nguyentansang_filethongtin_20251204091433.jpg" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
@@ -716,6 +750,7 @@
     <Content Include="Areas\HR\Views\Employee\information.cshtml" />
     <Content Include="Areas\HR\Views\Employee\Profile.cshtml" />
     <Content Include="Areas\Employee\Views\Home\Information.cshtml" />
+    <Content Include="Areas\FN\Views\Expense\NewExpense.cshtml" />
     <None Include="packages\jQuery.3.7.0\Content\Scripts\jquery-3.7.0-vsdoc.js" />
     <Content Include="packages\jQuery.3.7.0\Content\Scripts\jquery-3.7.0.js" />
     <Content Include="packages\jQuery.3.7.0\Content\Scripts\jquery-3.7.0.min.js" />
@@ -1014,22 +1049,6 @@
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
-    <Content Include="Uploads\HoSoUngVien\2025120116_1234cfrfcrcfr\z7279096394342_3cf1075f9429fa3ca961898334721e66.jpg" />
-    <Content Include="Uploads\HoSoUngVien\2025120116_1234cfrfcrcfr\z7279114463625_f449a2205acfa1d86d18b0ab0fd077ea.jpg" />
-    <Content Include="Uploads\HoSoUngVien\2025120116_beo\Untitled Diagram-Đăng ký.drawio.png" />
-    <Content Include="Uploads\HoSoUngVien\2025120116_beo\z7279105512234_df8136f358f605ddd9a46d97861d6acf.jpg" />
-    <Content Include="Uploads\HoSoUngVien\2025120116_con_me_gpt_ngu_vcl\Untitled Diagram-Đăng ký.drawio.png" />
-    <Content Include="Uploads\HoSoUngVien\2025120116_con_me_gpt_ngu_vcl\z7279096394342_3cf1075f9429fa3ca961898334721e66.jpg" />
-    <Content Include="Uploads\HoSoUngVien\2025120121_thien_hoang\thienhoang_filebangcap_20251201212450.png" />
-    <Content Include="Uploads\HoSoUngVien\2025120121_thien_hoang\thienhoang_filethongtin_20251201212450.png" />
-    <Content Include="Uploads\HoSoUngVien\2025120121_toi_yeu_Claude\toiyeuclaude_filebangcap_20251201212629.jpg" />
-    <Content Include="Uploads\HoSoUngVien\2025120121_toi_yeu_Claude\toiyeuclaude_filethongtin_20251201212629.jpg" />
-    <Content Include="Uploads\HoSoUngVien\2025120408_NGUYEN_TAN_SANG\nguyentansang_filebangcap_20251204081612.jpg" />
-    <Content Include="Uploads\HoSoUngVien\2025120408_NGUYEN_TAN_SANG\nguyentansang_filethongtin_20251204081612.jpg" />
-    <Content Include="Uploads\HoSoUngVien\2025120409_NGUYEN_TAN_LOC\nguyentanloc_filebangcap_20251204092208.jpg" />
-    <Content Include="Uploads\HoSoUngVien\2025120409_NGUYEN_TAN_LOC\nguyentanloc_filethongtin_20251204092208.jpg" />
-    <Content Include="Uploads\HoSoUngVien\2025120409_NGUYEN_TAN_SANG\nguyentansang_filebangcap_20251204091433.jpg" />
-    <Content Include="Uploads\HoSoUngVien\2025120409_NGUYEN_TAN_SANG\nguyentansang_filethongtin_20251204091433.jpg" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -1051,15 +1070,11 @@
     <Content Include="Views\Account\ForgotPassword.cshtml" />
     <Content Include="Views\JobSeeker\SubmitCV.cshtml" />
     <Content Include="Views\Shared\_Footer.cshtml" />
-    <Content Include="Uploads\HoSoUngVien\2025120408_NGUYEN_TAN_SANG\nguyentansang_filekhac_20251204081612.docx" />
-    <Content Include="Uploads\HoSoUngVien\2025120409_NGUYEN_TAN_LOC\nguyentanloc_filekhac_20251204092208.docx" />
-    <Content Include="Uploads\HoSoUngVien\2025120409_NGUYEN_TAN_SANG\nguyentansang_filekhac_20251204091433.docx" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Areas\Admin\Data\" />
     <Folder Include="Areas\Employee\Data\" />
-    <Folder Include="Areas\FN\Data\" />
     <Folder Include="Areas\HR\Data\" />
     <Folder Include="Areas\HR\Views\Department\" />
     <Folder Include="Areas\HR\Views\Project\" />

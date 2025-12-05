@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace QLNSVATC.Models.FN_Models
+namespace QLNSVATC.Areas.FN.Data.FN_Models
 {
     public class ProjectExpenseRowVM
     {

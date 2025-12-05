@@ -97,5 +97,49 @@ namespace QLNSVATC.Helpers
             string safeName = candidateName.ToSafeName();
             return $"{time:yyyyMMddHH}_{safeName}";
         }
+
+        public static string GetReportTypeCode(string areaName)
+        {
+            if (string.IsNullOrWhiteSpace(areaName))
+                return "BCCM";
+
+            areaName = areaName.Trim().ToUpperInvariant();
+
+            if (areaName == "FN") return "BCTC";
+            if (areaName == "HR") return "BCNS";
+
+            return "BCCM";
+        }
+
+        public static string BuildReportFileName(string areaName, DateTime? time = null, string extension = ".xlsx")
+        {
+            var ts = (time ?? DateTime.Now).ToString("yyyyMMddHHmmss");
+            var typeCode = GetReportTypeCode(areaName);
+
+            if (!extension.StartsWith("."))
+                extension = "." + extension;
+
+            return $"{ts}_{typeCode}{extension}";
+        }
+
+        public static string EnsureFolder(string virtualPath)
+        {
+            if (HttpContext.Current == null)
+                throw new InvalidOperationException("HttpContext.Current is null. Ensure this is called in web context.");
+
+            string physical = HttpContext.Current.Server.MapPath(virtualPath);
+            if (!Directory.Exists(physical))
+                Directory.CreateDirectory(physical);
+
+            return physical;
+        }
+
+        public static string SaveReportBytes(byte[] bytes, string virtualFolder, string fileName)
+        {
+            string folder = EnsureFolder(virtualFolder);
+            string fullPath = Path.Combine(folder, fileName);
+            File.WriteAllBytes(fullPath, bytes);
+            return fullPath;
+        }
     }
 }

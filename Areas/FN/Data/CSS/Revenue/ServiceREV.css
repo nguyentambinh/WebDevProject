@@ -20,7 +20,11 @@
     font-size: 12px;
     opacity: 0.8;
 }
-
+.rev-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 .rev-top-cards {
     margin-top: 18px;
     display: grid;
@@ -43,8 +47,8 @@
     }
 
     .card .label {
-        font-size: 12px;
-        opacity: .9;
+        font-size: var(--fz);
+        color: var(--accent);
         margin-bottom: 4px;
     }
 

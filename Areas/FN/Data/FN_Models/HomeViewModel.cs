@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
+using QLNSVATC.Models;
 
-namespace QLNSVATC.Models
-{
+namespace QLNSVATC.Areas.FN.Data.FN_Models
+{ 
     public class HomeViewModel
     {
         public List<DUAN> DuAn { get; set; }

@@ -1,9 +1,8 @@
 ﻿@using System.Linq
 @using System.Web.Helpers
-@using QLNSVATC.Models.FN_Models
 @using QLNSVATC.Models
 @using QLNSVATC.Helpers
-@model ProjectRevenueViewModel
+@model QLNSVATC.Areas.FN.Data.FN_Models.ProjectRevenueViewModel
 
 @{
     Layout = "~/Areas/FN/Views/Shared/_LayoutFN.cshtml";
@@ -138,6 +137,10 @@
                 @Model.FromDate.ToString("dd/MM/yyyy") – @Model.ToDate.ToString("dd/MM/yyyy")
             </p>
         </div>
+        <a class="btn btn-sm btn-primary"
+           href="@Url.Action("ExportProjectRevenue", "Revenue", new { area = "FN", from = Model.FromDate, to = Model.ToDate })">
+            Xuất báo cáo Excel
+        </a>
     </div>
 
     <div class="rev-top-cards">
@@ -237,7 +240,9 @@
         --fz: @(fz)px;
     }
 </style>
-<link href="~/Content/CSS/FNManager/Revenue/ProjectREV.css" rel="stylesheet" />
+
+<link href="~/Areas/FN/Data/CSS/Revenue/ProjectREV.css" rel="stylesheet" />
+
 <script>
     (function () {
         const labels = @Html.Raw(Json.Encode(monthLabels));

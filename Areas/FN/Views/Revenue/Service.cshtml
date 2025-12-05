@@ -1,8 +1,7 @@
 ﻿@using System.Linq
-@using QLNSVATC.Models.FN_Models
 @using QLNSVATC.Models
 @using QLNSVATC.Helpers
-@model ServiceRevenueViewModel
+@model QLNSVATC.Areas.FN.Data.FN_Models.ServiceRevenueViewModel
 
 @{
     Layout = "~/Areas/FN/Views/Shared/_LayoutFN.cshtml";
@@ -56,14 +55,15 @@
         { "en_US", "Average order value" }
     });
 
+    // TIÊU ĐỀ BIỂU ĐỒ MỚI
     var txtChartTitle = L(new Dictionary<string, string> {
-        { "vi_VN", "Doanh thu theo tháng" },
-        { "en_US", "Service revenue by month" }
+        { "vi_VN", "Cơ cấu doanh thu theo loại dịch vụ" },
+        { "en_US", "Revenue by service type" }
     });
 
     var txtChartSeries = L(new Dictionary<string, string> {
-        { "vi_VN", "Doanh thu dịch vụ" },
-        { "en_US", "Service revenue" }
+        { "vi_VN", "Doanh thu" },
+        { "en_US", "Revenue" }
     });
 
     var txtTopServices = L(new Dictionary<string, string> {
@@ -86,14 +86,13 @@
         { "en_US", "Revenue" }
     });
 
-    var monthLabels = Model.RevenueByMonth
-        .OrderBy(m => m.Year).ThenBy(m => m.Month)
-        .Select(m => $"{m.Month:00}/{m.Year}")
+    // DỮ LIỆU CHO BIỂU ĐỒ TRÒN – DÙNG TOP SERVICES
+    var svcTypeLabels = Model.TopServices
+        .Select(s => s.ServiceType)
         .ToList();
 
-    var revSeries = Model.RevenueByMonth
-        .OrderBy(m => m.Year).ThenBy(m => m.Month)
-        .Select(m => m.Revenue)
+    var svcTypeRevenues = Model.TopServices
+        .Select(s => s.Revenue)
         .ToList();
 }
 
@@ -107,6 +106,10 @@
                 @Model.FromDate.ToString("dd/MM/yyyy") – @Model.ToDate.ToString("dd/MM/yyyy")
             </p>
         </div>
+        <a class="btn btn-sm btn-primary"
+           href="@Url.Action("ExportServiceRevenue", "Revenue", new { area = "FN", from = Model.FromDate, to = Model.ToDate })">
+            Xuất báo cáo Excel
+        </a>
     </div>
 
     <div class="rev-top-cards">
@@ -125,15 +128,17 @@
     </div>
 
     <div class="rev-main-grid">
+        <!-- PANEL BIỂU ĐỒ TRÒN -->
         <div class="panel wide">
             <div class="panel-header">
                 <span class="panel-title">@txtChartTitle</span>
             </div>
             <div class="chart-wrap">
-                <canvas id="svcChart"></canvas>
+                <canvas id="svcPieChart"></canvas>
             </div>
         </div>
 
+        <!-- BẢNG TOP LOẠI DỊCH VỤ -->
         <div class="panel">
             <div class="panel-header">
                 <span class="panel-title">@txtTopServices</span>
@@ -179,49 +184,71 @@
         --font: @font;
         --fz: @(fz)px;
     }
-
 </style>
-<link href="~/Content/CSS/FNManager/Revenue/ServiceREV.css" rel="stylesheet" />
+
+<link href="~/Areas/FN/Data/CSS/Revenue/ServiceREV.css" rel="stylesheet" />
+
 <script>
     (function () {
-        const labels = @Html.Raw(Json.Encode(monthLabels));
-        const revenue = @Html.Raw(Json.Encode(revSeries));
+        const labels = @Html.Raw(Json.Encode(svcTypeLabels));
+        const data = @Html.Raw(Json.Encode(svcTypeRevenues));
 
-        const ctx = document.getElementById('svcChart');
+        if (!labels || !labels.length) return;
+
+        const ctx = document.getElementById('svcPieChart');
         if (!ctx) return;
 
+        const rootStyles = getComputedStyle(document.documentElement);
+        const accent = rootStyles.getPropertyValue('--accent').trim() || '#22c55e';
+
+        const palette = [
+            accent,
+            'rgba(59,130,246,0.9)',
+            'rgba(244,114,182,0.9)',
+            'rgba(234,179,8,0.9)',
+            'rgba(56,189,248,0.9)',
+            'rgba(52,211,153,0.9)',
+            'rgba(249,115,22,0.9)'
+        ];
+
+        const colors = labels.map((_, i) => palette[i % palette.length]);
+
         new Chart(ctx, {
-            type: 'bar',
+            type: 'doughnut',
             data: {
                 labels: labels,
-                datasets: [
-                    {
-                        label: '@txtChartSeries',
-                        data: revenue,
-                        backgroundColor: 'rgba(34,197,94,0.75)',
-                        borderRadius: 8,
-                        maxBarThickness: 26
-                    }
-                ]
+                datasets: [{
+                    label: '@txtChartSeries',
+                    data: data,
+                    backgroundColor: colors,
+                    borderWidth: 0,
+                    hoverOffset: 6
+                }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function (value) {
-                                if (value >= 1_000_000) return (value / 1_000_000).toFixed(1) + 'M';
-                                if (value >= 1_000) return (value / 1_000).toFixed(1) + 'K';
-                                return value;
-                            }
-                        }
-                    }
-                },
+                cutout: '55%',
                 plugins: {
                     legend: {
-                        labels: { font: { size: 11 } }
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 10,
+                            boxHeight: 10,
+                            padding: 10,
+                            font: { size: 11 }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (ctx) {
+                                const val = ctx.parsed;
+                                const total = ctx.chart.data.datasets[0].data
+                                    .reduce(function (a, b) { return a + b; }, 0);
+                                const pct = total ? (val * 100 / total).toFixed(1) : 0;
+                                return ctx.label + ': ' + val.toLocaleString() + ' (' + pct + '%)';
+                            }
+                        }
                     }
                 }
             }

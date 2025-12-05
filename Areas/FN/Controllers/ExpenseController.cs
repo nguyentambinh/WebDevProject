@@ -3,7 +3,7 @@ using System.Linq;
 using System.Web.Mvc;
 using QLNSVATC.Models;
 using QLNSVATC.Helpers;
-using QLNSVATC.Models.FN_Models;
+using QLNSVATC.Areas.FN.Data.FN_Models;
 using System.Data.Entity;
 
 
@@ -197,7 +197,6 @@ namespace QLNSVATC.Areas.FN.Controllers
 
             var today = DateTime.Today;
 
-            // 1. tổng chi phí theo từng MADA
             var cpByProject = db.CPDUANs
                 .GroupBy(c => c.MADA)
                 .ToList()
@@ -206,7 +205,6 @@ namespace QLNSVATC.Areas.FN.Controllers
                     g => g.Sum(x => x.CHIPHITONG ?? 0m)
                 );
 
-            // 2. danh sách dự án theo hợp đồng
             var list = db.DUANTHEOHOPDONGs
                 .Include(d => d.HOPDONG)
                 .ToList();
@@ -287,5 +285,171 @@ namespace QLNSVATC.Areas.FN.Controllers
 
             return View(vm);
         }
+
+        [HttpGet]
+        public ActionResult NewExpense()
+        {
+            BuildSettings();
+
+            var vm = new NewExpenseViewModel();
+
+            vm.ProjectOptions = db.DUANs
+                .Select(d => new SelectListItem
+                {
+                    Value = d.MADA,
+                    Text = d.MADA      
+                })
+                .OrderBy(x => x.Text)
+                .ToList();
+
+            vm.TypeOptions = new[]
+            {
+        new SelectListItem { Value = "Project",   Text = "Project" },
+        new SelectListItem { Value = "Material",  Text = "Material" },
+        new SelectListItem { Value = "Transport", Text = "Transport" }
+    }.ToList();
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult NewExpense(NewExpenseViewModel model)
+        {
+            BuildSettings();
+
+            if (string.IsNullOrWhiteSpace(model.ProjectCode))
+                ModelState.AddModelError("ProjectCode", "Project is required");
+
+            if (!model.Amount.HasValue || model.Amount.Value <= 0)
+                ModelState.AddModelError("Amount", "Amount must be > 0");
+
+            if (string.IsNullOrWhiteSpace(model.TypeCode))
+                model.TypeCode = "Project";
+
+            if (model.TypeCode == "Material" &&
+                string.IsNullOrWhiteSpace(model.MaterialName))
+            {
+                ModelState.AddModelError("MaterialName", "Material name is required");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                model.ProjectOptions = db.DUANs
+                    .Select(d => new SelectListItem
+                    {
+                        Value = d.MADA,
+                        Text = d.MADA
+                    }).OrderBy(x => x.Text).ToList();
+
+                model.TypeOptions = new[]
+                {
+            new SelectListItem { Value = "Project",   Text = "Project" },
+            new SelectListItem { Value = "Material",  Text = "Material" },
+            new SelectListItem { Value = "Transport", Text = "Transport" }
+        }.ToList();
+
+                return View(model);
+            }
+
+            var amount = model.Amount.Value;
+            var ngay = model.Date ?? DateTime.Today;
+
+            if (model.TypeCode == "Material")
+            {
+                var manhap = GenerateManhap();
+                var nvl = new NHAPNVL
+                {
+                    MANHAP = manhap,
+                    TENNVL = model.MaterialName,
+                    CPNHAP = amount,
+                    NGAYNHAP = ngay
+                };
+                db.NHAPNVLs.Add(nvl);
+
+                var cp = new CPDUAN
+                {
+                    MADA = model.ProjectCode,
+                    MANHAP = manhap,
+                    MAVC = null,
+                    CHIPHITONG = amount,
+                    HSTHAYDOI = model.ChangeFactor
+                };
+                db.CPDUANs.Add(cp);
+            }
+            else if (model.TypeCode == "Transport")
+            {
+                var mavc = GenerateMavc();
+                var vc = new VANCHUYENNVL
+                {
+                    MAVC = mavc,
+                    CPVC = amount,
+                    NGAYVC = ngay
+                };
+                db.VANCHUYENNVLs.Add(vc);
+
+                var cp = new CPDUAN
+                {
+                    MADA = model.ProjectCode,
+                    MANHAP = null,
+                    MAVC = mavc,
+                    CHIPHITONG = amount,
+                    HSTHAYDOI = model.ChangeFactor
+                };
+                db.CPDUANs.Add(cp);
+            }
+            else
+            {
+                var cp = new CPDUAN
+                {
+                    MADA = model.ProjectCode,
+                    MANHAP = null,
+                    MAVC = null,
+                    CHIPHITONG = amount,
+                    HSTHAYDOI = model.ChangeFactor
+                };
+                db.CPDUANs.Add(cp);
+            }
+
+            db.SaveChanges();
+
+            TempData["FN_Success"] = "Expense saved.";
+            return RedirectToAction("Project");
+        }
+
+        private string GenerateManhap()
+        {
+            var last = db.NHAPNVLs
+                .OrderByDescending(x => x.MANHAP)
+                .Select(x => x.MANHAP)
+                .FirstOrDefault();
+
+            int num = 0;
+            if (!string.IsNullOrEmpty(last))
+            {
+                var digits = new string(last.Reverse().TakeWhile(char.IsDigit).Reverse().ToArray());
+                int.TryParse(digits, out num);
+            }
+            num++;
+            return $"N{num:D4}";
+        }
+
+        private string GenerateMavc()
+        {
+            var last = db.VANCHUYENNVLs
+                .OrderByDescending(x => x.MAVC)
+                .Select(x => x.MAVC)
+                .FirstOrDefault();
+
+            int num = 0;
+            if (!string.IsNullOrEmpty(last))
+            {
+                var digits = new string(last.Reverse().TakeWhile(char.IsDigit).Reverse().ToArray());
+                int.TryParse(digits, out num);
+            }
+            num++;
+            return $"VC{num:D4}";
+        }
     }
 }
+

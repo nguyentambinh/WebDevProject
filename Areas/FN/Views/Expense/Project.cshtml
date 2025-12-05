@@ -1,7 +1,7 @@
 ﻿@using System.Collections.Generic
 @using QLNSVATC.Models
-@using QLNSVATC.Models.FN_Models
-@model ProjectExpenseListViewModel
+@using QLNSVATC.Helpers
+@model QLNSVATC.Areas.FN.Data.FN_Models.ProjectExpenseListViewModel
 
 @{
     Layout = "~/Areas/FN/Views/Shared/_LayoutFN.cshtml";
@@ -32,20 +32,21 @@
         if (d.ContainsKey("en_US")) return d["en_US"];
         return d.Values.First();
     };
+
     var tPrev = new Dictionary<string, string> {
-    { "vi_VN","Trước" },
-    { "en_US","Prev" },
-    { "jp_JP","前へ" },
-    { "kr_KR","이전" },
-    { "cn_CN","上一页" }
-};
+        { "vi_VN","Trước" },
+        { "en_US","Prev" },
+        { "jp_JP","前へ" },
+        { "kr_KR","이전" },
+        { "cn_CN","上一页" }
+    };
     var tNext = new Dictionary<string, string> {
-    { "vi_VN","Sau" },
-    { "en_US","Next" },
-    { "jp_JP","次へ" },
-    { "kr_KR","다음" },
-    { "cn_CN","下一页" }
-};
+        { "vi_VN","Sau" },
+        { "en_US","Next" },
+        { "jp_JP","次へ" },
+        { "kr_KR","다음" },
+        { "cn_CN","下一页" }
+    };
 
     var tTitle = new Dictionary<string, string> {
         { "vi_VN","Chi phí dự án" },
@@ -98,14 +99,13 @@
     string FormatType(string code)
     {
         return L(new Dictionary<string, string>{
-        { "vi_VN","Chi phí dự án" },
-        { "en_US","Project cost" },
-        { "jp_JP","プロジェクト費用" },
-        { "kr_KR","프로젝트 비용" },
-        { "cn_CN","项目费用" }
-    });
+            { "vi_VN","Chi phí dự án" },
+            { "en_US","Project cost" },
+            { "jp_JP","プロジェクト費用" },
+            { "kr_KR","프로젝트 비용" },
+            { "cn_CN","项目费用" }
+        });
     }
-
 
     string StatusText(string code)
     {
@@ -113,32 +113,32 @@
         {
             case "done":
                 return L(new Dictionary<string, string>{
-                { "vi_VN","Xong" },
-                { "en_US","Completed" },
-                { "jp_JP","完了" },
-                { "kr_KR","완료" },
-                { "cn_CN","已完成" }});
+                    { "vi_VN","Xong" },
+                    { "en_US","Completed" },
+                    { "jp_JP","完了" },
+                    { "kr_KR","완료" },
+                    { "cn_CN","已完成" }});
             case "overdue":
                 return L(new Dictionary<string, string>{
-                { "vi_VN","Quá hạn" },
-                { "en_US","Overdue" },
-                { "jp_JP","期限超過" },
-                { "kr_KR","기한 초과" },
-                { "cn_CN","已逾期" }});
+                    { "vi_VN","Quá hạn" },
+                    { "en_US","Overdue" },
+                    { "jp_JP","期限超過" },
+                    { "kr_KR","기한 초과" },
+                    { "cn_CN","已逾期" }});
             case "near":
                 return L(new Dictionary<string, string>{
-                { "vi_VN","Gần đến hạn" },
-                { "en_US","Due soon" },
-                { "jp_JP","期限間近" },
-                { "kr_KR","마감 임박" },
-                { "cn_CN","即将到期" }});
+                    { "vi_VN","Gần đến hạn" },
+                    { "en_US","Due soon" },
+                    { "jp_JP","期限間近" },
+                    { "kr_KR","마감 임박" },
+                    { "cn_CN","即将到期" }});
             default:
                 return L(new Dictionary<string, string>{
-                { "vi_VN","Đang thực hiện" },
-                { "en_US","In progress" },
-                { "jp_JP","進行中" },
-                { "kr_KR","진행 중" },
-                { "cn_CN","进行中" }});
+                    { "vi_VN","Đang thực hiện" },
+                    { "en_US","In progress" },
+                    { "jp_JP","進行中" },
+                    { "kr_KR","진행 중" },
+                    { "cn_CN","进行中" }});
         }
     }
 
@@ -152,7 +152,6 @@
             default: return "pexp-badge pexp-badge-ongoing";
         }
     }
-
 }
 
 <div class="pexp-root">
@@ -175,119 +174,141 @@
                 <div class="item">
                     <span class="label">
                         @L(new Dictionary<string, string>{
-    { "vi_VN","Tổng số dòng" },
-    { "en_US","Total items" }
-})
-                </span>
-                <span class="value">@Model.TotalCount</span>
+                            { "vi_VN","Tổng số dòng" },
+                            { "en_US","Total items" },
+                            { "jp_JP","合計件数" },
+                            { "kr_KR","총 항목 수" },
+                            { "cn_CN","总条目数" }
+                        })
+                    </span>
+                    <span class="value">@Model.TotalCount</span>
+                </div>
+                <div class="item">
+                    <span class="label">
+                        @L(new Dictionary<string, string>{
+                            { "vi_VN","Tổng chi" },
+                            { "en_US","Total amount" },
+                            { "jp_JP","合計金額" },
+                            { "kr_KR","총 금액" },
+                            { "cn_CN","总金额" }
+                        })
+                    </span>
+                    <span class="value">@Model.TotalAmount.ToShortCurrency(lang)</span>
+                </div>
             </div>
-            <div class="item">
-                <span class="label">
+        </div>
+
+        <div class="pexp-toolbar">
+            <button class="pexp-btn-primary">
+                <span>
+                    + @L(new Dictionary<string, string>{
+                      { "vi_VN","Thêm chi phí" },
+                      { "en_US","New expense" },
+                      { "jp_JP","費用を追加" },
+                      { "kr_KR","비용 추가" },
+                      { "cn_CN","新增费用" }
+                  })
+                </span>
+            </button>
+            <div class="pexp-toolbar-right">
+                <span class="info">
                     @L(new Dictionary<string, string>{
-{ "vi_VN","Tổng chi" },
-{ "en_US","Total amount" }
-})
-            </span>
-            <span class="value">@Model.TotalAmount.ToString("N0")</span>
+                        { "vi_VN","Chờ duyệt" },
+                        { "en_US","Pending" },
+                        { "jp_JP","保留中" },
+                        { "kr_KR","대기 중" },
+                        { "cn_CN","待审批" }
+                    }): @Model.PendingCount
+                </span>
+                <span class="info">
+                    @L(new Dictionary<string, string>{
+                        { "vi_VN","Đã duyệt" },
+                        { "en_US","Approved" },
+                        { "jp_JP","承認済み" },
+                        { "kr_KR","승인됨" },
+                        { "cn_CN","已批准" }
+                    }): @Model.ApprovedCount
+                </span>
+            </div>
+        </div>
+
+        <div class="pexp-table-wrap">
+            <table class="pexp-table">
+                <thead>
+                    <tr>
+                        <th class="col-details">@L(tColDetails)</th>
+                        <th class="col-project">@L(tColProject)</th>
+                        <th class="col-type">@L(tColType)</th>
+                        <th class="col-amount">@L(tColAmount)</th>
+                        <th class="col-status">@L(tColStatus)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in Model.Items)
+                    {
+                        <tr>
+                            <td class="col-details">
+                                <div class="detail-main">
+                                    <div class="detail-icon"></div>
+                                    <div class="detail-text">
+                                        <div class="detail-date">
+                                            @(row.ExpenseDate?.ToString("dd/MM/yyyy") ?? "-")
+                                        </div>
+                                        <div class="detail-label">
+                                            @row.DetailLabel
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="col-project">
+                                <div class="project-code">@row.ProjectCode</div>
+                                @if (!string.IsNullOrEmpty(row.ProjectName))
+                                {
+                                    <div class="project-name">@row.ProjectName</div>
+                                }
+                            </td>
+                            <td class="col-type">
+                                @FormatType(row.ExpenseType)
+                            </td>
+                            <td class="col-amount right">
+                                @row.Amount.ToCurrency(lang)
+                            </td>
+                            <td class="col-status">
+                                <span class="@StatusCss(row.StatusCode)">
+                                    @StatusText(row.StatusCode)
+                                </span>
+                            </td>
+                        </tr>
+                    }
+
+                    @if (!Model.Items.Any())
+                    {
+                        <tr>
+                            <td colspan="5" class="empty">
+                                @L(new Dictionary<string, string>{
+                                    { "vi_VN","Chưa có dữ liệu chi phí." },
+                                    { "en_US","No expense data yet." },
+                                    { "jp_JP","費用データがまだありません。" },
+                                    { "kr_KR","아직 비용 데이터가 없습니다." },
+                                    { "cn_CN","暂无费用数据。" }
+                                })
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 
-<div class="pexp-toolbar">
-    <button class="pexp-btn-primary">
-        <span>
-            + @L(new Dictionary<string, string>{
-        { "vi_VN","Thêm chi phí" },
-        { "en_US","New expense" }
-    })
-        </span>
-    </button>
-    <div class="pexp-toolbar-right">
-        <span class="info">
-            @L(new Dictionary<string, string>{
-                { "vi_VN","Chờ duyệt" },
-                { "en_US","Pending" }
-            }): @Model.PendingCount
-        </span>
-        <span class="info">
-            @L(new Dictionary<string, string>{
-                { "vi_VN","Đã duyệt" },
-                { "en_US","Approved" }
-            }): @Model.ApprovedCount
-        </span>
-    </div>
-</div>
-
-<div class="pexp-table-wrap">
-    <table class="pexp-table">
-        <thead>
-            <tr>
-                <th class="col-details">@L(tColDetails)</th>
-                <th class="col-project">@L(tColProject)</th>
-                <th class="col-type">@L(tColType)</th>
-                <th class="col-amount">@L(tColAmount)</th>
-                <th class="col-status">@L(tColStatus)</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var row in Model.Items)
-            {
-                <tr>
-                    <td class="col-details">
-                        <div class="detail-main">
-                            <div class="detail-icon"></div>
-                            <div class="detail-text">
-                                <div class="detail-date">
-                                    @(row.ExpenseDate?.ToString("dd/MM/yyyy") ?? "-")
-                                </div>
-                                <div class="detail-label">
-                                    @row.DetailLabel
-                                </div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="col-project">
-                        <div class="project-code">@row.ProjectCode</div>
-                        @if (!string.IsNullOrEmpty(row.ProjectName))
-                        {
-                            <div class="project-name">@row.ProjectName</div>
-                        }
-                    </td>
-                    <td class="col-type">
-                        @FormatType(row.ExpenseType)
-                    </td>
-                    <td class="col-amount right">
-                        @row.Amount.ToString("N0")
-                    </td>
-                    <td class="col-status">
-                        <span class="@StatusCss(row.StatusCode)">
-                            @StatusText(row.StatusCode)
-                        </span>
-                    </td>
-                </tr>
-            }
-
-            @if (!Model.Items.Any())
-            {
-                <tr>
-                    <td colspan="5" class="empty">
-                        @L(new Dictionary<string, string>{
-                            { "vi_VN","Chưa có dữ liệu chi phí." },
-                            { "en_US","No expense data yet." }
-                        })
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
-</div>
-</div>
 <div class="pexp-pager">
     <div class="pager-info">
         @L(new Dictionary<string, string>{
             { "vi_VN","Trang" },
-            { "en_US","Page" }
+            { "en_US","Page" },
+            { "jp_JP","ページ" },
+            { "kr_KR","페이지" },
+            { "cn_CN","页" }
         })
         @Model.Page / @Model.TotalPages
     </div>
@@ -296,7 +317,8 @@
         @if (Model.Page > 1)
         {
             <a class="pg-btn"
-               href="@Url.Action("Project", "Expense", new { area = "FN", page = Model.Page - 1 })">
+               href="@Url.Action("Project", "Expense", new { area = "FN", page = Model.Page - 1 })"
+               title="@L(tPrev)">
                 «
             </a>
         }
@@ -319,14 +341,15 @@
         @if (Model.Page < Model.TotalPages)
         {
             <a class="pg-btn"
-               href="@Url.Action("Project", "Expense", new { area = "FN", page = Model.Page + 1 })">
+               href="@Url.Action("Project", "Expense", new { area = "FN", page = Model.Page + 1 })"
+               title="@L(tNext)">
                 »
             </a>
         }
     </div>
 </div>
 
-<link href="~/Content/CSS/FNManager/Expense/ProjectExpense.css" rel="stylesheet" />
+<link href="~/Areas/FN/Data/CSS/Expense/ProjectExpense.css" rel="stylesheet" />
 
 <style>
     :root {

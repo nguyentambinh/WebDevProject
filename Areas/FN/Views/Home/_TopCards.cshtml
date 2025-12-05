@@ -1,7 +1,9 @@
 ﻿@using System.Collections.Generic
+@using System.Linq
+@using System.Web.Helpers
 @using QLNSVATC.Helpers
 
-@model QLNSVATC.Models.FNDashboardViewModel
+@model QLNSVATC.Areas.FN.Data.FN_Models.FNDashboardViewModel
 
 @{
     string currentLang = ViewBag.CurrentLang as string ?? "vi_VN";
@@ -19,14 +21,6 @@
         { "jp_JP", "総収益" },
         { "kr_KR", "총 수익" },
         { "cn_CN", "总收入" }
-    });
-
-    var txtTotalEarningSub = L(new Dictionary<string, string> {
-        { "vi_VN", "Từ dự án & dịch vụ" },
-        { "en_US", "From projects & services" },
-        { "jp_JP", "プロジェクトとサービスから" },
-        { "kr_KR", "프로젝트 및 서비스 수익" },
-        { "cn_CN", "来自项目和服务" }
     });
 
     var txtFromProjects = L(new Dictionary<string, string> {
@@ -84,14 +78,66 @@
         { "kr_KR", "잔액:" },
         { "cn_CN", "余额：" }
     });
+
+    var txtDetail = L(new Dictionary<string, string> {
+        { "vi_VN","Chi tiết" },
+        { "en_US","Details" },
+        { "jp_JP","詳細" },
+        { "kr_KR","자세히 보기" },
+        { "cn_CN","详情" }
+    });
+
+    IEnumerable<dynamic> trend = Model.RevenueTrend != null
+        ? Model.RevenueTrend.Cast<dynamic>()
+        : Enumerable.Empty<dynamic>();
+
+    var labelsJson = Html.Raw(Json.Encode(
+        trend.Select(x => (string)x.PeriodLabel)
+    ));
+
+    var dataJson = Html.Raw(Json.Encode(
+        trend.Select(x => (decimal)x.Amount)
+    ));
 }
 
 <div class="fn-top-cards">
 
-    <div class="fn-card highlight">
+    <div class="fn-card fn-card-highlight">
         <p class="label">@txtTotalEarning</p>
         <h3 class="value">@Model.TotalEarning.ToShortCurrency(currentLang)</h3>
-        <span class="sub">@Model.TotalEarning.ToCurrency(currentLang)</span>
+
+        <div class="fn-detail-wrapper">
+            <button type="button" class="fn-detail-link">
+                @txtDetail →
+            </button>
+
+            <div class="fn-detail-popup">
+                <div class="fn-detail-popup-header">
+                    <span class="title">
+                        @L(new Dictionary<string, string> {
+                            { "vi_VN","Biểu đồ tăng trưởng doanh thu" },
+                            { "en_US","Revenue growth chart" },
+                            { "jp_JP","売上成長チャート" },
+                            { "kr_KR","매출 성장 차트" },
+                            { "cn_CN","收入增长图表" }
+                        })
+                    </span>
+                    <span class="subtitle">
+                        @L(new Dictionary<string, string> {
+                            { "vi_VN","Tổng doanh thu" },
+                            { "en_US","Total revenue" },
+                            { "jp_JP","総売上" },
+                            { "kr_KR","총 매출" },
+                            { "cn_CN","总收入" }
+                        }): @Model.TotalEarning.ToCurrency(currentLang)
+                    </span>
+                </div>
+
+                <div class="fn-detail-chart">
+                    <canvas id="fnRevenueChart" height="150"></canvas>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="fn-card">
@@ -117,4 +163,72 @@
     </div>
 </div>
 
-<link href="~/Content/CSS/FNManager/_TopCards.css?v=2" rel="stylesheet" />
+<link href="~/Areas/FN/Data/CSS/Home/_TopCards.css" rel="stylesheet" />
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+    (function () {
+        var labels = @labelsJson;
+        var data = @dataJson;
+
+        if (!labels || !labels.length) return;
+
+        var canvas = document.getElementById('fnRevenueChart');
+        if (!canvas) return;
+
+        var accent = getComputedStyle(document.documentElement)
+            .getPropertyValue('--accent')
+            .trim() || '#22c55e';
+
+        var border = getComputedStyle(document.documentElement)
+            .getPropertyValue('--border')
+            .trim() || 'rgba(148,163,184,0.5)';
+
+        var ctx = canvas.getContext('2d');
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: accent,
+                    borderColor: border,
+                    borderWidth: 1,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function (ctx) {
+                                var v = ctx.parsed.y || 0;
+                                return v.toLocaleString('vi-VN');
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            font: { size: 10 }
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: 'rgba(148,163,184,0.2)'
+                        },
+                        ticks: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    })();
+</script>

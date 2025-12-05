@@ -1,0 +1,110 @@
+﻿.fn-top-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 22px;
+    margin-bottom: 24px;
+}
+
+/* card chung */
+.fn-card {
+    background: var(--card);
+    color: var(--text);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    padding: 18px 20px;
+    position: relative;
+}
+
+    .fn-card.fn-card-highlight {
+        background: var(--accent);
+        color: var(--text);
+    }
+
+    /* text */
+    .fn-card .label {
+        font-size: var(--fz);
+        opacity: .9;
+        margin-bottom: 6px;
+    }
+
+    .fn-card .value {
+        font-size: var(--fz);
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .fn-card .sub {
+        font-size: var(--fz);
+        opacity: .85;
+    }
+
+/* khối chứa link + popup */
+.fn-detail-wrapper {
+    margin-top: 6px;
+    display: inline-block;
+    position: relative;
+}
+
+/* link “Chi tiết” */
+.fn-detail-link {
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 12px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    color: rgba(248, 250, 252, 0.95);
+}
+
+/* popup */
+.fn-detail-popup {
+    position: absolute;
+    left: 0;
+    top: 100%;
+    margin-top: 10px;
+    width: 420px;
+    max-width: 90vw;
+    background: var(--card2, #020617);
+    border-radius: 14px;
+    padding: 12px 14px;
+    border: 1px solid rgba(148,163,184,0.5);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(6px);
+    transition: opacity .18s ease, transform .18s ease;
+    z-index: 50;
+}
+
+/* hover mới hiện popup */
+.fn-detail-wrapper:hover .fn-detail-popup {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+/* header popup */
+.fn-detail-popup-header .title {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.fn-detail-popup-header .subtitle {
+    display: block;
+    font-size: 11px;
+    color: var(--text-soft, #9ca3af);
+    margin-bottom: 10px;
+}
+
+/* vùng chứa chart */
+.fn-detail-chart {
+    height: 160px;
+}
+
+    .fn-detail-chart canvas {
+        width: 100% !important;
+        height: 100% !important;
+    }

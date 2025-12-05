@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace QLNSVATC.Models.FN_Models
+namespace QLNSVATC.Areas.FN.Data.FN_Models
 {
     public class RecentExpenseVM
     {

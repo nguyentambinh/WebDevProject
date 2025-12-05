@@ -1,8 +1,9 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Web.Mvc;
 using QLNSVATC.Models;
 using QLNSVATC.Helpers;
-using System;
+using QLNSVATC.Areas.FN.Data.FN_Models;
 
 namespace QLNSVATC.Areas.FN.Controllers
 {
@@ -13,10 +14,12 @@ namespace QLNSVATC.Areas.FN.Controllers
         [HttpGet]
         public ActionResult Index()
         {
-            string userId = Session["UserId"]?.ToString();
+            string userId = Session["UserId"] as string;
             var st = SettingsHelper.BuildViewBagData(db, userId);
 
             ViewBag.Settings = st;
+            ViewBag.CurrentLang = st.Lang;
+
             var vm = BuildDashboardViewModel();
             return View(vm);
         }
@@ -25,22 +28,27 @@ namespace QLNSVATC.Areas.FN.Controllers
         {
             return PartialView("_Sidebar");
         }
+
         public ActionResult LoadTopCards()
         {
             return PartialView("_TopCards");
         }
+
         public ActionResult LoadAnalytics()
         {
             return PartialView("_Analytics");
         }
+
         public ActionResult LoadBank()
         {
             return PartialView("_Bank");
         }
+
         public ActionResult LoadTarget()
         {
             return PartialView("_Target");
         }
+
         public ActionResult LoadActivity()
         {
             return PartialView("_Activity");
@@ -48,42 +56,40 @@ namespace QLNSVATC.Areas.FN.Controllers
 
         private FNDashboardViewModel BuildDashboardViewModel()
         {
-            // --- DOANH THU ---
-            var revenueProjects = db.DTDUANs
+            var today = DateTime.Today;
+
+            decimal revenueProjects = db.DTDUANs
                 .Select(x => (decimal?)x.TIENNGHIEMTHU_TONG)
                 .Sum() ?? 0m;
 
-            var revenueServices = db.DTDICHVUs
+            decimal revenueServices = db.DTDICHVUs
                 .Select(x => (decimal?)x.GIACATONG)
                 .Sum() ?? 0m;
-            var totalEarning = revenueProjects + revenueServices;
 
+            decimal totalEarning = revenueProjects + revenueServices;
 
-            // --- CHI PHÍ ---
-            var costProjects = db.CPDUANs
+            decimal costProjects = db.CPDUANs
                 .Select(x => (decimal?)x.CHIPHITONG)
                 .Sum() ?? 0m;
 
-            var costMaterials = db.NHAPNVLs
+            decimal costMaterials = db.NHAPNVLs
                 .Select(x => (decimal?)x.CPNHAP)
                 .Sum() ?? 0m;
 
-            var costTransport = db.VANCHUYENNVLs
+            decimal costTransport = db.VANCHUYENNVLs
                 .Select(x => (decimal?)x.CPVC)
                 .Sum() ?? 0m;
 
-            var totalSpending = costProjects + costMaterials + costTransport;
+            decimal totalSpending = costProjects + costMaterials + costTransport;
 
-            // --- ĐẾM NGHIỆP VỤ ---
-            var revenueInvoiceCount = db.DTDUANs.Count() + db.DTDICHVUs.Count();
+            int revenueInvoiceCount = db.DTDUANs.Count() + db.DTDICHVUs.Count();
 
-            var transactionCount = revenueInvoiceCount
+            int transactionCount = revenueInvoiceCount
                                    + db.CPDUANs.Count()
                                    + db.NHAPNVLs.Count()
                                    + db.VANCHUYENNVLs.Count();
 
-            var today = DateTime.Today;
-            var firstMonth = new DateTime(today.Year, today.Month, 1).AddMonths(-5);
+            DateTime firstMonth = new DateTime(today.Year, today.Month, 1).AddMonths(-5);
 
             var revenueByMonth = db.DTDICHVUs
                 .Where(x => x.NGAYSDDV.HasValue &&
@@ -98,18 +104,38 @@ namespace QLNSVATC.Areas.FN.Controllers
                 })
                 .ToList();
 
-            var trend = new System.Collections.Generic.List<FNChartPointVM>();
-            for (int i = 0; i < 6; i++)
-            {
-                var dt = firstMonth.AddMonths(i);
-                var found = revenueByMonth.FirstOrDefault(x => x.Year == dt.Year && x.Month == dt.Month);
-                trend.Add(new FNChartPointVM
+            var trendRaw = (from dt in db.DTDUANs
+                            join dahd in db.DUANTHEOHOPDONGs
+                                on dt.MADA equals dahd.MADA into gj
+                            from dahd in gj.DefaultIfEmpty()
+                            where dt.TIENNGHIEMTHU_TONG != null
+                                  && dahd != null
+                                  && dahd.NGAYKT.HasValue
+                            group new { dt, dahd } by new
+                            {
+                                dahd.NGAYKT.Value.Year,
+                                dahd.NGAYKT.Value.Month
+                            }
+    into g
+                            orderby g.Key.Year, g.Key.Month
+                            select new
+                            {
+                                g.Key.Year,
+                                g.Key.Month,
+                                Amount = g.Sum(x => x.dt.TIENNGHIEMTHU_TONG ?? 0)
+                            })
+               .Take(8)
+               .ToList();
+
+            var trend = trendRaw
+                .Select(x => new RevenuePointVM
                 {
-                    Label = dt.ToString("MM/yyyy"),
-                    Value = found?.Total ?? 0m
-                });
-            }
-            // -- NỔI BẬT --
+                    PeriodLabel = x.Month.ToString("00") + "/" + x.Year,
+                    Amount = x.Amount
+                })
+                .ToList();
+
+
             var revenueByProject = db.DTDUANs
                 .GroupBy(x => x.MADA)
                 .Select(g => new
@@ -129,7 +155,8 @@ namespace QLNSVATC.Areas.FN.Controllers
                 .ToList();
 
             var empByProject = db.NVTHAMGIADAs
-                .Where(x => x.DUANTHEOHOPDONG != null && x.DUANTHEOHOPDONG.DUAN != null)
+                .Where(x => x.DUANTHEOHOPDONG != null &&
+                            x.DUANTHEOHOPDONG.DUAN != null)
                 .GroupBy(x => x.DUANTHEOHOPDONG.DUAN.MADA)
                 .Select(g => new
                 {
@@ -137,6 +164,7 @@ namespace QLNSVATC.Areas.FN.Controllers
                     EmployeeCount = g.Select(z => z.MANV).Distinct().Count()
                 })
                 .ToList();
+
             var nameByProject = db.DUANTHEOHOPDONGs
                 .Where(x => x.DUAN != null && x.HOPDONG != null)
                 .GroupBy(x => x.DUAN.MADA)
@@ -202,7 +230,7 @@ namespace QLNSVATC.Areas.FN.Controllers
 
             var topProfit = joined
                 .Where(x => x.Cost > 0)
-                .OrderByDescending(x => (x.Revenue - x.Cost) / (x.Cost == 0 ? 1 : x.Cost))
+                .OrderByDescending(x => (x.Revenue - x.Cost) / x.Cost)
                 .Take(6)
                 .Select(makeVm)
                 .ToList();
@@ -218,17 +246,29 @@ namespace QLNSVATC.Areas.FN.Controllers
                 TotalEarning = totalEarning,
                 RevenueFromProjects = revenueProjects,
                 RevenueFromServices = revenueServices,
+
                 TotalSpending = totalSpending,
                 CostForProjects = costProjects,
                 CostForMaterials = costMaterials,
                 CostForTransport = costTransport,
+
                 RevenueInvoiceCount = revenueInvoiceCount,
                 TransactionCount = transactionCount,
+
                 RevenueTrend = trend,
                 TopRevenueProjects = topRevenue,
                 TopProfitProjects = topProfit,
                 TopEmployeeProjects = topEmployee
             };
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                db.Dispose();
+            }
+            base.Dispose(disposing);
         }
     }
 }

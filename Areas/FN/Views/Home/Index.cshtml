@@ -1,6 +1,6 @@
 ﻿@using System.Collections.Generic
 @using QLNSVATC.Models
-@model FNDashboardViewModel
+@model QLNSVATC.Areas.FN.Data.FN_Models.FNDashboardViewModel
 
 @{
     Layout = "~/Areas/FN/Views/Shared/_LayoutFN.cshtml";
@@ -47,7 +47,12 @@
     <div class="fn-main">
         <div class="fn-header-row">
             <h2 class="fn-title">@textDashboardTitle</h2>
+            <a class="btn btn-sm btn-outline"
+               href="@Url.Action("ExportRevenueOverview", "Revenue", new { area = "FN" })">
+                Xuất báo cáo tổng
+            </a>
         </div>
+        
 
         @Html.Partial("_TopCards", Model)
         @Html.Partial("_Highlight", Model)
@@ -60,8 +65,8 @@
     </div>
 </div>
 
-<link href="~/Content/CSS/FNManager/Index.css" rel="stylesheet" />
-
+<link href="~/Areas/FN/Data/CSS/Home/Index.css" rel="stylesheet" />
+git 
 <style>
     :root {
         --bg: @bg;
@@ -73,5 +78,4 @@
         --font: @font;
         --fz: @(fsize)px;
     }
-
 </style>

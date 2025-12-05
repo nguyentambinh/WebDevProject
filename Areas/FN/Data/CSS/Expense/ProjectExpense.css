@@ -1,5 +1,4 @@
 ﻿.pexp-root {
-    min-height: calc(100vh - 80px);
     font-family: var(--pexp-font);
     font-size: var(--pexp-fz);
     color: var(--pexp-text);
@@ -125,9 +124,6 @@
         border-bottom: none;
     }
 
-    .pexp-table .right {
-        text-align: right;
-    }
 
 /* columns */
 
@@ -256,6 +252,7 @@
 }
 .pexp-pager {
     margin-top: 12px;
+    margin-bottom: 24px;
     display: flex;
     justify-content: center;
     align-items: center;
