@@ -1,13 +1,25 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.Entity.Infrastructure;
+using System.Drawing.Printing;
+using System.Drawing;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Net.Mail;
+using System.Net;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using System.Xml.Linq;
 using QLNSVATC.Helpers;
 using QLNSVATC.Models;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+using iTextSharp.text.pdf.draw;
+using iTextFont = iTextSharp.text.Font;
+using QLNSVATC.Helper;
 
 namespace QLNSVATC.Areas.HR.Controllers
 {
@@ -17,6 +29,11 @@ namespace QLNSVATC.Areas.HR.Controllers
 
         public ActionResult Information(string keyword, string maPB, string maCV, string loaiNV)
         {
+            if (!CheckAccess.Role("HR"))
+            {
+                Session.Clear();
+                return RedirectToAction("Login", "Account", new { area = "" });
+            }
             var userId = Session["UserId"] as string;
             var st = SettingsHelper.BuildViewBagData(db, userId);
             ViewBag.Settings = st;
@@ -79,28 +96,72 @@ namespace QLNSVATC.Areas.HR.Controllers
             if (string.IsNullOrWhiteSpace(id))
                 return Json(new { success = false, message = "Invalid employee id." });
 
-            var nv = db.NHANVIENs.Find(id);
+            id = id.Trim();
+
+            var nv = db.NHANVIENs.FirstOrDefault(x => x.MANV == id);
             if (nv == null)
                 return Json(new { success = false, message = "Employee not found." });
 
-            try
+            using (var tran = db.Database.BeginTransaction())
             {
-                db.NHANVIENs.Remove(nv);
-                db.SaveChanges();
-
-                return Json(new { success = true, message = "Employee has been deleted successfully." });
-            }
-            catch (Exception)
-            {
-                return Json(new
+                try
                 {
-                    success = false,
-                    message = "Cannot delete this employee because there are related records (attendance, salary, contracts, etc.). Please remove or update related data first."
-                });
+                    var deptHeadList = db.PHONGBANs
+                        .Where(p => p.MATRG_PHG == id)
+                        .ToList();
+
+                    foreach (var pb in deptHeadList)
+                    {
+                        pb.MATRG_PHG = null;
+                    }
+                    var chamCong = db.CHAMCONGs.Where(x => x.MANV == id);
+                    db.CHAMCONGs.RemoveRange(chamCong);
+
+                    var thuongPhat = db.DSTHUONGPHATs.Where(x => x.MANV == id);
+                    db.DSTHUONGPHATs.RemoveRange(thuongPhat);
+                    var lichLamViec = db.LICHLAMVIECs.Where(x => x.MANV == id);
+                    db.LICHLAMVIECs.RemoveRange(lichLamViec);
+
+                    var luong = db.LUONGs.Where(x => x.MANV == id);
+                    db.LUONGs.RemoveRange(luong);
+
+                    var nhanThan = db.NHANTHANs.Where(x => x.MANV == id);
+                    db.NHANTHANs.RemoveRange(nhanThan);
+                    var nvDuAn = db.NVTHAMGIADAs.Where(x => x.MANV == id);
+                    db.NVTHAMGIADAs.RemoveRange(nvDuAn);
+
+                    var baoHiem = db.THONGTINBAOHIEMs.Where(x => x.MANV == id);
+                    db.THONGTINBAOHIEMs.RemoveRange(baoHiem);
+
+                    var lienHe = db.THONGTINLIENHEs.Where(x => x.MANV == id);
+                    db.THONGTINLIENHEs.RemoveRange(lienHe);
+                    var sucKhoe = db.THONGTINSUCKHOEs.Where(x => x.MANV == id);
+                    db.THONGTINSUCKHOEs.RemoveRange(sucKhoe);
+                    db.NHANVIENs.Remove(nv);
+
+                    db.SaveChanges();
+                    tran.Commit();
+
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Employee and all related records have been deleted successfully."
+                    });
+                }
+                catch (Exception ex)
+                {
+                    tran.Rollback();
+
+                    return Json(new
+                    {
+                        success = false,
+                        message = "System error while deleting this employee. Please try again later" + ex.Message
+                    });
+                }
             }
         }
 
-        [HttpPost]
+            [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult UpdatePosition(string id, string maPB, string maCV)
         {
@@ -468,7 +529,6 @@ namespace QLNSVATC.Areas.HR.Controllers
             var st = SettingsHelper.BuildViewBagData(db, userId);
             ViewBag.Settings = st;
 
-            // provide lists for dropdowns in Profile view
             ViewBag.Departments = db.PHONGBANs
                 .OrderBy(p => p.TENPB)
                 .ToList();
@@ -962,12 +1022,381 @@ namespace QLNSVATC.Areas.HR.Controllers
             }
         }
 
+        private static string BuildFolderName(string tenUngVien, string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(tenUngVien) || string.IsNullOrWhiteSpace(fileName))
+                return null;
+
+            var baseName = Path.GetFileNameWithoutExtension(fileName);
+            var parts = baseName.Split('_');
+            if (parts.Length < 3) return null;
+
+            string timeStr = parts[2];
+            if (!DateTime.TryParseExact(timeStr, "yyyyMMddHHmmss",
+                CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dt))
+            {
+                return null;
+            }
+
+            string prefix = dt.ToString("yyyyMMddHHmmss");
+            string name = RemoveDiacritics(tenUngVien ?? "")
+                .Trim()
+                .Replace(" ", string.Empty);
+
+            return $"{prefix}_{name}";
+        }
+
+        private static string BuildFileUrl(string tenUngVien, string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName)) return null;
+
+            string folder = BuildFolderName(tenUngVien, fileName);
+            if (string.IsNullOrEmpty(folder))
+                return "/Uploads/HoSoUngVien/" + fileName;
+
+            return "/Uploads/HoSoUngVien/" + folder + "/" + fileName;
+        }
+
+        public ActionResult Candidate(string keyword, DateTime? fromDate, DateTime? toDate)
+        {
+            var userId = Session["UserId"] as string;
+            var st = SettingsHelper.BuildViewBagData(db, userId);
+            ViewBag.Settings = st;
+
+            var query = db.HOSOVIECLAMs.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                keyword = keyword.Trim();
+                query = query.Where(x =>
+                    x.TENUNGVIEN.Contains(keyword) ||
+                    x.EMAIL.Contains(keyword));
+            }
+
+            var rawList = query
+                .OrderByDescending(x => x.ID)
+                .ToList();
+
+            var list = rawList
+                .Select(x =>
+                {
+                    string mainFile = x.FILETHONGTIN;
+                    if (string.IsNullOrWhiteSpace(mainFile))
+                    {
+                        if (!string.IsNullOrWhiteSpace(x.FILEBANGCAP))
+                            mainFile = x.FILEBANGCAP;
+                        else if (!string.IsNullOrWhiteSpace(x.FILEKHAC))
+                            mainFile = x.FILEKHAC;
+                    }
+
+                    DateTime? submittedAt = ExtractDateFromFileName(mainFile);
+
+                    return new CandidateViewModel
+                    {
+                        ID = x.ID,
+                        TenUngVien = x.TENUNGVIEN,
+                        Email = x.EMAIL,
+                        FileThongTin = x.FILETHONGTIN,
+                        FileBangCap = x.FILEBANGCAP,
+                        FileKhac = x.FILEKHAC,
+                        FileThongTinUrl = BuildFileUrl(x.TENUNGVIEN, x.FILETHONGTIN),
+                        FileBangCapUrl = BuildFileUrl(x.TENUNGVIEN, x.FILEBANGCAP),
+                        FileKhacUrl = BuildFileUrl(x.TENUNGVIEN, x.FILEKHAC),
+                        SubmittedAt = submittedAt
+                    };
+                })
+                .ToList();
+
+            if (fromDate.HasValue)
+            {
+                var from = fromDate.Value.Date;
+                list = list
+                    .Where(c => c.SubmittedAt.HasValue &&
+                                c.SubmittedAt.Value.Date >= from)
+                    .ToList();
+            }
+
+            if (toDate.HasValue)
+            {
+                var to = toDate.Value.Date;
+                list = list
+                    .Where(c => c.SubmittedAt.HasValue &&
+                                c.SubmittedAt.Value.Date <= to)
+                    .ToList();
+            }
+
+            ViewBag.Keyword = keyword;
+            ViewBag.FromDate = fromDate?.ToString("yyyy-MM-dd");
+            ViewBag.ToDate = toDate?.ToString("yyyy-MM-dd");
+
+            return View(list);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult SendInterviewEmail(int id, DateTime? interviewDate, string interviewTime, string note)
+        {
+            if (!interviewDate.HasValue || string.IsNullOrWhiteSpace(interviewTime))
+            {
+                return Json(new { success = false, message = "Please select both interview date and time." });
+            }
+
+            var candidate = db.HOSOVIECLAMs.FirstOrDefault(x => x.ID == id);
+            if (candidate == null)
+            {
+                return Json(new { success = false, message = "Candidate not found." });
+            }
+
+            string fullName = candidate.TENUNGVIEN ?? "Candidate";
+            string scheduleText = interviewDate.Value.ToString("dd/MM/yyyy") + " " + interviewTime.Trim();
+
+            string from = "httbworkstation@gmail.com";
+            string pass = "cotu wurg gbve crbk"; // TODO: move to config in production
+            string to = candidate.EMAIL;
+            string subject = "[TBT Center] Interview invitation";
+
+            string extraNote = string.IsNullOrWhiteSpace(note)
+                ? ""
+                : $"<p style='font-size:13px;line-height:1.6;color:#d0d0d0;'>{System.Net.WebUtility.HtmlEncode(note)}</p>";
+
+            string body = $@"
+                        <html>
+                        <head>
+                        <meta charset='UTF-8' />
+                        <style>
+                        @media only screen and (max-width: 600px) {{
+                            .container {{ width: 94% !important; }}
+                            .section {{ padding: 20px 18px !important; }}
+                        }}
+                        </style>
+                        </head>
+
+                        <body style='font-family:Segoe UI, Arial, sans-serif;background:#f4f4f4;margin:0;padding:20px;'>
+
+                        <div class='container' style='max-width:600px;margin:auto;background:#111;
+                                    color:#f5f5f5;border-radius:12px;overflow:hidden;
+                                    box-shadow:0 10px 25px rgba(0,0,0,0.35);'>
+
+                            <div style='background:linear-gradient(135deg,#fceabb,#f8b500);padding:20px 26px;'>
+                                <h2 style='margin:0;color:#1a1a1a;'>TBT Center</h2>
+                                <p style='margin:4px 0 0;font-size:13px;color:#4a3b0a;'>Interview invitation</p>
+                            </div>
+
+                            <div class='section' style='padding:26px 32px;'>
+                                <p style='font-size:14px;line-height:1.6;margin-top:0;'>
+                                    Hello <b>{fullName}</b>,<br />
+                                    Thank you for applying to <b>TBT HR &amp; Finance Management System</b>.
+                                </p>
+
+                                <p style='font-size:13px;line-height:1.6;color:#d0d0d0;'>
+                                    We would like to invite you to an interview at the following time:
+                                </p>
+
+                                <div style='text-align:center;margin:14px 0 18px;'>
+                                    <div style='display:inline-block;padding:10px 20px;border-radius:999px;
+                                                background:linear-gradient(135deg,#fceabb,#f8b500);
+                                                color:#1a1a1a;font-size:16px;font-weight:600;'>
+                                        {scheduleText}
+                                    </div>
+                                </div>
+
+                                {extraNote}
+
+                                <p style='font-size:13px;line-height:1.6;color:#d0d0d0;'>
+                                    Please reply to this email if you need to reschedule or have any questions.
+                                </p>
+
+                                <p style='font-size:12px;color:#9c9c9c;margin-top:6px;'>
+                                    If you did not expect this email, you can ignore it.
+                                </p>
+                            </div>
+
+                            <div style='padding:14px 22px;border-top:1px solid #333;font-size:11px;color:#777;'>
+                                © {DateTime.Now.Year} TBT Center. All rights reserved.
+                            </div>
+                        </div>
+
+                        </body>
+                        </html>";
+
+            try
+            {
+                using (var smtp = new SmtpClient("smtp.gmail.com", 587))
+                {
+                    smtp.EnableSsl = true;
+                    smtp.Credentials = new NetworkCredential(from, pass);
+
+                    var mail = new MailMessage();
+                    mail.From = new MailAddress(from, "TBT Center");
+                    mail.To.Add(to);
+                    mail.Subject = subject;
+                    mail.Body = body;
+                    mail.IsBodyHtml = true;
+
+                    smtp.Send(mail);
+                }
+
+                return Json(new { success = true, message = "Interview invitation has been sent." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error while sending email: " + ex.Message });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult DownloadCandidateFiles(int id)
+        {
+            var candidate = db.HOSOVIECLAMs.FirstOrDefault(x => x.ID == id);
+            if (candidate == null)
+            {
+                TempData["CandidateError"] = "Candidate not found.";
+                return RedirectToAction("Candidate");
+            }
+
+            string root = Server.MapPath("~/Uploads/HoSoUngVien");
+            var files = new List<Tuple<string, string>>();
+
+            void AddFileIfExists(string fileName)
+            {
+                if (string.IsNullOrWhiteSpace(fileName)) return;
+
+                string folderName = BuildFolderName(candidate.TENUNGVIEN, fileName);
+                string path = string.IsNullOrEmpty(folderName)
+                    ? Path.Combine(root, fileName)
+                    : Path.Combine(root, folderName, fileName);
+
+                if (System.IO.File.Exists(path))
+                {
+                    files.Add(Tuple.Create(path, fileName));
+                }
+            }
+
+            AddFileIfExists(candidate.FILETHONGTIN);
+            AddFileIfExists(candidate.FILEBANGCAP);
+            AddFileIfExists(candidate.FILEKHAC);
+
+            if (!files.Any())
+            {
+                TempData["CandidateError"] = "No files were found for this candidate.";
+                return RedirectToAction("Candidate");
+            }
+
+            using (var ms = new MemoryStream())
+            {
+                using (var archive = new ZipArchive(ms, ZipArchiveMode.Create, true))
+                {
+                    foreach (var f in files)
+                    {
+                        var entry = archive.CreateEntry(f.Item2, CompressionLevel.Fastest);
+                        using (var entryStream = entry.Open())
+                        using (var fileStream = System.IO.File.OpenRead(f.Item1))
+                        {
+                            fileStream.CopyTo(entryStream);
+                        }
+                    }
+                }
+
+                ms.Position = 0;
+                string zipName = "Candidate_" + id + "_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".zip";
+                return File(ms.ToArray(), "application/zip", zipName);
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ExportAndDelete(string selectedIds)
+        {
+            if (string.IsNullOrWhiteSpace(selectedIds))
+            {
+                TempData["CandidateError"] = "Please select at least one candidate.";
+                return RedirectToAction("Candidate");
+            }
+
+            var idList = new List<int>();
+            foreach (var s in selectedIds.Split(','))
+            {
+                if (int.TryParse(s, out int id))
+                    idList.Add(id);
+            }
+
+            if (!idList.Any())
+            {
+                TempData["CandidateError"] = "Selected candidate ID list is not valid.";
+                return RedirectToAction("Candidate");
+            }
+
+            var candidates = db.HOSOVIECLAMs
+                .Where(x => idList.Contains(x.ID))
+                .OrderBy(x => x.ID)
+                .ToList();
+
+            if (!candidates.Any())
+            {
+                TempData["CandidateError"] = "No selected candidates were found.";
+                return RedirectToAction("Candidate");
+            }
+
+            byte[] bytes;
+            using (var ms = new MemoryStream())
+            {
+                var doc = new Document(PageSize.A4, 40, 40, 40, 40);
+                PdfWriter.GetInstance(doc, ms);
+                doc.Open();
+
+                iTextFont titleFont = FontFactory.GetFont("Helvetica", 16, iTextFont.BOLD);
+                iTextFont normalFont = FontFactory.GetFont("Helvetica", 11, iTextFont.NORMAL);
+
+                foreach (var c in candidates)
+                {
+                    doc.Add(new Paragraph("Candidate #" + c.ID, titleFont));
+                    doc.Add(new Paragraph("Full name: " + c.TENUNGVIEN, normalFont));
+                    doc.Add(new Paragraph("Email: " + c.EMAIL, normalFont));
+                    doc.Add(new Paragraph("File - Info: " + c.FILETHONGTIN, normalFont));
+                    doc.Add(new Paragraph("File - Degree: " + c.FILEBANGCAP, normalFont));
+                    doc.Add(new Paragraph("File - Others: " + c.FILEKHAC, normalFont));
+                    doc.Add(new Paragraph("Generated at: " + DateTime.Now.ToString("dd/MM/yyyy HH:mm"), normalFont));
+
+                    doc.Add(new Paragraph(" ", normalFont));
+                    doc.Add(new LineSeparator());
+                    doc.Add(new Paragraph(" ", normalFont));
+                }
+
+                doc.Close();
+                bytes = ms.ToArray();
+            }
+
+            db.HOSOVIECLAMs.RemoveRange(candidates);
+            db.SaveChanges();
+
+            string fileName = "Candidates_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".pdf";
+            return File(bytes, "application/pdf", fileName);
+        }
+        private static DateTime? ExtractDateFromFileName(string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName)) return null;
+
+            string baseName = Path.GetFileNameWithoutExtension(fileName);
+            var parts = baseName.Split('_');
+            if (parts.Length < 3) return null;
+
+            string timeStr = parts[2];
+            if (DateTime.TryParseExact(timeStr, "yyyyMMddHHmmss",
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.None,
+                out DateTime dt))
+            {
+                return dt;
+            }
+
+            return null;
+        }
+
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
-            {
-                db.Dispose();
-            }
+            if (disposing) db.Dispose();
             base.Dispose(disposing);
         }
     }

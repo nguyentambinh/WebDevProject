@@ -1,0 +1,949 @@
+﻿@model QLNSVATC.Areas.HR.Data.WorkWeekViewModel
+@using QLNSVATC.Models
+@using QLNSVATC.Areas.HR.Data
+@using System
+@using System.Collections.Generic
+@using System.Globalization
+
+@{
+    Layout = "~/Areas/HR/Views/Shared/_LayoutHR.cshtml";
+
+    var settings = ViewBag.Settings as UserViewBagModel;
+
+    string themeColor = (settings != null && !string.IsNullOrEmpty(settings.ThemeHex))
+        ? settings.ThemeHex
+        : "#22c55e";
+
+    string fontFamily = (settings != null && !string.IsNullOrEmpty(settings.FontFamily))
+        ? settings.FontFamily
+        : "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
+    int fontSize = (settings != null && settings.FontSize > 0)
+        ? settings.FontSize
+        : 16;
+
+    bool isDarkMode = settings != null ? settings.DarkMode : true;
+
+    string pageBg = isDarkMode ? "#020617" : "#f3f4f6";
+    string cardBg = isDarkMode ? "#020617" : "#ffffff";
+    string borderColor = isDarkMode ? "#1f2937" : "#e5e7eb";
+    string mainTextColor = isDarkMode ? "#e5e7eb" : "#111827";
+    string subTextColor = isDarkMode ? "#9ca3af" : "#6b7280";
+
+    var days = Model?.Days ?? new List<DateTime>();
+    var employees = Model?.Employees ?? new List<WorkEmployeeRow>();
+    var cellMap = Model?.CellMap ?? new Dictionary<string, WorkCellViewModel>();
+
+    var dayNames = new Dictionary<DayOfWeek, string>
+{
+        { DayOfWeek.Monday, "Thứ hai" },
+        { DayOfWeek.Tuesday, "Thứ ba" },
+        { DayOfWeek.Wednesday, "Thứ tư" },
+        { DayOfWeek.Thursday, "Thứ năm" },
+        { DayOfWeek.Friday, "Thứ sáu" },
+        { DayOfWeek.Saturday, "Thứ bảy" },
+        { DayOfWeek.Sunday, "Chủ nhật" }
+    };
+
+    var prevWeek = Model.WeekStart.AddDays(-7);
+    var nextWeek = Model.WeekStart.AddDays(7);
+}
+
+<style>
+    :root {
+        --wk-theme-color: @themeColor;
+        --wk-page-bg: @pageBg;
+        --wk-card-bg: @cardBg;
+        --wk-border: @borderColor;
+        --wk-text-main: @mainTextColor;
+        --wk-text-sub: @subTextColor;
+    }
+
+    .wk-page {
+        padding:22px;
+        font-family:@fontFamily;
+        font-size:@(fontSize);
+        color:var(--wk-text-main);
+        background:var(--wk-page-bg);
+        min-height:calc(100vh - 80px);
+    }
+
+    .wk-header {
+        display:flex;
+        justify-content:space-between;
+        align-items:flex-start;
+        gap:18px;
+        margin-bottom:16px;
+        flex-wrap:wrap;
+    }
+
+    .wk-title {
+        font-size:24px;
+        font-weight:700;
+        letter-spacing:.04em;
+        text-transform:uppercase;
+        color:var(--wk-theme-color);
+    }
+
+    .wk-sub {
+        margin-top:4px;
+        font-size:13px;
+        color:var(--wk-text-sub);
+    }
+
+    .wk-range {
+        margin-top:6px;
+        font-size:12px;
+        color:var(--wk-text-sub);
+    }
+
+    .wk-week-tools {
+        display:flex;
+        flex-direction:column;
+        gap:10px;
+        align-items:flex-end;
+    }
+
+    .wk-week-nav {
+        display:flex;
+        gap:8px;
+    }
+
+    .wk-nav-btn {
+        width:32px;
+        height:30px;
+        border-radius:999px;
+        border:1px solid var(--wk-border);
+        background:var(--wk-card-bg);
+        color:var(--wk-text-main);
+        cursor:pointer;
+        font-size:16px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        box-shadow:0 12px 24px rgba(15,23,42,0.6);
+    }
+
+    .wk-nav-btn:hover {
+        border-color:var(--wk-theme-color);
+        transform:translateY(-1px);
+    }
+
+    .wk-week-picker-box {
+        display:flex;
+        align-items:center;
+        gap:8px;
+        font-size:12px;
+        color:var(--wk-text-sub);
+    }
+
+    .wk-week-picker {
+        border-radius:999px;
+        border:1px solid var(--wk-border);
+        background:var(--wk-card-bg);
+        color:var(--wk-text-main);
+        padding:4px 8px;
+        font-size:12px;
+        outline:none;
+    }
+
+    .wk-week-picker::-webkit-calendar-picker-indicator {
+        filter:invert(0.8);
+    }
+
+    .wk-table-card {
+        background:var(--wk-card-bg);
+        border-radius:18px;
+        border:1px solid var(--wk-border);
+        box-shadow:0 20px 45px rgba(15,23,42,0.85);
+        padding:10px 10px 12px;
+    }
+
+    .wk-filter-row {
+        display:flex;
+        align-items:center;
+        gap:8px;
+        padding:4px 6px 10px;
+        border-bottom:1px solid var(--wk-border);
+    }
+
+    .wk-filter-icon {
+        width:26px;
+        height:26px;
+        border-radius:999px;
+        border:1px solid var(--wk-border);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:14px;
+    }
+
+    .wk-filter-input {
+        flex:1;
+        border:none;
+        background:transparent;
+        color:var(--wk-text-main);
+        font-size:13px;
+        outline:none;
+    }
+
+    .wk-table-wrapper {
+        margin-top:4px;
+        max-height:540px;
+        overflow-y:auto;
+        overflow-x:auto;
+    }
+
+    .wk-table-wrapper::-webkit-scrollbar {
+        width:8px;
+        height:8px;
+    }
+
+    .wk-table-wrapper::-webkit-scrollbar-track {
+        background:rgba(15,23,42,0.9);
+    }
+
+    .wk-table-wrapper::-webkit-scrollbar-thumb {
+        border-radius:999px;
+        background:linear-gradient(180deg, var(--wk-theme-color), #a855f7);
+    }
+
+    .wk-table {
+        width:100%;
+        border-collapse:collapse;
+        table-layout:fixed;
+        font-size:13px;
+    }
+
+    .wk-table thead {
+        background:rgba(15,23,42,0.9);
+    }
+
+    .wk-table th,
+    .wk-table td {
+        border-bottom:1px solid rgba(31,41,55,0.85);
+        padding:6px 4px;
+    }
+
+    .wk-col-emp-head {
+        width:260px;
+        font-size:12px;
+        color:var(--wk-text-sub);
+        text-align:left;
+    }
+
+    .wk-day-head {
+        text-align:center;
+        font-size:11px;
+        text-transform:uppercase;
+        letter-spacing:.04em;
+        color:var(--wk-text-sub);
+    }
+
+    .wk-day-name {
+        font-weight:600;
+    }
+
+    .wk-day-date {
+        margin-top:2px;
+        font-size:12px;
+        color:var(--wk-text-main);
+    }
+
+    .wk-day-head--sun {
+        background:rgba(185,28,28,0.4);
+        color:#fecaca;
+    }
+
+    .wk-row {
+        transition:background .15s ease;
+    }
+
+    .wk-row:hover {
+        background:rgba(15,23,42,0.7);
+    }
+
+    .wk-col-emp {
+        width:260px;
+    }
+
+    .wk-emp {
+        display:flex;
+        align-items:center;
+        gap:8px;
+    }
+
+    .wk-avatar {
+        width:32px;
+        height:32px;
+        border-radius:999px;
+        background:radial-gradient(circle, var(--wk-theme-color), #0f172a);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:16px;
+        font-weight:600;
+        color:#0b1120;
+        overflow:hidden;
+    }
+
+    .wk-avatar img {
+        width:100%;
+        height:100%;
+        object-fit:cover;
+        display:block;
+    }
+
+    .wk-emp-info {
+        display:flex;
+        flex-direction:column;
+        gap:2px;
+    }
+
+    .wk-emp-name {
+        font-size:13px;
+        font-weight:600;
+    }
+
+    .wk-emp-pos {
+        font-size:11px;
+        color:var(--wk-text-sub);
+    }
+
+    .wk-cell {
+        padding:4px 3px;
+    }
+
+    .wk-cell-sun {
+        background:rgba(127,29,29,0.45);
+    }
+
+    .wk-slot {
+        min-height:54px;
+        border-radius:10px;
+        border:1px dashed rgba(148,163,184,0.4);
+        padding:4px 6px;
+        cursor:pointer;
+        display:flex;
+        flex-direction:column;
+        justify-content:center;
+        gap:3px;
+        transition:all .16s ease;
+        overflow:hidden;
+    }
+
+    .wk-slot-empty {
+        background:rgba(15,23,42,0.4);
+    }
+
+    .wk-slot-empty:hover {
+        border-color:var(--wk-theme-color);
+        box-shadow:0 10px 26px rgba(15,23,42,0.8);
+        transform:translateY(-1px);
+    }
+
+    .wk-slot-busy {
+        border-style:solid;
+        border-color:var(--wk-theme-color);
+        background:linear-gradient(135deg, rgba(15,23,42,0.9), rgba(15,23,42,0.6));
+        box-shadow:0 14px 32px rgba(0,0,0,0.85);
+    }
+
+    .wk-slot-busy-holiday {
+        border-color:#f97316;
+        box-shadow:0 18px 40px rgba(248,113,22,0.9);
+    }
+
+    .wk-slot-busy:hover {
+        transform:translateY(-1px);
+        box-shadow:0 20px 40px rgba(0,0,0,0.95);
+    }
+
+    .wk-slot-title {
+        font-size:12px;
+        font-weight:600;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        white-space:nowrap;
+    }
+
+    .wk-slot-sub {
+        font-size:11px;
+        color:var(--wk-text-sub);
+    }
+
+    .wk-slot-sub-holiday {
+        color:#fed7aa;
+    }
+
+    /* Toast */
+    .wk-toast {
+        position:fixed;
+        top:-70px;
+        left:50%;
+        transform:translateX(-50%);
+        background:#020617;
+        border-radius:999px;
+        border:1px solid var(--wk-theme-color);
+        padding:8px 14px;
+        color:var(--wk-text-main);
+        font-size:13px;
+        box-shadow:0 18px 40px rgba(0,0,0,0.9);
+        opacity:0;
+        transition:all .25s ease;
+        z-index:9999;
+        max-width:90vw;
+        white-space:nowrap;
+        text-overflow:ellipsis;
+        overflow:hidden;
+    }
+
+    .wk-toast.show {
+        top:22px;
+        opacity:1;
+    }
+
+    /* Modal */
+    .wk-modal-backdrop {
+        position:fixed;
+        inset:0;
+        background:rgba(15,23,42,0.85);
+        display:none;
+        align-items:center;
+        justify-content:center;
+        z-index:9998;
+    }
+
+    .wk-modal-backdrop.show {
+        display:flex;
+    }
+
+    .wk-modal {
+        width:420px;
+        max-width:95vw;
+        border-radius:18px;
+        background:#020617;
+        border:1px solid rgba(148,163,184,0.8);
+        box-shadow:0 24px 60px rgba(0,0,0,0.95);
+        padding:14px 16px 12px;
+        color:var(--wk-text-main);
+        font-size:13px;
+    }
+
+    .wk-modal-header {
+        display:flex;
+        justify-content:space-between;
+        align-items:flex-start;
+        gap:8px;
+        margin-bottom:8px;
+    }
+
+    .wk-modal-title {
+        font-size:15px;
+        font-weight:600;
+        color:var(--wk-theme-color);
+    }
+
+    .wk-modal-sub {
+        font-size:12px;
+        color:var(--wk-text-sub);
+        margin-top:2px;
+    }
+
+    .wk-modal-close {
+        border:none;
+        background:transparent;
+        color:var(--wk-text-sub);
+        font-size:20px;
+        cursor:pointer;
+    }
+
+    .wk-modal-body {
+        margin-top:4px;
+    }
+
+    .wk-form-group {
+        margin-bottom:8px;
+        display:flex;
+        flex-direction:column;
+        gap:3px;
+    }
+
+    .wk-label {
+        font-size:12px;
+        color:var(--wk-text-sub);
+    }
+
+    .wk-input {
+        border-radius:10px;
+        border:1px solid var(--wk-border);
+        background:#020617;
+        color:var(--wk-text-main);
+        padding:6px 8px;
+        font-size:13px;
+        resize:vertical;
+        outline:none;
+        min-height:34px;
+    }
+
+    .wk-form-note {
+        font-size:11px;
+        color:var(--wk-text-sub);
+    }
+
+    .wk-modal-footer {
+        margin-top:10px;
+        display:flex;
+        justify-content:flex-end;
+        gap:8px;
+    }
+
+    .wk-btn {
+        border-radius:999px;
+        border:1px solid transparent;
+        padding:6px 12px;
+        font-size:13px;
+        cursor:pointer;
+        white-space:nowrap;
+    }
+
+    .wk-btn-secondary {
+        background:transparent;
+        border-color:var(--wk-border);
+        color:var(--wk-text-sub);
+    }
+
+    .wk-btn-primary {
+        background:var(--wk-theme-color);
+        color:#0b1120;
+        font-weight:600;
+    }
+
+    .wk-btn-danger {
+        background:rgba(127,29,29,0.95);
+        border-color:#b91c1c;
+        color:#fee2e2;
+        display:none;
+    }
+
+    @@media (max-width: 900px) {
+        .wk-page {
+            padding:14px 10px;
+        }
+
+        .wk-title {
+            font-size:21px;
+        }
+    }
+</style>
+
+<div class="wk-page">
+    @Html.AntiForgeryToken()
+
+    <div class="wk-header">
+        <div>
+            <div class="wk-title">Lịch làm việc trong tuần</div>
+            <div class="wk-sub">
+                Bấm vào từng ô để thêm, chỉnh sửa hoặc xoá lịch làm việc cho từng nhân viên.
+            </div>
+            <div class="wk-range">
+                Tuần từ @Model.WeekStart.ToString("dd/MM/yyyy") đến @Model.WeekEnd.ToString("dd/MM/yyyy")
+            </div>
+        </div>
+
+        <div class="wk-week-tools">
+            <div class="wk-week-nav">
+                <button type="button"
+                        class="wk-nav-btn"
+                        id="wkPrevWeek"
+                        data-target-week="@prevWeek.ToString("yyyy-MM-dd")">
+                    ‹
+                </button>
+                <button type="button"
+                        class="wk-nav-btn"
+                        id="wkNextWeek"
+                        data-target-week="@nextWeek.ToString("yyyy-MM-dd")">
+                    ›
+                </button>
+            </div>
+            <div class="wk-week-picker-box">
+                <span>Nhảy tới tuần</span>
+                <input type="date"
+                       id="wkWeekPicker"
+                       class="wk-week-picker"
+                       value="@Model.WeekStart.ToString("yyyy-MM-dd")" />
+            </div>
+        </div>
+    </div>
+
+    <div class="wk-table-card">
+        <div class="wk-filter-row">
+            <div class="wk-filter-icon">🔍</div>
+            <input type="text"
+                   id="wkFilterEmployee"
+                   class="wk-filter-input"
+                   placeholder="Lọc nhân viên theo tên..." />
+        </div>
+
+        <div class="wk-table-wrapper">
+            <table class="wk-table">
+                <thead>
+                    <tr>
+                        <th class="wk-col-emp-head">Nhân viên</th>
+                        @foreach (var d in days)
+                        {
+                            bool isSun = d.DayOfWeek == DayOfWeek.Sunday;
+                            var headClass = "wk-day-head" + (isSun ? " wk-day-head--sun" : "");
+                            <th class="@headClass">
+                                <div class="wk-day-name">@dayNames[d.DayOfWeek]</div>
+                                <div class="wk-day-date">@d.ToString("dd/MM")</div>
+                            </th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var emp in employees)
+                    {
+                        <tr class="wk-row" data-emp-name="@emp.FullName.ToLower()">
+                            <td class="wk-col-emp">
+                                <div class="wk-emp">
+                                    <div class="wk-avatar">
+                                        @if (!string.IsNullOrEmpty(emp.EmployeeId))
+                                        {
+                                            var avatarPath = Url.Content("~/Content/Images/Home/NhanVien/" + emp.EmployeeId + ".jpg");
+                                            <img src="@avatarPath" alt="avatar" />
+                                        }
+                                        else
+                                        {
+                                            @(string.IsNullOrEmpty(emp.FullName)
+                                                ? "?"
+                                                : emp.FullName.Trim()[emp.FullName.Trim().Length - 1].ToString().ToUpper())
+                                        }
+                                    </div>
+                                    <div class="wk-emp-info">
+                                        <div class="wk-emp-name">@emp.FullName</div>
+                                        @if (!string.IsNullOrEmpty(emp.PositionName))
+                                        {
+                                            <div class="wk-emp-pos">@emp.PositionName</div>
+                                        }
+                                    </div>
+                                </div>
+                            </td>
+                            @foreach (var d in days)
+                            {
+                                bool isSun = d.DayOfWeek == DayOfWeek.Sunday;
+                                string tdClass = "wk-cell" + (isSun ? " wk-cell-sun" : "");
+                                string key = emp.EmployeeId + "|" + d.ToString("yyyy-MM-dd");
+
+                                WorkCellViewModel cell;
+                                cellMap.TryGetValue(key, out cell);
+
+                                bool has = cell != null; // có record là coi như có lịch
+                                string slotClass = "wk-slot " + (has ? "wk-slot-busy" : "wk-slot-empty");
+                                if (has && cell.IsHoliday)
+                                {
+                                    slotClass += " wk-slot-busy-holiday";
+                                }
+
+                                string dateText = dayNames[d.DayOfWeek] + ", " + d.ToString("dd/MM");
+                                string contentText = has ? (cell.Content ?? "").Trim() : "";
+                                string factorText = has && cell.Factor.HasValue
+                                    ? cell.Factor.Value.ToString("0.##", CultureInfo.InvariantCulture)
+                                    : "";
+                                <td class="@tdClass">
+                                    <div class="@slotClass"
+                                         data-emp-id="@emp.EmployeeId"
+                                         data-emp-name="@Html.AttributeEncode(emp.FullName)"
+                                         data-date="@d.ToString("yyyy-MM-dd")"
+                                         data-date-text="@dateText"
+                                         data-has="@(has ? "true" : "false")"
+                                         data-content="@Html.AttributeEncode(contentText)"
+                                         data-factor="@factorText">
+                                        @if (has)
+                                        {
+                                            if (!string.IsNullOrWhiteSpace(contentText))
+                                            {
+                                                <div class="wk-slot-title">@contentText</div>
+                                            }
+                                            else
+                                            {
+                                                <div class="wk-slot-title">(Đã có lịch)</div>
+                                            }
+
+                                            if (!string.IsNullOrEmpty(factorText))
+                                            {
+                                                <div class="wk-slot-sub">Hệ số: @cell.Factor.Value.ToString("0.##")</div>
+                                            }
+
+                                            if (cell.IsHoliday)
+                                            {
+                                                <div class="wk-slot-sub wk-slot-sub-holiday">
+                                                    Ngày lễ @(
+                                                        string.IsNullOrWhiteSpace(cell.HolidayName)
+                                                            ? ""
+                                                            : (": " + cell.HolidayName)
+                                                    )
+                                                </div>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="wk-slot-add">+ Thêm</span>
+                                        }
+                                    </div>
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="wkToast" class="wk-toast"></div>
+
+    <!-- Modal -->
+    <div class="wk-modal-backdrop" id="wkModalBackdrop">
+        <div class="wk-modal">
+            <div class="wk-modal-header">
+                <div>
+                    <div class="wk-modal-title">Lịch làm việc</div>
+                    <div class="wk-modal-sub">
+                        <span id="wkFormEmpName"></span> ·
+                        <span id="wkFormDateLabel"></span>
+                    </div>
+                </div>
+                <button type="button" class="wk-modal-close" id="wkBtnClose">&times;</button>
+            </div>
+            <div class="wk-modal-body">
+                <input type="hidden" id="wkFormEmpId" />
+                <input type="hidden" id="wkFormDate" />
+                <div class="wk-form-group">
+                    <label class="wk-label">Nội dung công việc</label>
+                    <textarea id="wkFormContent"
+                              class="wk-input"
+                              rows="3"
+                              placeholder="VD: Lắp đặt cáp, kiểm tra vật liệu..."></textarea>
+                </div>
+                <div class="wk-form-group">
+                    <label class="wk-label">Hệ số lương</label>
+                    <input type="number"
+                           step="0.1"
+                           id="wkFormFactor"
+                           class="wk-input"
+                           placeholder="Ví dụ: 3.1" />
+                    <div class="wk-form-note">
+                        Để trống nếu không có hệ số đặc biệt.
+                    </div>
+                </div>
+            </div>
+            <div class="wk-modal-footer">
+                <button type="button" class="wk-btn wk-btn-secondary" id="wkBtnCancel">Huỷ</button>
+                <button type="button" class="wk-btn wk-btn-danger" id="wkBtnDelete">Xoá</button>
+                <button type="button" class="wk-btn wk-btn-primary" id="wkBtnSave">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        var tokenInput = document.querySelector("input[name='__RequestVerificationToken']");
+        var token = tokenInput ? tokenInput.value : "";
+
+        var toast = document.getElementById("wkToast");
+        function showToast(msg) {
+            if (!toast) return;
+            toast.textContent = msg;
+            toast.classList.add("show");
+            setTimeout(function () {
+                toast.classList.remove("show");
+            }, 2200);
+        }
+
+        var modalBackdrop = document.getElementById("wkModalBackdrop");
+        var formEmpId = document.getElementById("wkFormEmpId");
+        var formDate = document.getElementById("wkFormDate");
+        var formEmpName = document.getElementById("wkFormEmpName");
+        var formDateLabel = document.getElementById("wkFormDateLabel");
+        var formContent = document.getElementById("wkFormContent");
+        var formFactor = document.getElementById("wkFormFactor");
+        var btnSave = document.getElementById("wkBtnSave");
+        var btnDelete = document.getElementById("wkBtnDelete");
+        var btnCancel = document.getElementById("wkBtnCancel");
+        var btnClose = document.getElementById("wkBtnClose");
+
+        var hasCurrentSchedule = false;
+
+        function openModal(slot) {
+            if (!slot) return;
+
+            var empId = slot.getAttribute("data-emp-id");
+            var empName = slot.getAttribute("data-emp-name") || "";
+            var date = slot.getAttribute("data-date");
+            var dateText = slot.getAttribute("data-date-text") || date;
+            var content = slot.getAttribute("data-content") || "";
+            var factor = slot.getAttribute("data-factor") || "";
+            hasCurrentSchedule = slot.getAttribute("data-has") === "true";
+
+            formEmpId.value = empId;
+            formDate.value = date;
+            formEmpName.textContent = empName;
+            formDateLabel.textContent = dateText;
+            formContent.value = content;
+            formFactor.value = factor;
+
+            btnDelete.style.display = hasCurrentSchedule ? "inline-block" : "none";
+
+            modalBackdrop.classList.add("show");
+        }
+
+        function closeModal() {
+            modalBackdrop.classList.remove("show");
+        }
+
+        if (modalBackdrop) {
+            modalBackdrop.addEventListener("click", function (e) {
+                if (e.target === modalBackdrop) {
+                    closeModal();
+                }
+            });
+        }
+        if (btnCancel) btnCancel.addEventListener("click", closeModal);
+        if (btnClose) btnClose.addEventListener("click", closeModal);
+
+        // click ô lịch
+        var slots = document.querySelectorAll(".wk-slot");
+        slots.forEach(function (slot) {
+            slot.addEventListener("click", function () {
+                openModal(this);
+            });
+        });
+
+        var saveUrl = '@Url.Action("SaveDay", "Work", new { area = "HR" })';
+        var deleteUrl = '@Url.Action("DeleteDay", "Work", new { area = "HR" })';
+
+        function postForm(url, body, defaultSuccessMsg, onDone) {
+            if (!token) {
+                showToast("Thiếu security token.");
+                if (onDone) onDone();
+                return;
+            }
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+                },
+                body: body
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    if (res && res.success) {
+                        showToast(res.message || defaultSuccessMsg || "Thành công.");
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 800);
+                    } else {
+                        showToast((res && res.message) || "Thao tác thất bại.");
+                    }
+                })
+                .catch(function () {
+                    showToast("Lỗi hệ thống.");
+                })
+                .finally(function () {
+                    if (onDone) onDone();
+                });
+        }
+
+        if (btnSave) {
+            btnSave.addEventListener("click", function () {
+                var empId = formEmpId.value;
+                var date = formDate.value;
+                var content = formContent.value.trim();
+                var factor = formFactor.value.trim();
+
+                if (!empId || !date) {
+                    showToast("Dữ liệu không hợp lệ.");
+                    return;
+                }
+                if (!content) {
+                    showToast("Vui lòng nhập nội dung công việc.");
+                    return;
+                }
+
+                var body = "__RequestVerificationToken=" + encodeURIComponent(token) +
+                    "&employeeId=" + encodeURIComponent(empId) +
+                    "&date=" + encodeURIComponent(date) +
+                    "&content=" + encodeURIComponent(content) +
+                    "&factor=" + encodeURIComponent(factor);
+
+                btnSave.disabled = true;
+                postForm(saveUrl, body, "Đã lưu lịch làm việc.", function () {
+                    btnSave.disabled = false;
+                });
+            });
+        }
+
+        if (btnDelete) {
+            btnDelete.addEventListener("click", function () {
+                if (!hasCurrentSchedule) {
+                    closeModal();
+                    return;
+                }
+                var empId = formEmpId.value;
+                var date = formDate.value;
+
+                var body = "__RequestVerificationToken=" + encodeURIComponent(token) +
+                    "&employeeId=" + encodeURIComponent(empId) +
+                    "&date=" + encodeURIComponent(date);
+
+                btnDelete.disabled = true;
+                postForm(deleteUrl, body, "Đã xoá lịch làm việc.", function () {
+                    btnDelete.disabled = false;
+                });
+            });
+        }
+
+        // filter nhân viên
+        var filterInput = document.getElementById("wkFilterEmployee");
+        if (filterInput) {
+            var rows = document.querySelectorAll(".wk-row");
+            filterInput.addEventListener("input", function () {
+                var val = (this.value || "").toLowerCase();
+                rows.forEach(function (row) {
+                    var name = (row.getAttribute("data-emp-name") || "").toLowerCase();
+                    row.style.display = !val || name.indexOf(val) !== -1 ? "" : "none";
+                });
+            });
+        }
+
+        // chuyển tuần
+        var baseUrl = '@Url.Action("Index", "Work", new { area = "HR" })';
+        function goWeek(anchor) {
+            if (!anchor) return;
+            window.location.href = baseUrl + "?anchor=" + encodeURIComponent(anchor);
+        }
+
+        var btnPrev = document.getElementById("wkPrevWeek");
+        var btnNext = document.getElementById("wkNextWeek");
+        var weekPicker = document.getElementById("wkWeekPicker");
+
+        if (btnPrev) {
+            btnPrev.addEventListener("click", function () {
+                goWeek(this.getAttribute("data-target-week"));
+            });
+        }
+        if (btnNext) {
+            btnNext.addEventListener("click", function () {
+                goWeek(this.getAttribute("data-target-week"));
+            });
+        }
+        if (weekPicker) {
+            weekPicker.addEventListener("change", function () {
+                if (this.value) {
+                    goWeek(this.value);
+                }
+            });
+        }
+    })();
+</script>

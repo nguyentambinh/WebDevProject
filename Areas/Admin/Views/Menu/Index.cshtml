@@ -1,0 +1,1000 @@
+﻿@using QLNSVATC.Models
+@using QLNSVATC.Areas.Admin.Data
+@model IEnumerable<QLNSVATC.Models.MENU>
+
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewBag.Title = "Menu Management";
+    string themeColor = "#f59e0b";
+    string fontFamily = "'Roboto', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    int fontSize = 20;
+    string pageBg = "#020617";
+    string cardBg = "#020617";
+    string borderColor = "#1f2937";
+    string textMain = "#e5e7eb";
+    string textSub = "#9ca3af";
+
+    var roles = ViewBag.Roles as List<string> ?? new List<string>();
+    string selectedRole = ViewBag.RoleFilter as string ?? "";
+    var transDict = ViewBag.Translations as Dictionary<string, PHIENDICH>;
+
+    var allMenus = (Model ?? Enumerable.Empty<QLNSVATC.Models.MENU>()).ToList();
+    var roots = allMenus
+        .Where(m => m.ParentId == null)
+        .OrderBy(m => m.OrderNumber)
+        .ThenBy(m => m.MenuId)
+        .ToList();
+}
+
+<style>
+    :root {
+        --mm-theme: @themeColor;
+        --mm-bg: @pageBg;
+        --mm-card: @cardBg;
+        --mm-border: @borderColor;
+        --mm-text: @textMain;
+        --mm-sub: @textSub;
+    }
+
+    .mm-page {
+        padding: 22px;
+        min-height: calc(100vh - 70px);
+        font-family: @fontFamily;
+        font-size: @(fontSize);
+        color: var(--mm-text);
+        background: var(--mm-bg);
+    }
+
+    .mm-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+    }
+
+    .mm-title-block {
+        max-width: 520px;
+    }
+
+    .mm-title {
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: var(--mm-theme);
+    }
+
+    .mm-sub {
+        font-size: 13px;
+        color: var(--mm-sub);
+        margin-top: 6px;
+    }
+
+    .mm-meta {
+        font-size: 12px;
+        color: var(--mm-sub);
+        margin-top: 6px;
+    }
+
+    .mm-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+    }
+
+    .mm-role-filter form {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .mm-role-filter label {
+        font-size: 13px;
+        color: var(--mm-sub);
+    }
+
+    .mm-role-filter select {
+        min-width: 160px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid var(--mm-border);
+        background: var(--mm-card);
+        color: var(--mm-text);
+        font-size: 13px;
+    }
+
+    .mm-role-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 4px 0 14px;
+    }
+
+    .mm-role-tab {
+        padding: 4px 12px;
+        border-radius: 999px;
+        border: 1px solid var(--mm-border);
+        font-size: 12px;
+        text-decoration: none;
+        cursor: pointer;
+        color: var(--mm-sub);
+        background: rgba(15,23,42,0.6);
+    }
+
+    .mm-role-tab.active {
+        background: var(--mm-theme);
+        color: #020617;
+        border-color: var(--mm-theme);
+        font-weight: 600;
+    }
+
+    .mm-btn-primary {
+        padding: 8px 14px;
+        border-radius: 999px;
+        border: none;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        background: var(--mm-theme);
+        color: #020617;
+        box-shadow: 0 0 14px rgba(245, 158, 11, 0.7);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    .mm-btn-primary span.icon {
+        font-size: 16px;
+    }
+
+    .mm-tree {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .mm-group {
+        background: var(--mm-card);
+        border-radius: 16px;
+        border: 1px solid var(--mm-border);
+        box-shadow: 0 18px 40px rgba(0,0,0,0.55);
+        padding: 12px 14px;
+    }
+
+    .mm-group-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: flex-start;
+        border-bottom: 1px dashed var(--mm-border);
+        padding-bottom: 6px;
+        margin-bottom: 6px;
+    }
+
+    .mm-group-title {
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .mm-group-sub {
+        font-size: 12px;
+        color: var(--mm-sub);
+    }
+
+    .mm-lang-list {
+        margin-top: 4px;
+        font-size: 11px;
+        color: var(--mm-sub);
+        line-height: 1.4;
+    }
+
+    .mm-lang-item span.lang-code {
+        font-weight: 600;
+        color: var(--mm-theme);
+        margin-right: 4px;
+    }
+
+    .mm-group-tags {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 4px;
+        font-size: 11px;
+        color: var(--mm-sub);
+    }
+
+    .mm-tag {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.7);
+    }
+
+    .mm-items {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-top: 4px;
+    }
+
+    .mm-item {
+        display: grid;
+        grid-template-columns: minmax(0, 2.1fr) minmax(0, 2fr) 90px 90px 110px;
+        gap: 8px;
+        align-items: center;
+        padding: 4px 4px;
+        border-radius: 10px;
+    }
+
+    .mm-item.root {
+        background: linear-gradient(135deg, rgba(248, 250, 252, 0.03), rgba(15, 23, 42, 0.5));
+        border: 1px solid rgba(148, 163, 184, 0.6);
+        margin-bottom: 2px;
+    }
+
+    .mm-item.child {
+        padding-left: 26px;
+    }
+
+    .mm-item-name {
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .mm-item-link {
+        font-size: 12px;
+        color: var(--mm-sub);
+        word-break: break-all;
+    }
+
+    .mm-item-role,
+    .mm-item-order {
+        font-size: 12px;
+        text-align: center;
+    }
+
+    .mm-item-langs {
+        grid-column: 1 / -1;
+        font-size: 11px;
+        color: var(--mm-sub);
+        margin-top: 2px;
+    }
+
+    .mm-actions {
+        display: flex;
+        gap: 4px;
+        justify-content: flex-end;
+    }
+
+    .mm-chip-btn {
+        padding: 3px 8px;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.7);
+        background: transparent;
+        color: var(--mm-sub);
+        font-size: 11px;
+        cursor: pointer;
+    }
+
+    .mm-chip-btn:hover {
+        border-color: var(--mm-theme);
+        color: var(--mm-theme);
+    }
+
+    .mm-link-delete {
+        border: none;
+        background: transparent;
+        color: #f97373;
+        font-size: 14px;
+        cursor: pointer;
+        padding: 0 4px;
+    }
+
+    .mm-empty {
+        margin-top: 22px;
+        font-size: 13px;
+        color: var(--mm-sub);
+        text-align: center;
+    }
+
+    .mm-alert {
+        padding: 8px 10px;
+        border-radius: 10px;
+        font-size: 13px;
+        margin-bottom: 10px;
+    }
+
+    .mm-alert.success {
+        background: rgba(22, 163, 74, 0.1);
+        border: 1px solid #16a34a;
+        color: #bbf7d0;
+    }
+
+    .mm-alert.error {
+        background: rgba(220, 38, 38, 0.14);
+        border: 1px solid #ef4444;
+        color: #fecaca;
+    }
+
+    .mm-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.55);
+        display: none;
+        z-index: 9998;
+    }
+
+    .mm-overlay.show {
+        display: block;
+    }
+
+    .mm-modal {
+        position: fixed;
+        top: 50vh;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 420px;
+        max-width: 96vw;
+        max-height: 95vh;
+        overflow-y: auto;
+        background: #020617;
+        border-radius: 18px;
+        padding: 18px 18px 16px;
+        box-shadow: 0 20px 55px rgba(0,0,0,0.7);
+        z-index: 9999;
+        display: none;
+        color: #e5e7eb;
+        font-family: @fontFamily;
+    }
+
+    .mm-modal.show {
+        display: block;
+    }
+
+    .mm-modal-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 6px;
+    }
+
+    .mm-modal-title {
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .mm-modal-close {
+        border: none;
+        background: transparent;
+        color: #9ca3af;
+        font-size: 20px;
+        cursor: pointer;
+        line-height: 1;
+    }
+
+    .mm-modal-body {
+        font-size: 13px;
+    }
+
+    .mm-field {
+        margin-bottom: 8px;
+    }
+
+    .mm-label {
+        font-size: 12px;
+        margin-bottom: 2px;
+        color: #9ca3af;
+    }
+
+    .mm-input,
+    .mm-select,
+    .mm-textarea {
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid rgba(148, 163, 184, 0.6);
+        background: #020617;
+        color: #e5e7eb;
+        padding: 6px 9px;
+        font-size: 13px;
+        box-sizing: border-box;
+    }
+
+    .mm-textarea {
+        min-height: 42px;
+        resize: vertical;
+    }
+
+    .mm-modal-footer {
+        margin-top: 6px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+
+    .mm-btn-cancel {
+        padding: 7px 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.7);
+        background: transparent;
+        color: #e5e7eb;
+        font-size: 13px;
+        cursor: pointer;
+    }
+
+    .mm-btn-save {
+        padding: 7px 14px;
+        border-radius: 999px;
+        border: none;
+        background: var(--mm-theme);
+        color: #020617;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .mm-modal-delete .mm-modal-body {
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .mm-modal-delete .mm-modal-footer {
+        justify-content: space-between;
+    }
+
+    .mm-btn-delete {
+        padding: 7px 14px;
+        border-radius: 999px;
+        border: none;
+        background: #ef4444;
+        color: #fee2e2;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    /* remove number input arrows */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+
+    /* Responsive: keep one row with smaller columns */
+    @@media (max-width: 768px) {
+        .mm-page {
+            padding: 16px 12px;
+        }
+
+        .mm-group {
+            padding: 10px 10px;
+        }
+
+        .mm-item {
+            grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.8fr) 70px 70px 80px;
+            column-gap: 6px;
+            align-items: center;
+        }
+
+        .mm-item-name {
+            font-size: 12px;
+        }
+
+        .mm-item-link {
+            font-size: 11px;
+        }
+
+        .mm-item-role,
+        .mm-item-order {
+            font-size: 11px;
+        }
+
+        .mm-actions {
+            justify-content: flex-end;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .mm-header {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .mm-role-filter form {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .mm-btn-primary {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .mm-role-tabs {
+            gap: 6px;
+        }
+
+        /* hide order column on very small screens to avoid wrapping */
+        .mm-item {
+            grid-template-columns: minmax(0, 2.6fr) minmax(0, 2.4fr) 80px 80px;
+            column-gap: 6px;
+        }
+
+        .mm-item-order {
+            display: none;
+        }
+    }
+</style>
+
+<div class="mm-page">
+
+    <div class="mm-header">
+        <div class="mm-title-block">
+            <div class="mm-title">Menu Management</div>
+            <div class="mm-sub">
+                Manage menus for each <strong>Role</strong>, grouped by ParentId and edit multi-language translations.
+            </div>
+            <div class="mm-meta">
+                System: <strong>TBT Center</strong>
+            </div>
+        </div>
+
+        <div class="mm-role-filter">
+            <form method="get" action="@Url.Action("Index", "Menu", new { area = "Admin" })">
+                <label for="role">Role:</label>
+                <select id="role" name="role" onchange="this.form.submit()">
+                    <option value="">All</option>
+                    @foreach (var r in roles)
+                    {
+                        <option value="@r" @(r == selectedRole ? "selected" : "")>@r</option>
+                    }
+                </select>
+            </form>
+        </div>
+    </div>
+
+    <div class="mm-role-tabs">
+        <a class="mm-role-tab @(string.IsNullOrEmpty(selectedRole) ? "active" : "")"
+           href="@Url.Action("Index", "Menu", new { area = "Admin", role = (string)null })">
+            USER
+        </a>
+
+        <a class="mm-role-tab @(selectedRole == "HR" ? "active" : "")"
+           href="@Url.Action("Index", "Menu", new { area = "Admin", role = "HR" })">
+            HR
+        </a>
+
+        <a class="mm-role-tab @(selectedRole == "FN" ? "active" : "")"
+           href="@Url.Action("Index", "Menu", new { area = "Admin", role = "FN" })">
+            FN
+        </a>
+
+        <a class="mm-role-tab @(selectedRole == "AD" ? "active" : "")"
+           href="@Url.Action("Index", "Menu", new { area = "Admin", role = "AD" })">
+            AD
+        </a>
+    </div>
+
+    @if (TempData["MenuSuccess"] != null)
+    {
+        <div class="mm-alert success">@TempData["MenuSuccess"]</div>
+    }
+    @if (TempData["MenuError"] != null)
+    {
+        <div class="mm-alert error">@TempData["MenuError"]</div>
+    }
+
+    <div class="mm-toolbar">
+        <div></div>
+        <button type="button"
+                class="mm-btn-primary"
+                onclick="mmOpenNewRoot()">
+            <span class="icon">➕</span> Add new menu
+        </button>
+    </div>
+
+    @if (!allMenus.Any())
+    {
+        <div class="mm-empty">
+            No menu for this role yet. Click <strong>Add new menu</strong> to start.
+        </div>
+    }
+    else
+    {
+        <div class="mm-tree">
+            @foreach (var root in roots)
+            {
+                PHIENDICH tRoot = null;
+                if (transDict != null && !string.IsNullOrEmpty(root.TranslateKey) &&
+                    transDict.ContainsKey(root.TranslateKey))
+                {
+                    tRoot = transDict[root.TranslateKey];
+                }
+
+                var children = allMenus
+                    .Where(m => m.ParentId == root.MenuId)
+                    .OrderBy(m => m.OrderNumber)
+                    .ThenBy(m => m.MenuId)
+                    .ToList();
+
+                <div class="mm-group">
+                    <div class="mm-group-header">
+                        <div>
+                            <div class="mm-group-title">@root.MenuName</div>
+                            <div class="mm-group-sub">
+                                Link:
+                                @(string.IsNullOrEmpty(root.MenuLink)
+                                    ? "(not configured)"
+                                    : root.MenuLink)
+
+                                @if (!string.IsNullOrEmpty(root.TranslateKey))
+                                {
+                                    <text> &bull; Key: @root.TranslateKey</text>
+                                }
+                                <div class="mm-lang-list">
+                                    @if (tRoot != null)
+                                    {
+                                        if (!string.IsNullOrEmpty(tRoot.vi_VN))
+                                        {
+                                            <div class="mm-lang-item"><span class="lang-code">vi:</span> @tRoot.vi_VN</div>
+                                        }
+                                        if (!string.IsNullOrEmpty(tRoot.en_US))
+                                        {
+                                            <div class="mm-lang-item"><span class="lang-code">en:</span> @tRoot.en_US</div>
+                                        }
+                                        if (!string.IsNullOrEmpty(tRoot.jp_JP))
+                                        {
+                                            <div class="mm-lang-item"><span class="lang-code">jp:</span> @tRoot.jp_JP</div>
+                                        }
+                                        if (!string.IsNullOrEmpty(tRoot.kr_KR))
+                                        {
+                                            <div class="mm-lang-item"><span class="lang-code">kr:</span> @tRoot.kr_KR</div>
+                                        }
+                                        if (!string.IsNullOrEmpty(tRoot.cn_CN))
+                                        {
+                                            <div class="mm-lang-item"><span class="lang-code">cn:</span> @tRoot.cn_CN</div>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mm-group-tags">
+                            <span class="mm-tag">Role: @(root.Role ?? "N/A")</span>
+                            <span class="mm-tag">Order: @root.OrderNumber</span>
+                        </div>
+                    </div>
+
+                    <div class="mm-items">
+                        <div class="mm-item root">
+                            <div class="mm-item-name">@root.MenuName</div>
+                            <div class="mm-item-link">@root.MenuLink</div>
+                            <div class="mm-item-role">@root.Role</div>
+                            <div class="mm-item-order">@root.OrderNumber</div>
+                            <div class="mm-actions">
+                                <button type="button"
+                                        class="mm-chip-btn"
+                                        data-mm-edit="1"
+                                        data-id="@root.MenuId"
+                                        data-name="@root.MenuName"
+                                        data-link="@root.MenuLink"
+                                        data-parent=""
+                                        data-order="@root.OrderNumber"
+                                        data-role="@root.Role"
+                                        data-key="@root.TranslateKey"
+                                        data-vi="@(tRoot?.vi_VN)"
+                                        data-en="@(tRoot?.en_US)"
+                                        data-jp="@(tRoot?.jp_JP)"
+                                        data-kr="@(tRoot?.kr_KR)"
+                                        data-cn="@(tRoot?.cn_CN)">
+                                    Edit
+                                </button>
+
+                                <button type="button"
+                                        class="mm-chip-btn"
+                                        onclick="mmOpenNewChild(@root.MenuId, '@(root.Role)')"
+                                        title="Add child menu">
+                                    +
+                                </button>
+
+                                @using (Html.BeginForm("Delete", "Menu", FormMethod.Post, new { area = "Admin", @class = "mm-delete-form" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@root.MenuId" />
+                                    <input type="hidden" name="role" value="@root.Role" />
+                                    <button type="button" class="mm-link-delete" title="Delete root menu">✕</button>
+                                }
+                            </div>
+                        </div>
+
+                        @foreach (var child in children)
+                        {
+                            PHIENDICH tChild = null;
+                            if (transDict != null && !string.IsNullOrEmpty(child.TranslateKey) &&
+                                transDict.ContainsKey(child.TranslateKey))
+                            {
+                                tChild = transDict[child.TranslateKey];
+                            }
+
+                            <div class="mm-item child">
+                                <div class="mm-item-name">└ @child.MenuName</div>
+                                <div class="mm-item-link">@child.MenuLink</div>
+                                <div class="mm-item-role">@child.Role</div>
+                                <div class="mm-item-order">@child.OrderNumber</div>
+                                <div class="mm-actions">
+                                    <button type="button"
+                                            class="mm-chip-btn"
+                                            data-mm-edit="1"
+                                            data-id="@child.MenuId"
+                                            data-name="@child.MenuName"
+                                            data-link="@child.MenuLink"
+                                            data-parent="@child.ParentId"
+                                            data-order="@child.OrderNumber"
+                                            data-role="@child.Role"
+                                            data-key="@child.TranslateKey"
+                                            data-vi="@(tChild?.vi_VN)"
+                                            data-en="@(tChild?.en_US)"
+                                            data-jp="@(tChild?.jp_JP)"
+                                            data-kr="@(tChild?.kr_KR)"
+                                            data-cn="@(tChild?.cn_CN)">
+                                        Edit
+                                    </button>
+
+                                    @using (Html.BeginForm("Delete", "Menu", FormMethod.Post, new { area = "Admin", @class = "mm-delete-form" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@child.MenuId" />
+                                        <input type="hidden" name="role" value="@child.Role" />
+                                        <button type="button" class="mm-link-delete" title="Delete menu">✕</button>
+                                    }
+                                </div>
+
+                                <div class="mm-item-langs">
+                                    @if (tChild != null)
+                                    {
+                                        if (!string.IsNullOrEmpty(tChild.vi_VN))
+                                        {
+                                            <span class="mm-lang-item"><span class="lang-code">vi:</span> @tChild.vi_VN</span><br />
+                                        }
+                                        if (!string.IsNullOrEmpty(tChild.en_US))
+                                        {
+                                            <span class="mm-lang-item"><span class="lang-code">en:</span> @tChild.en_US</span><br />
+                                        }
+                                        if (!string.IsNullOrEmpty(tChild.jp_JP))
+                                        {
+                                            <span class="mm-lang-item"><span class="lang-code">jp:</span> @tChild.jp_JP</span><br />
+                                        }
+                                        if (!string.IsNullOrEmpty(tChild.kr_KR))
+                                        {
+                                            <span class="mm-lang-item"><span class="lang-code">kr:</span> @tChild.kr_KR</span><br />
+                                        }
+                                        if (!string.IsNullOrEmpty(tChild.cn_CN))
+                                        {
+                                            <span class="mm-lang-item"><span class="lang-code">cn:</span> @tChild.cn_CN</span>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <div id="mmOverlay" class="mm-overlay" onclick="mmCloseModal()"></div>
+
+    <div id="mmModal" class="mm-modal" onclick="event.stopPropagation();">
+        <div class="mm-modal-header">
+            <div class="mm-modal-title" id="mmModalTitle">Add menu</div>
+            <button type="button" class="mm-modal-close" onclick="mmCloseModal()">×</button>
+        </div>
+        <div class="mm-modal-body">
+            @using (Html.BeginForm("SaveMenu", "Menu", FormMethod.Post, new { area = "Admin", id = "mmForm" }))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="MenuId" id="mmMenuId" />
+                <input type="hidden" name="Role" id="mmRoleHidden" value="@selectedRole" />
+
+                <div class="mm-field">
+                    <div class="mm-label">Menu name</div>
+                    <input type="text" id="mmMenuName" name="MenuName" class="mm-input" required />
+                </div>
+
+                <div class="mm-field">
+                    <div class="mm-label">Link</div>
+                    <input type="text" id="mmMenuLink" name="MenuLink" class="mm-input" />
+                </div>
+
+                <div class="mm-field">
+                    <div class="mm-label">Parent menu</div>
+                    <select id="mmParentId" name="ParentId" class="mm-select">
+                        <option value="">(Root menu)</option>
+                        @foreach (var m in allMenus.OrderBy(x => x.MenuName))
+                        {
+                            <option value="@m.MenuId">@m.MenuName (@m.Role)</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mm-field">
+                    <div class="mm-label">Display order (OrderNumber)</div>
+                    <input type="number" id="mmOrder" name="OrderNumber" class="mm-input" value="1" />
+                </div>
+
+                <div class="mm-field">
+                    <div class="mm-label">Role</div>
+                    <select id="mmRole" class="mm-select" name="Role">
+                        <option value="">(Not set)</option>
+                        @foreach (var r in roles)
+                        {
+                            <option value="@r" @(r == selectedRole ? "selected" : "")>@r</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mm-field">
+                    <div class="mm-label">TranslateKey (optional, auto generated if empty)</div>
+                    <input type="text" id="mmKey" name="TranslateKey" class="mm-input" />
+                </div>
+
+                <hr style="border-color:#1f2937;margin:8px 0;" />
+
+                <div class="mm-field">
+                    <div class="mm-label">vi_VN</div>
+                    <textarea id="mmVi" name="vi_VN" class="mm-textarea"></textarea>
+                </div>
+                <div class="mm-field">
+                    <div class="mm-label">en_US</div>
+                    <textarea id="mmEn" name="en_US" class="mm-textarea"></textarea>
+                </div>
+                <div class="mm-field">
+                    <div class="mm-label">jp_JP</div>
+                    <textarea id="mmJp" name="jp_JP" class="mm-textarea"></textarea>
+                </div>
+                <div class="mm-field">
+                    <div class="mm-label">kr_KR</div>
+                    <textarea id="mmKr" name="kr_KR" class="mm-textarea"></textarea>
+                </div>
+                <div class="mm-field">
+                    <div class="mm-label">cn_CN</div>
+                    <textarea id="mmCn" name="cn_CN" class="mm-textarea"></textarea>
+                </div>
+
+                <div class="mm-modal-footer">
+                    <button type="button" class="mm-btn-cancel" onclick="mmCloseModal()">
+                        Cancel
+                    </button>
+                    <button type="submit" class="mm-btn-save">
+                        Save
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div id="mmDeleteConfirm" class="mm-modal mm-modal-delete" onclick="event.stopPropagation();">
+        <div class="mm-modal-header">
+            <div class="mm-modal-title">Delete menu</div>
+            <button type="button" class="mm-modal-close" onclick="mmCloseModal()">×</button>
+        </div>
+        <div class="mm-modal-body">
+            Are you sure you want to delete this menu?<br />
+            This action cannot be undone.
+        </div>
+        <div class="mm-modal-footer">
+            <button type="button" class="mm-btn-cancel" onclick="mmCloseModal()">
+                Cancel
+            </button>
+            <button type="button" class="mm-btn-delete" onclick="mmConfirmDelete()">
+                Delete
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    var mmDeleteForm = null;
+
+    function mmOpenModal() {
+        document.getElementById('mmOverlay').classList.add('show');
+        document.getElementById('mmModal').classList.add('show');
+    }
+
+    function mmCloseModal() {
+        document.getElementById('mmOverlay').classList.remove('show');
+        var modal = document.getElementById('mmModal');
+        var delModal = document.getElementById('mmDeleteConfirm');
+        if (modal) modal.classList.remove('show');
+        if (delModal) delModal.classList.remove('show');
+        mmDeleteForm = null;
+    }
+
+    function mmResetForm() {
+        document.getElementById('mmForm').reset();
+        document.getElementById('mmMenuId').value = '';
+        document.getElementById('mmParentId').value = '';
+        document.getElementById('mmKey').value = '';
+        document.getElementById('mmVi').value = '';
+        document.getElementById('mmEn').value = '';
+        document.getElementById('mmJp').value = '';
+        document.getElementById('mmKr').value = '';
+        document.getElementById('mmCn').value = '';
+
+        var roleHidden = document.getElementById('mmRoleHidden').value;
+        if (roleHidden) {
+            document.getElementById('mmRole').value = roleHidden;
+        }
+    }
+
+    function mmOpenNewRoot() {
+        mmResetForm();
+        document.getElementById('mmModalTitle').innerText = 'Add new menu';
+        mmOpenModal();
+    }
+
+    function mmOpenNewChild(parentId, role) {
+        mmResetForm();
+        document.getElementById('mmModalTitle').innerText = 'Add child menu';
+        document.getElementById('mmParentId').value = parentId;
+        if (role) {
+            document.getElementById('mmRole').value = role;
+        }
+        mmOpenModal();
+    }
+
+    function mmConfirmDelete() {
+        if (mmDeleteForm) {
+            mmDeleteForm.submit();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var editButtons = document.querySelectorAll('[data-mm-edit="1"]');
+        Array.prototype.forEach.call(editButtons, function (btn) {
+            btn.addEventListener('click', function () {
+                mmResetForm();
+                document.getElementById('mmModalTitle').innerText = 'Edit menu';
+
+                document.getElementById('mmMenuId').value = this.getAttribute('data-id') || '';
+                document.getElementById('mmMenuName').value = this.getAttribute('data-name') || '';
+                document.getElementById('mmMenuLink').value = this.getAttribute('data-link') || '';
+                document.getElementById('mmParentId').value = this.getAttribute('data-parent') || '';
+                document.getElementById('mmOrder').value = this.getAttribute('data-order') || 1;
+
+                var role = this.getAttribute('data-role') || '';
+                if (role) {
+                    document.getElementById('mmRole').value = role;
+                }
+
+                document.getElementById('mmKey').value = this.getAttribute('data-key') || '';
+
+                document.getElementById('mmVi').value = this.getAttribute('data-vi') || '';
+                document.getElementById('mmEn').value = this.getAttribute('data-en') || '';
+                document.getElementById('mmJp').value = this.getAttribute('data-jp') || '';
+                document.getElementById('mmKr').value = this.getAttribute('data-kr') || '';
+                document.getElementById('mmCn').value = this.getAttribute('data-cn') || '';
+
+                mmOpenModal();
+            });
+        });
+        var deleteButtons = document.querySelectorAll('.mm-delete-form .mm-link-delete');
+        Array.prototype.forEach.call(deleteButtons, function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                mmDeleteForm = this.closest('form');
+                document.getElementById('mmOverlay').classList.add('show');
+                document.getElementById('mmDeleteConfirm').classList.add('show');
+            });
+        });
+    });
+</script>

@@ -179,7 +179,7 @@ namespace QLNSVATC.Controllers
                     var fromAddress = new MailAddress(from, "TBT Center HR");
                     var toAddress = new MailAddress(model.EMAIL, model.TENUNGVIEN);
 
-                    string subject = "TBT Center - Application received";
+                    string subject = "TBT Center HR - Application received";
 
                     string body = $@"
                     <html>

@@ -1,0 +1,1765 @@
+﻿@model QLNSVATC.Areas.HR.Data.ProjectInformationViewModel
+@using QLNSVATC.Models
+@using System.Collections.Generic
+
+@{
+    Layout = "~/Areas/HR/Views/Shared/_LayoutHR.cshtml";
+
+    var settings = ViewBag.Settings as UserViewBagModel;
+
+    string themeColor = (settings != null && !string.IsNullOrEmpty(settings.ThemeHex))
+        ? settings.ThemeHex
+        : "#f97316";
+
+    string fontFamily = (settings != null && !string.IsNullOrEmpty(settings.FontFamily))
+        ? settings.FontFamily
+        : "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
+    int fontSize = (settings != null && settings.FontSize > 0)
+        ? settings.FontSize
+        : 16;
+
+    bool isDarkMode = settings != null ? settings.DarkMode : true;
+
+    string pageBg = isDarkMode ? "#020617" : "#f3f4f6";
+    string cardBg = isDarkMode ? "#020617" : "#ffffff";
+    string borderColor = isDarkMode ? "#1f2937" : "#e5e7eb";
+    string mainTextColor = isDarkMode ? "#e5e7eb" : "#111827";
+    string subTextColor = isDarkMode ? "#9ca3af" : "#6b7280";
+
+    var sections = Model?.Sections ?? new List<QLNSVATC.Areas.HR.Data.ProjectSectionViewModel>();
+    var areaList = Model?.Areas ?? new List<DTTHEOKV>();
+    var loaiHinhList = Model?.Types ?? new List<DTTHEOLHCT>();
+    var customerList = Model?.Customers ?? new List<KHACHHANG>();
+
+    string currentLang = ViewBag.CurrentLang as string ?? "vi_VN";
+    var txt = new Dictionary<string, string>();
+
+    if (currentLang == "en_US")
+    {
+        txt["PageTitle"] = "Projects information";
+        txt["PageSub"] = "Overview of all projects by contract type. Use filters per section and drag a card into the red box to delete (or use delete button on mobile).";
+        txt["LegendStatus"] = "Status badges";
+        txt["LegendEmployees"] = "👥 = Employees in project";
+        txt["BtnNewProject"] = "+ New project";
+        txt["SectionProjectsSuffix"] = "projects";
+
+        txt["FilterProjectName"] = "Project name";
+        txt["FilterProjectNamePlaceholder"] = "Search by name...";
+        txt["FilterLocation"] = "Location";
+        txt["FilterStartFrom"] = "Start from";
+        txt["FilterEndTo"] = "End to";
+        txt["FilterStatus"] = "Status";
+
+        txt["StatusAll"] = "All";
+        txt["StatusUpcoming"] = "Upcoming";
+        txt["StatusOngoing"] = "Ongoing";
+        txt["StatusDone"] = "Done";
+        txt["StatusOverdue"] = "Overdue";
+        txt["StatusOnTrack"] = "On track";
+
+        txt["DropTitle"] = "Drop here to delete";
+        txt["DropSub"] = "Drag a project card into this area (desktop only).";
+
+        txt["NextProject"] = "Next project →";
+
+        txt["ConfirmDeleteTitle"] = "Delete project";
+        txt["ConfirmDeleteText"] = "Are you sure you want to delete this project? This action cannot be undone.";
+        txt["BtnCancel"] = "Cancel";
+        txt["BtnDelete"] = "Delete";
+
+        txt["WizardTitle"] = "New project";
+        txt["Step1"] = "Basic info";
+        txt["Step2"] = "Location & type";
+        txt["Step3"] = "Finance";
+
+        txt["FieldType"] = "Contract / project type";
+        txt["FieldName"] = "Project / contract name";
+        txt["FieldCustomer"] = "Customer";
+        txt["FieldArea"] = "Location (province / area)";
+        txt["FieldLoaiHinh"] = "Project category";
+        txt["FieldStartDate"] = "Start date (contract)";
+        txt["FieldEndDate"] = "End date (project)";
+        txt["FieldDeposit"] = "Deposit";
+        txt["FieldExpected"] = "Expected revenue";
+        txt["FieldCoeff"] = "Adjustment coefficient";
+        txt["FieldTotal"] = "Final amount / total";
+        txt["FieldNote"] = "Notes (optional)";
+        txt["FieldNoteHint"] = "Internal notes about this project...";
+        txt["AutoCodeHint"] = "Project code and contract code will be generated automatically from selected information.";
+
+        txt["Type1"] = "Type 1";
+        txt["Type2"] = "Type 2";
+        txt["Type3"] = "Type 3";
+        txt["Type4"] = "Type 4";
+
+        txt["ClientLabel"] = "Client";
+        txt["LocationLabel"] = "Location";
+        txt["TimelineLabel"] = "Timeline";
+
+        txt["SelectTypeOption"] = "-- Select type --";
+        txt["SelectCustomerOption"] = "-- Select customer --";
+        txt["SelectAreaOption"] = "-- Select area --";
+        txt["SelectLoaiHinhOption"] = "-- Select category --";
+
+        txt["ToastProjectIdInvalid"] = "Project id is invalid.";
+        txt["ToastMissingToken"] = "Missing security token.";
+        txt["ToastDeleteError"] = "Cannot delete this project.";
+        txt["ToastDeleteOk"] = "Project deleted.";
+        txt["ToastCreateOk"] = "Project created successfully.";
+        txt["ToastCreateError"] = "Cannot create project.";
+        txt["ToastValidateStep1"] = "Please select type, enter project name and choose customer.";
+        txt["ToastValidateStep2"] = "Please select location and project category.";
+        txt["ToastValidateStep2Dates"] = "End date must be after or equal to start date.";
+        txt["ToastDeleteSystemError"] = "System error while deleting project.";
+        txt["ToastCreateSystemError"] = "System error while creating project.";
+
+        txt["BtnBack"] = "Back";
+        txt["BtnNext"] = "Next";
+        txt["BtnCreate"] = "Create project";
+    }
+    else if (currentLang == "jp_JP")
+    {
+        txt["PageTitle"] = "プロジェクト情報";
+        txt["PageSub"] = "契約タイプ別の全プロジェクト一覧です。各セクションのフィルターを使い、カードを赤いボックスへドラッグすると削除できます（モバイルでは削除ボタンを使用）。";
+        txt["LegendStatus"] = "ステータスラベル";
+        txt["LegendEmployees"] = "👥 = 参加社員";
+        txt["BtnNewProject"] = "＋新規プロジェクト";
+        txt["SectionProjectsSuffix"] = "件のプロジェクト";
+
+        txt["FilterProjectName"] = "プロジェクト名";
+        txt["FilterProjectNamePlaceholder"] = "名前で検索...";
+        txt["FilterLocation"] = "エリア";
+        txt["FilterStartFrom"] = "開始日（以降）";
+        txt["FilterEndTo"] = "終了日（まで）";
+        txt["FilterStatus"] = "ステータス";
+
+        txt["StatusAll"] = "すべて";
+        txt["StatusUpcoming"] = "開始予定";
+        txt["StatusOngoing"] = "進行中";
+        txt["StatusDone"] = "完了";
+        txt["StatusOverdue"] = "期限超過";
+        txt["StatusOnTrack"] = "順調";
+
+        txt["DropTitle"] = "ここにドロップして削除";
+        txt["DropSub"] = "プロジェクトカードをこの領域にドラッグ＆ドロップします（デスクトップのみ）。";
+
+        txt["NextProject"] = "次のプロジェクト →";
+
+        txt["ConfirmDeleteTitle"] = "プロジェクトを削除";
+        txt["ConfirmDeleteText"] = "このプロジェクトを削除してよろしいですか。元に戻すことはできません。";
+        txt["BtnCancel"] = "キャンセル";
+        txt["BtnDelete"] = "削除";
+
+        txt["WizardTitle"] = "新規プロジェクト";
+        txt["Step1"] = "基本情報";
+        txt["Step2"] = "エリアと種別";
+        txt["Step3"] = "財務";
+
+        txt["FieldType"] = "契約 / プロジェクト種別";
+        txt["FieldName"] = "プロジェクト / 契約名";
+        txt["FieldCustomer"] = "顧客";
+        txt["FieldArea"] = "エリア（都道府県など）";
+        txt["FieldLoaiHinh"] = "プロジェクトカテゴリ";
+        txt["FieldStartDate"] = "開始日（契約）";
+        txt["FieldEndDate"] = "終了日（プロジェクト）";
+        txt["FieldDeposit"] = "前受金";
+        txt["FieldExpected"] = "想定売上";
+        txt["FieldCoeff"] = "調整係数";
+        txt["FieldTotal"] = "最終金額 / 合計";
+        txt["FieldNote"] = "メモ（任意）";
+        txt["FieldNoteHint"] = "このプロジェクトに関する社内メモ...";
+        txt["AutoCodeHint"] = "プロジェクトコードと契約コードは選択した情報から自動生成されます。";
+
+        txt["Type1"] = "タイプ 1";
+        txt["Type2"] = "タイプ 2";
+        txt["Type3"] = "タイプ 3";
+        txt["Type4"] = "タイプ 4";
+
+        txt["ClientLabel"] = "顧客";
+        txt["LocationLabel"] = "エリア";
+        txt["TimelineLabel"] = "期間";
+
+        txt["SelectTypeOption"] = "-- 種別を選択 --";
+        txt["SelectCustomerOption"] = "-- 顧客を選択 --";
+        txt["SelectAreaOption"] = "-- エリアを選択 --";
+        txt["SelectLoaiHinhOption"] = "-- カテゴリを選択 --";
+
+        txt["ToastProjectIdInvalid"] = "プロジェクトIDが正しくありません。";
+        txt["ToastMissingToken"] = "セキュリティトークンがありません。";
+        txt["ToastDeleteError"] = "このプロジェクトを削除できません。";
+        txt["ToastDeleteOk"] = "プロジェクトを削除しました。";
+        txt["ToastCreateOk"] = "プロジェクトを作成しました。";
+        txt["ToastCreateError"] = "プロジェクトを作成できません。";
+        txt["ToastValidateStep1"] = "種別を選択し、プロジェクト名と顧客を入力してください。";
+        txt["ToastValidateStep2"] = "エリアとプロジェクトカテゴリを選択してください。";
+        txt["ToastValidateStep2Dates"] = "終了日は開始日以降である必要があります。";
+        txt["ToastDeleteSystemError"] = "プロジェクト削除中にシステムエラーが発生しました。";
+        txt["ToastCreateSystemError"] = "プロジェクト作成中にシステムエラーが発生しました。";
+
+        txt["BtnBack"] = "戻る";
+        txt["BtnNext"] = "次へ";
+        txt["BtnCreate"] = "プロジェクトを作成";
+    }
+    else if (currentLang == "kr_KR")
+    {
+        txt["PageTitle"] = "프로젝트 정보";
+        txt["PageSub"] = "계약 유형별 모든 프로젝트 현황입니다. 섹션별 필터를 사용하고 카드를 빨간 박스로 드래그하면 삭제됩니다(모바일은 삭제 버튼 사용).";
+        txt["LegendStatus"] = "상태 배지";
+        txt["LegendEmployees"] = "👥 = 프로젝트 참여 인원";
+        txt["BtnNewProject"] = "+ 새 프로젝트";
+        txt["SectionProjectsSuffix"] = "개 프로젝트";
+
+        txt["FilterProjectName"] = "프로젝트 이름";
+        txt["FilterProjectNamePlaceholder"] = "이름으로 검색...";
+        txt["FilterLocation"] = "지역";
+        txt["FilterStartFrom"] = "시작일 이후";
+        txt["FilterEndTo"] = "종료일 까지";
+        txt["FilterStatus"] = "상태";
+
+        txt["StatusAll"] = "전체";
+        txt["StatusUpcoming"] = "예정";
+        txt["StatusOngoing"] = "진행 중";
+        txt["StatusDone"] = "완료";
+        txt["StatusOverdue"] = "지연";
+        txt["StatusOnTrack"] = "정상 진행";
+
+        txt["DropTitle"] = "여기에 드롭하여 삭제";
+        txt["DropSub"] = "프로젝트 카드를 이 영역으로 드래그 앤 드롭합니다(데스크톱 전용).";
+
+        txt["NextProject"] = "다음 프로젝트 →";
+
+        txt["ConfirmDeleteTitle"] = "프로젝트 삭제";
+        txt["ConfirmDeleteText"] = "이 프로젝트를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.";
+        txt["BtnCancel"] = "취소";
+        txt["BtnDelete"] = "삭제";
+
+        txt["WizardTitle"] = "새 프로젝트";
+        txt["Step1"] = "기본 정보";
+        txt["Step2"] = "지역 및 유형";
+        txt["Step3"] = "재무";
+
+        txt["FieldType"] = "계약 / 프로젝트 유형";
+        txt["FieldName"] = "프로젝트 / 계약 이름";
+        txt["FieldCustomer"] = "고객";
+        txt["FieldArea"] = "지역 (도 / 권역)";
+        txt["FieldLoaiHinh"] = "프로젝트 카테고리";
+        txt["FieldStartDate"] = "시작일 (계약)";
+        txt["FieldEndDate"] = "종료일 (프로젝트)";
+        txt["FieldDeposit"] = "계약금";
+        txt["FieldExpected"] = "예상 매출";
+        txt["FieldCoeff"] = "조정 계수";
+        txt["FieldTotal"] = "최종 금액 / 합계";
+        txt["FieldNote"] = "메모 (선택 사항)";
+        txt["FieldNoteHint"] = "프로젝트에 대한 내부 메모...";
+        txt["AutoCodeHint"] = "선택한 정보로 프로젝트 코드와 계약 코드를 자동 생성합니다.";
+
+        txt["Type1"] = "유형 1";
+        txt["Type2"] = "유형 2";
+        txt["Type3"] = "유형 3";
+        txt["Type4"] = "유형 4";
+
+        txt["ClientLabel"] = "고객";
+        txt["LocationLabel"] = "지역";
+        txt["TimelineLabel"] = "기간";
+
+        txt["SelectTypeOption"] = "-- 유형 선택 --";
+        txt["SelectCustomerOption"] = "-- 고객 선택 --";
+        txt["SelectAreaOption"] = "-- 지역 선택 --";
+        txt["SelectLoaiHinhOption"] = "-- 카테고리 선택 --";
+
+        txt["ToastProjectIdInvalid"] = "프로젝트 ID가 올바르지 않습니다.";
+        txt["ToastMissingToken"] = "보안 토큰이 없습니다.";
+        txt["ToastDeleteError"] = "이 프로젝트를 삭제할 수 없습니다.";
+        txt["ToastDeleteOk"] = "프로젝트가 삭제되었습니다.";
+        txt["ToastCreateOk"] = "프로젝트가 생성되었습니다.";
+        txt["ToastCreateError"] = "프로젝트를 생성할 수 없습니다.";
+        txt["ToastValidateStep1"] = "유형을 선택하고 프로젝트 이름과 고객을 입력하세요.";
+        txt["ToastValidateStep2"] = "지역과 프로젝트 카테고리를 선택하세요.";
+        txt["ToastValidateStep2Dates"] = "종료일은 시작일 이후여야 합니다.";
+        txt["ToastDeleteSystemError"] = "프로젝트 삭제 중 시스템 오류가 발생했습니다.";
+        txt["ToastCreateSystemError"] = "프로젝트 생성 중 시스템 오류가 발생했습니다.";
+
+        txt["BtnBack"] = "이전";
+        txt["BtnNext"] = "다음";
+        txt["BtnCreate"] = "프로젝트 생성";
+    }
+    else if (currentLang == "cn_CN")
+    {
+        txt["PageTitle"] = "项目信息";
+        txt["PageSub"] = "按合同类型汇总所有项目。使用每个分组的筛选器，将卡片拖到红色区域即可删除（手机可使用删除按钮）。";
+        txt["LegendStatus"] = "状态标记";
+        txt["LegendEmployees"] = "👥 = 项目参与人员";
+        txt["BtnNewProject"] = "+ 新建项目";
+        txt["SectionProjectsSuffix"] = "个项目";
+
+        txt["FilterProjectName"] = "项目名称";
+        txt["FilterProjectNamePlaceholder"] = "按名称搜索...";
+        txt["FilterLocation"] = "地区";
+        txt["FilterStartFrom"] = "开始日期";
+        txt["FilterEndTo"] = "结束日期";
+        txt["FilterStatus"] = "状态";
+
+        txt["StatusAll"] = "全部";
+        txt["StatusUpcoming"] = "即将开始";
+        txt["StatusOngoing"] = "进行中";
+        txt["StatusDone"] = "已完成";
+        txt["StatusOverdue"] = "已逾期";
+        txt["StatusOnTrack"] = "进度正常";
+
+        txt["DropTitle"] = "拖到此处删除";
+        txt["DropSub"] = "将项目卡片拖放到此区域（仅限桌面端）。";
+
+        txt["NextProject"] = "下一个项目 →";
+
+        txt["ConfirmDeleteTitle"] = "删除项目";
+        txt["ConfirmDeleteText"] = "确定要删除此项目吗？该操作无法恢复。";
+        txt["BtnCancel"] = "取消";
+        txt["BtnDelete"] = "删除";
+
+        txt["WizardTitle"] = "新建项目";
+        txt["Step1"] = "基础信息";
+        txt["Step2"] = "地区与类型";
+        txt["Step3"] = "财务";
+
+        txt["FieldType"] = "合同 / 项目类型";
+        txt["FieldName"] = "项目 / 合同名称";
+        txt["FieldCustomer"] = "客户";
+        txt["FieldArea"] = "地区（省 / 区域）";
+        txt["FieldLoaiHinh"] = "项目类别";
+        txt["FieldStartDate"] = "开始日期（合同）";
+        txt["FieldEndDate"] = "结束日期（项目）";
+        txt["FieldDeposit"] = "定金";
+        txt["FieldExpected"] = "预期收入";
+        txt["FieldCoeff"] = "调整系数";
+        txt["FieldTotal"] = "最终金额 / 合计";
+        txt["FieldNote"] = "备注（可选）";
+        txt["FieldNoteHint"] = "关于此项目的内部备注...";
+        txt["AutoCodeHint"] = "项目代码和合同代码将根据所选信息自动生成。";
+
+        txt["Type1"] = "类型 1";
+        txt["Type2"] = "类型 2";
+        txt["Type3"] = "类型 3";
+        txt["Type4"] = "类型 4";
+
+        txt["ClientLabel"] = "客户";
+        txt["LocationLabel"] = "地区";
+        txt["TimelineLabel"] = "时间";
+
+        txt["SelectTypeOption"] = "-- 选择类型 --";
+        txt["SelectCustomerOption"] = "-- 选择客户 --";
+        txt["SelectAreaOption"] = "-- 选择地区 --";
+        txt["SelectLoaiHinhOption"] = "-- 选择类别 --";
+
+        txt["ToastProjectIdInvalid"] = "项目编号无效。";
+        txt["ToastMissingToken"] = "缺少安全令牌。";
+        txt["ToastDeleteError"] = "无法删除该项目。";
+        txt["ToastDeleteOk"] = "项目已删除。";
+        txt["ToastCreateOk"] = "项目创建成功。";
+        txt["ToastCreateError"] = "无法创建项目。";
+        txt["ToastValidateStep1"] = "请选择类型，填写项目名称并选择客户。";
+        txt["ToastValidateStep2"] = "请选择地区和项目类别。";
+        txt["ToastValidateStep2Dates"] = "结束日期必须不早于开始日期。";
+        txt["ToastDeleteSystemError"] = "删除项目时发生系统错误。";
+        txt["ToastCreateSystemError"] = "创建项目时发生系统错误。";
+
+        txt["BtnBack"] = "返回";
+        txt["BtnNext"] = "下一步";
+        txt["BtnCreate"] = "创建项目";
+    }
+    else
+    {
+        txt["PageTitle"] = "Thông tin dự án";
+        txt["PageSub"] = "Tổng quan tất cả dự án theo loại hợp đồng. Dùng bộ lọc từng nhóm, kéo thả thẻ vào ô màu đỏ để xóa (hoặc dùng nút xóa trên điện thoại).";
+        txt["LegendStatus"] = "Nhãn trạng thái";
+        txt["LegendEmployees"] = "👥 = Nhân sự tham gia";
+        txt["BtnNewProject"] = "+ Dự án mới";
+        txt["SectionProjectsSuffix"] = "dự án";
+
+        txt["FilterProjectName"] = "Tên dự án";
+        txt["FilterProjectNamePlaceholder"] = "Tìm theo tên...";
+        txt["FilterLocation"] = "Khu vực";
+        txt["FilterStartFrom"] = "Bắt đầu từ";
+        txt["FilterEndTo"] = "Kết thúc đến";
+        txt["FilterStatus"] = "Trạng thái";
+
+        txt["StatusAll"] = "Tất cả";
+        txt["StatusUpcoming"] = "Sắp triển khai";
+        txt["StatusOngoing"] = "Đang thực hiện";
+        txt["StatusDone"] = "Hoàn thành";
+        txt["StatusOverdue"] = "Quá hạn";
+        txt["StatusOnTrack"] = "Đúng tiến độ";
+
+        txt["DropTitle"] = "Kéo thả vào đây để xóa";
+        txt["DropSub"] = "Kéo thả thẻ dự án vào vùng này (chỉ desktop).";
+
+        txt["NextProject"] = "Dự án tiếp theo →";
+
+        txt["ConfirmDeleteTitle"] = "Xóa dự án";
+        txt["ConfirmDeleteText"] = "Bạn chắc chắn muốn xóa dự án này? Thao tác không thể hoàn tác.";
+        txt["BtnCancel"] = "Hủy";
+        txt["BtnDelete"] = "Xóa";
+
+        txt["WizardTitle"] = "Dự án mới";
+        txt["Step1"] = "Thông tin cơ bản";
+        txt["Step2"] = "Khu vực & loại hình";
+        txt["Step3"] = "Tài chính";
+
+        txt["FieldType"] = "Loại hợp đồng / dự án";
+        txt["FieldName"] = "Tên dự án / hợp đồng";
+        txt["FieldCustomer"] = "Khách hàng";
+        txt["FieldArea"] = "Khu vực (tỉnh / vùng)";
+        txt["FieldLoaiHinh"] = "Loại hình dự án";
+        txt["FieldStartDate"] = "Ngày bắt đầu (HĐ)";
+        txt["FieldEndDate"] = "Ngày kết thúc (DA)";
+        txt["FieldDeposit"] = "Tiền cọc";
+        txt["FieldExpected"] = "Doanh thu dự kiến";
+        txt["FieldCoeff"] = "Hệ số điều chỉnh";
+        txt["FieldTotal"] = "Tổng nghiệm thu";
+        txt["FieldNote"] = "Ghi chú (tuỳ chọn)";
+        txt["FieldNoteHint"] = "Ghi chú nội bộ về dự án...";
+        txt["AutoCodeHint"] = "Mã dự án và mã hợp đồng sẽ được sinh tự động từ thông tin đã chọn.";
+
+        txt["Type1"] = "Loại 1";
+        txt["Type2"] = "Loại 2";
+        txt["Type3"] = "Loại 3";
+        txt["Type4"] = "Loại 4";
+
+        txt["ClientLabel"] = "Khách hàng";
+        txt["LocationLabel"] = "Khu vực";
+        txt["TimelineLabel"] = "Thời gian";
+
+        txt["SelectTypeOption"] = "-- Chọn loại --";
+        txt["SelectCustomerOption"] = "-- Chọn khách hàng --";
+        txt["SelectAreaOption"] = "-- Chọn khu vực --";
+        txt["SelectLoaiHinhOption"] = "-- Chọn loại hình --";
+
+        txt["ToastProjectIdInvalid"] = "Mã dự án không hợp lệ.";
+        txt["ToastMissingToken"] = "Thiếu mã bảo mật.";
+        txt["ToastDeleteError"] = "Không thể xóa dự án này.";
+        txt["ToastDeleteOk"] = "Đã xóa dự án.";
+        txt["ToastCreateOk"] = "Tạo dự án thành công.";
+        txt["ToastCreateError"] = "Không thể tạo dự án.";
+        txt["ToastValidateStep1"] = "Hãy chọn loại, nhập tên dự án và chọn khách hàng.";
+        txt["ToastValidateStep2"] = "Hãy chọn khu vực và loại hình dự án.";
+        txt["ToastValidateStep2Dates"] = "Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu.";
+        txt["ToastDeleteSystemError"] = "Lỗi hệ thống khi xóa dự án.";
+        txt["ToastCreateSystemError"] = "Lỗi hệ thống khi tạo dự án.";
+
+        txt["BtnBack"] = "Quay lại";
+        txt["BtnNext"] = "Tiếp tục";
+        txt["BtnCreate"] = "Tạo dự án";
+    }
+
+    Func<string, string> typeName = code =>
+    {
+        switch ((code ?? "").Trim())
+        {
+            case "1": return txt["Type1"];
+            case "2": return txt["Type2"];
+            case "3": return txt["Type3"];
+            case "4": return txt["Type4"];
+            default: return txt["Type1"];
+        }
+    };
+}
+
+<style>
+    .pi-page {
+        padding: 22px;
+        font-family: @fontFamily;
+        font-size: @(fontSize);
+        color: @mainTextColor;
+        @*background: @pageBg;*@
+        min-height: calc(100vh - 80px);
+    }
+    .pi-header {
+        display:flex;
+        justify-content:space-between;
+        align-items:flex-start;
+        gap:16px;
+        margin-bottom:18px;
+        flex-wrap:wrap;
+    }
+    .pi-title-block {
+        max-width:480px;
+    }
+    .pi-title {
+        font-size:24px;
+        font-weight:700;
+        letter-spacing:.04em;
+        text-transform:uppercase;
+        color:@themeColor;
+    }
+    .pi-sub {
+        margin-top:6px;
+        font-size:13px;
+        color:@subTextColor;
+    }
+    .pi-header-right {
+        display:flex;
+        flex-direction:column;
+        gap:8px;
+        align-items:flex-end;
+    }
+    .pi-legend {
+        display:flex;
+        gap:10px;
+        flex-wrap:wrap;
+        font-size:11px;
+        color:@subTextColor;
+        justify-content:flex-end;
+    }
+    .pi-legend span {
+        display:inline-flex;
+        align-items:center;
+        gap:4px;
+    }
+    .pi-dot {
+        width:10px;
+        height:10px;
+        border-radius:999px;
+        background:@themeColor;
+        opacity:.8;
+    }
+    .pi-add-btn {
+        border-radius:999px;
+        padding:6px 14px;
+        font-size:12px;
+        border:1px solid transparent;
+        background:@themeColor;
+        color:#111827;
+        font-weight:600;
+        cursor:pointer;
+        box-shadow:0 0 14px rgba(249,115,22,0.7);
+    }
+    .pi-add-btn:hover {
+        filter:brightness(1.05);
+    }
+    .pi-section {
+        margin-bottom:22px;
+        border-radius:18px;
+        border:1px solid @borderColor;
+        background:linear-gradient(135deg, rgba(15,23,42,0.95), rgba(15,23,42,0.85));
+        box-shadow:0 20px 45px rgba(15,23,42,0.7);
+        padding:14px 14px 12px;
+    }
+    .pi-section-header {
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:10px;
+        margin-bottom:10px;
+    }
+    .pi-section-title {
+        font-size:14px;
+        font-weight:600;
+        letter-spacing:.08em;
+        text-transform:uppercase;
+        color:@themeColor;
+    }
+    .pi-section-meta {
+        font-size:11px;
+        color:@subTextColor;
+    }
+    .pi-filters {
+        display:grid;
+        grid-template-columns: minmax(0,2fr) minmax(0,1.3fr) repeat(2,minmax(0,1.1fr)) minmax(0,1.2fr);
+        gap:8px;
+        margin-bottom:10px;
+    }
+    .pi-filter-item {
+        display:flex;
+        flex-direction:column;
+        gap:3px;
+        font-size:11px;
+    }
+    .pi-filter-label {
+        color:@subTextColor;
+    }
+    .pi-input,
+    .pi-select {
+        width:100%;
+        border-radius:999px;
+        border:1px solid rgba(148,163,184,0.6);
+        background:#020617;
+        color:#e5e7eb;
+        padding:5px 10px;
+        font-size:12px;
+        outline:none;
+        box-sizing:border-box;
+    }
+    .pi-input::-webkit-calendar-picker-indicator {
+        filter:invert(0.8);
+    }
+    .pi-row {
+        display:grid;
+        grid-auto-flow:column;
+        grid-auto-columns:260px;
+        gap:10px;
+        overflow-x:auto;
+        padding-bottom:4px;
+    }
+    .pi-row::-webkit-scrollbar {
+        height:6px;
+    }
+    .pi-row::-webkit-scrollbar-track {
+        background:rgba(15,23,42,0.9);
+    }
+    .pi-row::-webkit-scrollbar-thumb {
+        background: linear-gradient(90deg, var(--theme-color), #facc15);
+        border-radius:999px;
+    }
+    .pi-card,
+    .pi-drop {
+        background:@cardBg;
+        border-radius:14px;
+        border:1px solid @borderColor;
+        padding:10px 11px 28px;
+        position:relative;
+        display:flex;
+        flex-direction:column;
+        gap:6px;
+        box-shadow:0 14px 30px rgba(15,23,42,0.7);
+        transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+    }
+    .pi-card {
+        cursor:grab;
+    }
+    .pi-card:active {
+        cursor:grabbing;
+    }
+    .pi-card.dragging {
+        opacity:.7;
+        transform:scale(.97);
+        box-shadow:0 10px 24px rgba(15,23,42,0.6);
+    }
+    .pi-card-header {
+        display:flex;
+        justify-content:space-between;
+        align-items:flex-start;
+        gap:6px;
+    }
+    .pi-card-title {
+        font-size:14px;
+        font-weight:600;
+        margin-bottom:2px;
+    }
+    .pi-card-code {
+        font-size:11px;
+        color:@subTextColor;
+    }
+    .pi-status-pill {
+        border-radius:999px;
+        padding:3px 8px;
+        font-size:10px;
+        text-transform:uppercase;
+        letter-spacing:.09em;
+        border:1px solid rgba(148,163,184,0.8);
+        color:#e5e7eb;
+        white-space:nowrap;
+    }
+    .pi-status-pill[data-status="upcoming"] { border-color:#22c55e; }
+    .pi-status-pill[data-status="ongoing"]  { border-color:#38bdf8; }
+    .pi-status-pill[data-status="done"]     { border-color:#a855f7; }
+    .pi-status-pill[data-status="overdue"]  { border-color:#f97316; }
+    .pi-card-body {
+        font-size:11px;
+        display:flex;
+        flex-direction:column;
+        gap:3px;
+    }
+    .pi-row-line {
+        display:flex;
+        justify-content:space-between;
+        gap:6px;
+    }
+    .pi-row-label {
+        color:@subTextColor;
+        white-space:nowrap;
+    }
+    .pi-row-value {
+        text-align:right;
+        flex:1;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        white-space:nowrap;
+    }
+    .pi-card-footer {
+        position:absolute;
+        left:10px;
+        right:10px;
+        bottom:6px;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:8px;
+        font-size:11px;
+    }
+    .pi-emp-count {
+        color:@subTextColor;
+        white-space:nowrap;
+    }
+    .pi-delete-mobile-btn {
+        border-radius:999px;
+        border:1px solid #b91c1c;
+        background:rgba(127,29,29,0.9);
+        color:#fee2e2;
+        font-size:11px;
+        padding:3px 9px;
+        cursor:pointer;
+        position:absolute;
+        right:8px;
+        left:auto;
+        bottom:5px;
+        display:none;
+    }
+    .pi-drop {
+        border-style:dashed;
+        border-color:#b91c1c;
+        background:rgba(127,29,29,0.25);
+        align-items:center;
+        justify-content:center;
+        text-align:center;
+        padding:12px;
+        min-height:90px;
+        margin-top:10px;
+    }
+    .pi-drop-title {
+        font-size:12px;
+        font-weight:600;
+        color:#fecaca;
+    }
+    .pi-drop-sub {
+        margin-top:4px;
+        font-size:10px;
+        color:#fecaca;
+    }
+    .pi-drop.over {
+        border-color:#fca5a5;
+        background:rgba(220,38,38,0.4);
+    }
+    .pi-section-nav {
+        margin-top:8px;
+        display:flex;
+        justify-content:center;
+    }
+    .pi-next-btn {
+        border-radius:999px;
+        border:1px solid @borderColor;
+        background:transparent;
+        color:@subTextColor;
+        font-size:11px;
+        padding:4px 12px;
+        cursor:pointer;
+    }
+    .pi-next-btn:hover {
+        border-color:@themeColor;
+        color:@themeColor;
+    }
+    .pi-toast {
+        position:fixed;
+        left:50%;
+        top:-70px;
+        transform:translateX(-50%);
+        background:#020617;
+        border-radius:999px;
+        border:1px solid @themeColor;
+        padding:9px 15px;
+        color:#e5e7eb;
+        font-size:13px;
+        box-shadow:0 18px 40px rgba(15,23,42,0.8);
+        opacity:0;
+        transition:all .25s ease;
+        z-index:9999;
+        max-width:90vw;
+        text-align:center;
+        white-space:nowrap;
+        text-overflow:ellipsis;
+        overflow:hidden;
+    }
+    .pi-toast.show {
+        top:22px;
+        opacity:1;
+    }
+    .pi-confirm-backdrop,
+    .pi-create-backdrop {
+        position:fixed;
+        inset:0;
+        background:rgba(15,23,42,0.8);
+        display:none;
+        align-items:center;
+        justify-content:center;
+        z-index:9998;
+    }
+    .pi-confirm-backdrop.show,
+    .pi-create-backdrop.show {
+        display:flex;
+    }
+    .pi-confirm-box {
+        width:320px;
+        max-width:95vw;
+        border-radius:16px;
+        background:#020617;
+        border:1px solid rgba(248,113,22,0.7);
+        box-shadow:0 20px 50px rgba(0,0,0,0.85);
+        padding:16px 18px 14px;
+        color:#e5e7eb;
+        font-size:13px;
+    }
+    .pi-confirm-title {
+        font-size:15px;
+        font-weight:600;
+        margin-bottom:6px;
+    }
+    .pi-confirm-text {
+        font-size:13px;
+        color:@subTextColor;
+    }
+    .pi-confirm-actions {
+        margin-top:12px;
+        display:flex;
+        justify-content:flex-end;
+        gap:8px;
+    }
+    .pi-btn-secondary,
+    .pi-btn-primary {
+        border-radius:999px;
+        padding:6px 13px;
+        font-size:13px;
+        border:1px solid transparent;
+        cursor:pointer;
+    }
+    .pi-btn-secondary {
+        background:transparent;
+        color:@subTextColor;
+        border-color:rgba(148,163,184,0.8);
+    }
+    .pi-btn-primary {
+        background:#b91c1c;
+        color:#fee2e2;
+        border-color:#fecaca;
+        font-weight:600;
+    }
+    .pi-create-box {
+        width:460px;
+        max-width:95vw;
+        border-radius:18px;
+        background:#020617;
+        border:1px solid rgba(148,163,184,0.7);
+        box-shadow:0 20px 50px rgba(0,0,0,0.9);
+        padding:16px 18px 14px;
+        color:#e5e7eb;
+        font-size:13px;
+    }
+    .pi-create-header {
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        margin-bottom:8px;
+        gap:8px;
+    }
+    .pi-create-title {
+        font-size:15px;
+        font-weight:600;
+    }
+    .pi-create-close {
+        border:none;
+        background:transparent;
+        color:#9ca3af;
+        font-size:18px;
+        cursor:pointer;
+    }
+    .pi-create-steps {
+        display:flex;
+        justify-content:center;
+        gap:12px;
+        margin-bottom:8px;
+        font-size:11px;
+        color:@subTextColor;
+    }
+    .pi-step-dot {
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        gap:2px;
+    }
+    .pi-step-dot span {
+        font-size:11px;
+    }
+    .pi-step-circle {
+        width:18px;
+        height:18px;
+        border-radius:999px;
+        border:1px solid rgba(148,163,184,0.7);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:10px;
+    }
+    .pi-step-dot.active .pi-step-circle {
+        border-color:@themeColor;
+        background:@themeColor;
+        color:#111827;
+    }
+    .pi-step-dot.active span {
+        color:@themeColor;
+    }
+    .pi-create-body {
+        margin-top:4px;
+    }
+    .pi-create-step {
+        display:none;
+    }
+    .pi-create-step.active {
+        display:block;
+    }
+    .pi-create-group {
+        margin-top:8px;
+        display:flex;
+        flex-direction:column;
+        gap:3px;
+    }
+    .pi-create-label {
+        font-size:12px;
+        color:@subTextColor;
+    }
+    .pi-create-input,
+    .pi-create-select,
+    .pi-create-textarea {
+        width:100%;
+        border-radius:10px;
+        border:1px solid rgba(148,163,184,0.7);
+        background:#020617;
+        color:#e5e7eb;
+        padding:6px 8px;
+        font-size:13px;
+        box-sizing:border-box;
+        outline:none;
+    }
+    .pi-create-two-cols {
+        display:grid;
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:8px;
+    }
+    .pi-create-footer {
+        margin-top:10px;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:8px;
+    }
+    .pi-create-next {
+        background:@themeColor;
+        color:#111827;
+        border-radius:999px;
+        border:1px solid transparent;
+        padding:6px 13px;
+        font-size:13px;
+        cursor:pointer;
+        font-weight:600;
+        box-shadow:0 0 12px rgba(248,181,0,0.9);
+    }
+    .pi-create-next:disabled {
+        opacity:.6;
+        cursor:default;
+        box-shadow:none;
+    }
+    @@media (max-width: 992px) {
+        .pi-filters {
+            grid-template-columns: repeat(2,minmax(0,1fr));
+        }
+    }
+    @@media (max-width: 768px) {
+        .pi-page {
+            padding: 12px 10px;
+        }
+        .pi-row {
+            grid-auto-columns: 82vw;
+        }
+        .pi-drop {
+            display:none;
+        }
+        .pi-delete-mobile-btn {
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+        }
+    }
+    @@media (max-width: 480px) {
+        .pi-title {
+            font-size:20px;
+        }
+    }
+</style>
+
+<div class="pi-page">
+    @Html.AntiForgeryToken()
+
+    <div class="pi-header">
+        <div class="pi-title-block">
+            <div class="pi-title">@txt["PageTitle"]</div>
+            <div class="pi-sub">
+                @txt["PageSub"]
+            </div>
+        </div>
+        <div class="pi-header-right">
+            <div class="pi-legend">
+                <span><span class="pi-dot"></span> @txt["LegendStatus"]</span>
+                <span>@txt["LegendEmployees"]</span>
+            </div>
+            <button type="button" class="pi-add-btn" id="piOpenCreate">
+                @txt["BtnNewProject"]
+            </button>
+        </div>
+    </div>
+
+    @foreach (var sec in sections)
+    {
+        var hasItems = sec.Items != null && sec.Items.Count > 0;
+        <section class="pi-section" data-section-type="@sec.TypeCode">
+            <div class="pi-section-header">
+                <div>
+                    <div class="pi-section-title">@typeName(sec.TypeCode)</div>
+                    <div class="pi-section-meta">
+                        @((hasItems ? sec.Items.Count : 0)) @txt["SectionProjectsSuffix"]
+                    </div>
+                </div>
+            </div>
+
+            <div class="pi-filters">
+                <div class="pi-filter-item">
+                    <span class="pi-filter-label">@txt["FilterProjectName"]</span>
+                    <input type="text" class="pi-input pi-filter-name"
+                           placeholder="@txt["FilterProjectNamePlaceholder"]" />
+                </div>
+                <div class="pi-filter-item">
+                    <span class="pi-filter-label">@txt["FilterLocation"]</span>
+                    <select class="pi-select pi-filter-area">
+                        <option value="">@txt["StatusAll"]</option>
+                        @foreach (var kv in areaList)
+                        {
+                            <option value="@kv.MAKV">@kv.TENTINH</option>
+                        }
+                    </select>
+                </div>
+                <div class="pi-filter-item">
+                    <span class="pi-filter-label">@txt["FilterStartFrom"]</span>
+                    <input type="date" class="pi-input pi-filter-start" />
+                </div>
+                <div class="pi-filter-item">
+                    <span class="pi-filter-label">@txt["FilterEndTo"]</span>
+                    <input type="date" class="pi-input pi-filter-end" />
+                </div>
+                <div class="pi-filter-item">
+                    <span class="pi-filter-label">@txt["FilterStatus"]</span>
+                    <select class="pi-select pi-filter-status">
+                        <option value="">@txt["StatusAll"]</option>
+                        <option value="upcoming">@txt["StatusUpcoming"]</option>
+                        <option value="ongoing">@txt["StatusOngoing"]</option>
+                        <option value="done">@txt["StatusDone"]</option>
+                        <option value="overdue">@txt["StatusOverdue"]</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="pi-row">
+                @if (hasItems)
+                {
+                    foreach (var item in sec.Items)
+                    {
+                        var startStr = item.StartDate.HasValue
+                            ? item.StartDate.Value.ToString("yyyy-MM-dd")
+                            : "";
+                        var endStr = item.EndDate.HasValue
+                            ? item.EndDate.Value.ToString("yyyy-MM-dd")
+                            : "";
+
+                        var statusCode = (item.StatusCode ?? "").ToLower();
+                        string statusText = txt["StatusOnTrack"];
+                        if (statusCode == "upcoming") { statusText = txt["StatusUpcoming"]; }
+                        else if (statusCode == "ongoing") { statusText = txt["StatusOngoing"]; }
+                        else if (statusCode == "done") { statusText = txt["StatusDone"]; }
+                        else if (statusCode == "overdue") { statusText = txt["StatusOverdue"]; }
+
+                        <article class="pi-card"
+                                 draggable="true"
+                                 data-project-id="@item.ProjectKey"
+                                 data-url="@Url.Action("Details", "Project", new { area = "HR", id = item.ProjectKey })"
+                                 data-name="@item.ProjectName.ToLower()"
+                                 data-area="@item.AreaCode"
+                                 data-start="@startStr"
+                                 data-end="@endStr"
+                                 data-status="@item.StatusCode">
+                            <div class="pi-card-header">
+                                <div>
+                                    <div class="pi-card-title">@item.ProjectName</div>
+                                    <div class="pi-card-code">
+                                        @item.ProjectCode · @item.ContractCode
+                                    </div>
+                                </div>
+                                <div class="pi-status-pill" data-status="@item.StatusCode">
+                                    @statusText
+                                </div>
+                            </div>
+
+                            <div class="pi-card-body">
+                                <div class="pi-row-line">
+                                    <span class="pi-row-label">@txt["ClientLabel"]</span>
+                                    <span class="pi-row-value">@item.CustomerName</span>
+                                </div>
+                                <div class="pi-row-line">
+                                    <span class="pi-row-label">@txt["LocationLabel"]</span>
+                                    <span class="pi-row-value">@item.AreaName</span>
+                                </div>
+                                <div class="pi-row-line">
+                                    <span class="pi-row-label">@txt["TimelineLabel"]</span>
+                                    <span class="pi-row-value">
+                                        @(item.StartDate.HasValue
+                                            ? item.StartDate.Value.ToString("dd/MM/yyyy")
+                                            : "?")
+                                        –
+                                        @(item.EndDate.HasValue
+                                            ? item.EndDate.Value.ToString("dd/MM/yyyy")
+                                            : "?")
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="pi-card-footer">
+                                <span class="pi-emp-count">👥 @item.EmployeeCount</span>
+
+                                <button type="button"
+                                        class="pi-delete-mobile-btn pi-delete-mobile"
+                                        data-id="@item.ProjectKey">
+                                    @txt["BtnDelete"]
+                                </button>
+                            </div>
+                        </article>
+                    }
+                }
+            </div>
+
+            <div class="pi-drop" data-section-type="@sec.TypeCode">
+                <div class="pi-drop-title">@txt["DropTitle"]</div>
+                <div class="pi-drop-sub">
+                    @txt["DropSub"]
+                </div>
+            </div>
+
+            <div class="pi-section-nav">
+                <button type="button"
+                        class="pi-next-btn"
+                        data-section="@sec.TypeCode">
+                    @txt["NextProject"]
+                </button>
+            </div>
+        </section>
+    }
+
+    <div id="piToast" class="pi-toast"></div>
+</div>
+
+<div class="pi-confirm-backdrop" id="piConfirmDelete">
+    <div class="pi-confirm-box">
+        <div class="pi-confirm-title">@txt["ConfirmDeleteTitle"]</div>
+        <div class="pi-confirm-text">
+            @txt["ConfirmDeleteText"]
+        </div>
+        <div class="pi-confirm-actions">
+            <button type="button"
+                    class="pi-btn-secondary"
+                    id="piCancelDelete">
+                @txt["BtnCancel"]
+            </button>
+            <button type="button"
+                    class="pi-btn-primary"
+                    id="piConfirmDeleteBtn">
+                @txt["BtnDelete"]
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="pi-create-backdrop" id="piCreateModal">
+    <div class="pi-create-box">
+        <div class="pi-create-header">
+            <div class="pi-create-title">@txt["WizardTitle"]</div>
+            <button type="button" class="pi-create-close" id="piCreateClose">&times;</button>
+        </div>
+
+        <div class="pi-create-steps">
+            <div class="pi-step-dot active" data-step-dot="1">
+                <div class="pi-step-circle">1</div>
+                <span>@txt["Step1"]</span>
+            </div>
+            <div class="pi-step-dot" data-step-dot="2">
+                <div class="pi-step-circle">2</div>
+                <span>@txt["Step2"]</span>
+            </div>
+            <div class="pi-step-dot" data-step-dot="3">
+                <div class="pi-step-circle">3</div>
+                <span>@txt["Step3"]</span>
+            </div>
+        </div>
+
+        <div class="pi-create-body">
+            <div class="pi-create-step active" data-step="1">
+                <div class="pi-create-group">
+                    <span class="pi-create-label">@txt["FieldType"] <span style="color:#f97316">*</span></span>
+                    <select id="piType" class="pi-create-select">
+                        <option value="">@txt["SelectTypeOption"]</option>
+                        <option value="1">@txt["Type1"]</option>
+                        <option value="2">@txt["Type2"]</option>
+                        <option value="3">@txt["Type3"]</option>
+                        <option value="4">@txt["Type4"]</option>
+                    </select>
+                </div>
+                <div class="pi-create-group">
+                    <span class="pi-create-label">@txt["FieldName"] <span style="color:#f97316">*</span></span>
+                    <input type="text" id="piName" class="pi-create-input"
+                           placeholder="@txt["FieldName"]" />
+                </div>
+                <div class="pi-create-group">
+                    <span class="pi-create-label">@txt["FieldCustomer"] <span style="color:#f97316">*</span></span>
+                    <select id="piCustomer" class="pi-create-select">
+                        <option value="">@txt["SelectCustomerOption"]</option>
+                        @foreach (var c in customerList)
+                        {
+                            var label = string.IsNullOrEmpty(c.LOAIKH)
+                                ? c.MAKH
+                                : (c.LOAIKH + " (" + c.MAKH + ")");
+                            <option value="@c.MAKH">@label</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="pi-create-step" data-step="2">
+                <div class="pi-create-group">
+                    <span class="pi-create-label">@txt["FieldArea"] <span style="color:#f97316">*</span></span>
+                    <select id="piArea" class="pi-create-select">
+                        <option value="">@txt["SelectAreaOption"]</option>
+                        @foreach (var kv in areaList)
+                        {
+                            <option value="@kv.MAKV">@kv.TENTINH</option>
+                        }
+                    </select>
+                </div>
+                <div class="pi-create-group">
+                    <span class="pi-create-label">@txt["FieldLoaiHinh"] <span style="color:#f97316">*</span></span>
+                    <select id="piLoaiHinh" class="pi-create-select">
+                        <option value="">@txt["SelectLoaiHinhOption"]</option>
+                        @foreach (var lh in loaiHinhList)
+                        {
+                            <option value="@lh.MALH">@lh.TENLH</option>
+                        }
+                    </select>
+                </div>
+                <div class="pi-create-two-cols">
+                    <div class="pi-create-group">
+                        <span class="pi-create-label">@txt["FieldStartDate"]</span>
+                        <input type="date" id="piStart" class="pi-create-input" />
+                    </div>
+                    <div class="pi-create-group">
+                        <span class="pi-create-label">@txt["FieldEndDate"]</span>
+                        <input type="date" id="piEnd" class="pi-create-input" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="pi-create-step" data-step="3">
+                <div class="pi-create-two-cols">
+                    <div class="pi-create-group">
+                        <span class="pi-create-label">@txt["FieldDeposit"]</span>
+                        <input type="number" id="piDeposit" class="pi-create-input"
+                               min="0" step="1000" placeholder="0" />
+                    </div>
+                    <div class="pi-create-group">
+                        <span class="pi-create-label">@txt["FieldExpected"]</span>
+                        <input type="number" id="piExpected" class="pi-create-input"
+                               min="0" step="1000" placeholder="0" />
+                    </div>
+                </div>
+
+                <div class="pi-create-two-cols">
+                    <div class="pi-create-group">
+                        <span class="pi-create-label">@txt["FieldCoeff"]</span>
+                        <input type="number" id="piCoeff" class="pi-create-input"
+                               step="0.01" placeholder="1.00" />
+                    </div>
+                    <div class="pi-create-group">
+                        <span class="pi-create-label">@txt["FieldTotal"]</span>
+                        <input type="number" id="piTotal" class="pi-create-input"
+                               min="0" step="1000" placeholder="0" />
+                    </div>
+                </div>
+
+                <div class="pi-create-group">
+                    <span class="pi-create-label">@txt["FieldNote"]</span>
+                    <textarea id="piNote" rows="2" class="pi-create-textarea"
+                              placeholder="@txt["FieldNoteHint"]"></textarea>
+                </div>
+
+                <div class="pi-create-group" style="font-size:11px;color:@subTextColor;margin-top:6px;">
+                    @txt["AutoCodeHint"]
+                </div>
+            </div>
+        </div>
+
+        <div class="pi-create-footer">
+            <button type="button" class="pi-btn-secondary" id="piCreateCancel">@txt["BtnCancel"]</button>
+            <div style="display:flex;gap:8px;align-items:center;">
+                <button type="button" class="pi-btn-secondary" id="piCreatePrev" style="display:none;">
+                    @txt["BtnBack"]
+                </button>
+                <button type="button" class="pi-create-next" id="piCreateNext">
+                    @txt["BtnNext"]
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        var toast = document.getElementById("piToast");
+        var tokenInput = document.querySelector("input[name='__RequestVerificationToken']");
+        var token = tokenInput ? tokenInput.value : "";
+
+        var i18n = {
+            projectIdInvalid: '@txt["ToastProjectIdInvalid"]',
+            missingToken: '@txt["ToastMissingToken"]',
+            deleteError: '@txt["ToastDeleteError"]',
+            deleteOk: '@txt["ToastDeleteOk"]',
+            createOk: '@txt["ToastCreateOk"]',
+            createError: '@txt["ToastCreateError"]',
+            validateStep1: '@txt["ToastValidateStep1"]',
+            validateStep2: '@txt["ToastValidateStep2"]',
+            validateStep2Dates: '@txt["ToastValidateStep2Dates"]',
+            deleteSystemError: '@txt["ToastDeleteSystemError"]',
+            createSystemError: '@txt["ToastCreateSystemError"]',
+            btnNext: '@txt["BtnNext"]',
+            btnCreate: '@txt["BtnCreate"]'
+        };
+
+        function showToast(msg) {
+            if (!toast) return;
+            toast.textContent = msg;
+            toast.classList.add("show");
+            setTimeout(function () {
+                toast.classList.remove("show");
+            }, 2200);
+        }
+
+        var confirmModal = document.getElementById("piConfirmDelete");
+        var btnCancelDelete = document.getElementById("piCancelDelete");
+        var btnConfirmDelete = document.getElementById("piConfirmDeleteBtn");
+        var pendingDeleteId = null;
+
+        function openConfirm(id) {
+            pendingDeleteId = id;
+            if (confirmModal) confirmModal.classList.add("show");
+        }
+        function closeConfirm() {
+            pendingDeleteId = null;
+            if (confirmModal) confirmModal.classList.remove("show");
+        }
+
+        if (btnCancelDelete) {
+            btnCancelDelete.addEventListener("click", function () {
+                closeConfirm();
+            });
+        }
+        if (confirmModal) {
+            confirmModal.addEventListener("click", function (e) {
+                if (e.target === confirmModal) {
+                    closeConfirm();
+                }
+            });
+        }
+
+        if (btnConfirmDelete) {
+            btnConfirmDelete.addEventListener("click", function () {
+                if (!pendingDeleteId) {
+                    closeConfirm();
+                    return;
+                }
+                deleteProject(pendingDeleteId);
+            });
+        }
+
+        function deleteProject(projectId) {
+            if (!projectId) {
+                showToast(i18n.projectIdInvalid);
+                closeConfirm();
+                return;
+            }
+            if (!token) {
+                showToast(i18n.missingToken);
+                closeConfirm();
+                return;
+            }
+
+            var urlDelete = '@Url.Action("DeleteProject", "Project", new { area = "HR" })';
+
+            fetch(urlDelete, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+                },
+                body: "__RequestVerificationToken=" + encodeURIComponent(token) +
+                    "&id=" + encodeURIComponent(projectId)
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    closeConfirm();
+                    if (res && res.success) {
+                        showToast(res.message || i18n.deleteOk);
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 800);
+                    } else {
+                        showToast((res && res.message) || i18n.deleteError);
+                    }
+                })
+                .catch(function () {
+                    closeConfirm();
+                    showToast(i18n.deleteSystemError);
+                });
+        }
+
+        var cards = document.querySelectorAll(".pi-card");
+        cards.forEach(function (card) {
+            card.addEventListener("dragstart", function (e) {
+                var id = this.getAttribute("data-project-id");
+                e.dataTransfer.setData("text/plain", id);
+                this.classList.add("dragging");
+            });
+            card.addEventListener("dragend", function () {
+                this.classList.remove("dragging");
+            });
+
+            card.addEventListener("click", function (e) {
+                if (e.target && e.target.closest(".pi-delete-mobile-btn")) {
+                    return;
+                }
+                var url = card.getAttribute("data-url");
+                if (url) {
+                    window.location.href = url;
+                }
+            });
+        });
+
+        var drops = document.querySelectorAll(".pi-drop");
+        drops.forEach(function (drop) {
+            drop.addEventListener("dragover", function (e) {
+                e.preventDefault();
+                drop.classList.add("over");
+            });
+            drop.addEventListener("dragleave", function () {
+                drop.classList.remove("over");
+            });
+            drop.addEventListener("drop", function (e) {
+                e.preventDefault();
+                drop.classList.remove("over");
+                var id = e.dataTransfer.getData("text/plain");
+                if (id) {
+                    openConfirm(id);
+                }
+            });
+        });
+
+        var mobileDeletes = document.querySelectorAll(".pi-delete-mobile");
+        mobileDeletes.forEach(function (btn) {
+            btn.addEventListener("click", function (e) {
+                e.stopPropagation();
+                var id = this.getAttribute("data-id");
+                if (id) {
+                    openConfirm(id);
+                }
+            });
+        });
+
+        function bindSectionFilters(sectionEl) {
+            var nameInput = sectionEl.querySelector(".pi-filter-name");
+            var areaSelect = sectionEl.querySelector(".pi-filter-area");
+            var startInput = sectionEl.querySelector(".pi-filter-start");
+            var endInput = sectionEl.querySelector(".pi-filter-end");
+            var statusSelect = sectionEl.querySelector(".pi-filter-status");
+
+            var handler = function () {
+                filterSection(sectionEl, nameInput, areaSelect, startInput, endInput, statusSelect);
+            };
+
+            if (nameInput) nameInput.addEventListener("input", handler);
+            if (areaSelect) areaSelect.addEventListener("change", handler);
+            if (startInput) startInput.addEventListener("change", handler);
+            if (endInput) endInput.addEventListener("change", handler);
+            if (statusSelect) statusSelect.addEventListener("change", handler);
+        }
+
+        function filterSection(sectionEl, nameInput, areaSelect, startInput, endInput, statusSelect) {
+            var row = sectionEl.querySelector(".pi-row");
+            var cards = sectionEl.querySelectorAll(".pi-card");
+            var nameVal = (nameInput && nameInput.value || "").toLowerCase();
+            var areaVal = areaSelect ? areaSelect.value : "";
+            var startVal = startInput ? startInput.value : "";
+            var endVal = endInput ? endInput.value : "";
+            var statusVal = statusSelect ? statusSelect.value : "";
+
+            cards.forEach(function (card) {
+                var pName = (card.getAttribute("data-name") || "").toLowerCase();
+                var pArea = card.getAttribute("data-area") || "";
+                var pStart = card.getAttribute("data-start") || "";
+                var pEnd = card.getAttribute("data-end") || "";
+                var pStatus = card.getAttribute("data-status") || "";
+
+                var visible = true;
+
+                if (nameVal && pName.indexOf(nameVal) === -1) visible = false;
+                if (visible && areaVal && pArea !== areaVal) visible = false;
+                if (visible && startVal && pStart && pStart < startVal) visible = false;
+                if (visible && endVal && pEnd && pEnd > endVal) visible = false;
+                if (visible && statusVal && pStatus !== statusVal) visible = false;
+
+                card.style.display = visible ? "" : "none";
+            });
+
+            if (row) {
+                row.removeAttribute("data-current-index");
+            }
+        }
+
+        var sectionsEls = document.querySelectorAll(".pi-section");
+        sectionsEls.forEach(function (sec) {
+            bindSectionFilters(sec);
+        });
+
+        var nextBtns = document.querySelectorAll(".pi-next-btn");
+        nextBtns.forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                var type = this.getAttribute("data-section");
+                var section = document.querySelector('.pi-section[data-section-type="' + type + '"]');
+                if (!section) return;
+                var row = section.querySelector(".pi-row");
+                if (!row) return;
+
+                var allCards = Array.prototype.slice.call(row.querySelectorAll(".pi-card"));
+                var visibleCards = allCards.filter(function (c) {
+                    return c.style.display !== "none";
+                });
+
+                if (!visibleCards.length) return;
+
+                var currentIndex = parseInt(row.getAttribute("data-current-index") || "0", 10);
+                currentIndex++;
+                if (currentIndex >= visibleCards.length) currentIndex = 0;
+                row.setAttribute("data-current-index", currentIndex);
+
+                var card = visibleCards[currentIndex];
+                var offset = card.offsetLeft - (row.clientWidth - card.clientWidth) / 2;
+                if (offset < 0) offset = 0;
+
+                row.scrollTo({
+                    left: offset,
+                    behavior: "smooth"
+                });
+            });
+        });
+
+        var createModal = document.getElementById("piCreateModal");
+        var btnOpenCreate = document.getElementById("piOpenCreate");
+        var btnCloseCreate = document.getElementById("piCreateClose");
+        var btnCancelCreate = document.getElementById("piCreateCancel");
+        var btnPrev = document.getElementById("piCreatePrev");
+        var btnNext = document.getElementById("piCreateNext");
+
+        var currentStep = 1;
+        var totalSteps = 3;
+
+        function getStepElems() {
+            return createModal ? createModal.querySelectorAll(".pi-create-step") : [];
+        }
+
+        function getDotElems() {
+            return createModal ? createModal.querySelectorAll(".pi-step-dot") : [];
+        }
+
+        function updateWizardUI() {
+            var steps = getStepElems();
+            steps.forEach(function (s) {
+                var step = parseInt(s.getAttribute("data-step"), 10);
+                s.classList.toggle("active", step === currentStep);
+            });
+
+            var dots = getDotElems();
+            dots.forEach(function (d) {
+                var step = parseInt(d.getAttribute("data-step-dot"), 10);
+                d.classList.toggle("active", step === currentStep);
+            });
+
+            if (btnPrev) {
+                btnPrev.style.display = currentStep === 1 ? "none" : "inline-flex";
+            }
+            if (btnNext) {
+                btnNext.textContent = currentStep === totalSteps ? i18n.btnCreate : i18n.btnNext;
+            }
+        }
+
+        function openCreate() {
+            if (!createModal) return;
+            currentStep = 1;
+            updateWizardUI();
+            createModal.classList.add("show");
+        }
+        function closeCreate() {
+            if (!createModal) return;
+            createModal.classList.remove("show");
+        }
+
+        if (btnOpenCreate) {
+            btnOpenCreate.addEventListener("click", function () {
+                openCreate();
+            });
+        }
+        if (btnCloseCreate) {
+            btnCloseCreate.addEventListener("click", function () {
+                closeCreate();
+            });
+        }
+        if (btnCancelCreate) {
+            btnCancelCreate.addEventListener("click", function () {
+                closeCreate();
+            });
+        }
+        if (createModal) {
+            createModal.addEventListener("click", function (e) {
+                if (e.target === createModal) {
+                    closeCreate();
+                }
+            });
+        }
+
+        function validateStep(step) {
+            var typeEl = document.getElementById("piType");
+            var nameEl = document.getElementById("piName");
+            var cusEl = document.getElementById("piCustomer");
+            var areaEl = document.getElementById("piArea");
+            var lhEl = document.getElementById("piLoaiHinh");
+            var startEl = document.getElementById("piStart");
+            var endEl = document.getElementById("piEnd");
+
+            if (step === 1) {
+                if (!typeEl.value || !nameEl.value.trim() || !cusEl.value) {
+                    showToast(i18n.validateStep1);
+                    return false;
+                }
+            }
+            if (step === 2) {
+                if (!areaEl.value || !lhEl.value) {
+                    showToast(i18n.validateStep2);
+                    return false;
+                }
+                if (startEl.value && endEl.value && endEl.value < startEl.value) {
+                    showToast(i18n.validateStep2Dates);
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function createProject() {
+            if (!token) {
+                showToast(i18n.missingToken);
+                return;
+            }
+
+            var typeEl   = document.getElementById("piType");
+            var nameEl   = document.getElementById("piName");
+            var cusEl    = document.getElementById("piCustomer");
+            var areaEl   = document.getElementById("piArea");
+            var lhEl     = document.getElementById("piLoaiHinh");
+            var startEl  = document.getElementById("piStart");
+            var endEl    = document.getElementById("piEnd");
+            var depEl    = document.getElementById("piDeposit");
+            var expEl    = document.getElementById("piExpected");
+            var coeffEl  = document.getElementById("piCoeff");
+            var totalEl  = document.getElementById("piTotal");
+            var noteEl   = document.getElementById("piNote");
+
+            if (!validateStep(1) || !validateStep(2)) {
+                return;
+            }
+
+            var urlCreate = '@Url.Action("CreateProject", "Project", new { area = "HR" })';
+
+            var body =
+                "__RequestVerificationToken=" + encodeURIComponent(token) +
+                "&typeCode="       + encodeURIComponent(typeEl.value) +
+                "&projectName="    + encodeURIComponent(nameEl.value.trim()) +
+                "&customerId="     + encodeURIComponent(cusEl.value || "") +
+                "&areaCode="       + encodeURIComponent(areaEl.value || "") +
+                "&loaiHinhCode="   + encodeURIComponent(lhEl.value || "") +
+                "&startDate="      + encodeURIComponent(startEl.value || "") +
+                "&endDate="        + encodeURIComponent(endEl.value || "") +
+                "&deposit="        + encodeURIComponent(depEl.value || "") +
+                "&expectedTotal="  + encodeURIComponent(expEl.value || "") +
+                "&coefficient="    + encodeURIComponent(coeffEl.value || "") +
+                "&finalTotal="     + encodeURIComponent(totalEl.value || "") +
+                "&note="           + encodeURIComponent(noteEl.value || "");
+
+            btnNext && (btnNext.disabled = true);
+
+            fetch(urlCreate, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+                },
+                body: body
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    btnNext && (btnNext.disabled = false);
+                    if (res && res.success) {
+                        closeCreate();
+                        showToast(res.message || i18n.createOk);
+                        setTimeout(function () {
+                            if (res.redirectUrl) {
+                                window.location.href = res.redirectUrl;
+                            } else {
+                                window.location.reload();
+                            }
+                        }, 900);
+                    } else {
+                        showToast((res && res.message) || i18n.createError);
+                    }
+                })
+                .catch(function () {
+                    btnNext && (btnNext.disabled = false);
+                    showToast(i18n.createSystemError);
+                });
+        }
+
+        if (btnPrev) {
+            btnPrev.addEventListener("click", function () {
+                if (currentStep > 1) {
+                    currentStep--;
+                    updateWizardUI();
+                }
+            });
+        }
+
+        if (btnNext) {
+            btnNext.addEventListener("click", function () {
+                if (currentStep < totalSteps) {
+                    if (!validateStep(currentStep)) return;
+                    currentStep++;
+                    updateWizardUI();
+                } else {
+                    createProject();
+                }
+            });
+        }
+    })();
+</script>

@@ -1,0 +1,1078 @@
+﻿@model QLNSVATC.Models.DepartmentDetailsViewModel
+@using QLNSVATC.Models
+
+@{
+    Layout = "~/Areas/HR/Views/Shared/_LayoutHR.cshtml";
+
+    var settings = ViewBag.Settings as UserViewBagModel;
+
+    string themeColor = (settings != null && !string.IsNullOrEmpty(settings.ThemeHex))
+        ? settings.ThemeHex
+        : "#22c55e";
+
+    string fontFamily = (settings != null && !string.IsNullOrEmpty(settings.FontFamily))
+        ? settings.FontFamily
+        : "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
+    int fontSize = (settings != null && settings.FontSize > 0) ? settings.FontSize : 16;
+    bool isDarkMode = settings != null ? settings.DarkMode : true;
+
+    string pageBg = isDarkMode ? "#020617" : "#f3f4f6";
+    string cardBg = isDarkMode ? "#020617" : "#ffffff";
+    string borderColor = isDarkMode ? "#1f2937" : "#e5e7eb";
+    string mainTextColor = isDarkMode ? "#e5e7eb" : "#111827";
+    string subTextColor = isDarkMode ? "#9ca3af" : "#6b7280";
+
+    string currentLang = (settings != null && !string.IsNullOrEmpty(settings.Lang))
+        ? settings.Lang
+        : "vi_VN";
+
+    var pb = Model.PhongBan;
+    var employeesIn = Model.EmployeesInDepartment ?? new List<NHANVIEN>();
+    var employeesOut = Model.EmployeesOutsideDepartment ?? new List<NHANVIEN>();
+    int totalIn = employeesIn.Count;
+    int totalOut = employeesOut.Count;
+    NHANVIEN headEmp = null;
+    if (!string.IsNullOrEmpty(pb.MATRG_PHG))
+    {
+        headEmp = employeesIn.FirstOrDefault(x => x.MANV == pb.MATRG_PHG);
+    }
+
+    string txtHeaderCodeLabel;
+    string txtHeaderLocationLabel;
+    string txtBackToList;
+
+    string txtSection1Title;
+    string txtSection1Sub;
+
+    string lblDeptCode;
+    string lblDeptName;
+    string lblHeadManv;
+    string lblLocationCode;
+
+    string statInLabel;
+    string statInNote;
+    string statHeadLabel;
+    string statHeadNoteNoHead;
+    string statOutLabel;
+    string statOutNote;
+
+    string textNotSetShort;  
+    string textNotSetHead;   
+    string textHeadManvPrefix; 
+
+    string dropzoneText;
+
+    string emptyDeptIn;
+    string emptyDeptOut;
+
+    string btnViewProfile;
+    string btnPromoteHead;
+    string btnRemove;
+
+    string section2Title;
+    string section2Sub;
+    string textCurrentDeptPrefix; 
+    string textNoDept;          
+
+    // Toast messages
+    string toastEmpIdInvalid;
+    string toastMissingToken;
+    string toastAddSuccess;
+    string toastAddFail;
+    string toastAddSystemError;
+    string toastInvalidData;
+    string toastRemoveSuccess;
+    string toastRemoveFail;
+    string toastRemoveSystemError;
+    string toastPromoteSuccess;
+    string toastPromoteFail;
+    string toastPromoteSystemError;
+
+    switch (currentLang)
+    {
+        case "en_US":
+            txtHeaderCodeLabel = "Code:";
+            txtHeaderLocationLabel = "Location code:";
+            txtBackToList = "← Back to list";
+
+            txtSection1Title = "Department information";
+            txtSection1Sub = "Current employees in this department. The head can only view profiles. Regular staff can be promoted to head or removed from the department.";
+
+            lblDeptCode = "Department code";
+            lblDeptName = "Department name";
+            lblHeadManv = "Head of department (ID)";
+            lblLocationCode = "Location code";
+
+            statInLabel = "Employees in department";
+            statInNote = "Includes the head if set";
+            statHeadLabel = "Head of department";
+            statHeadNoteNoHead = "Can be promoted from the list";
+            statOutLabel = "Employees outside";
+            statOutNote = "Drag here to assign to this department";
+
+            textNotSetShort = "Not set";
+            textNotSetHead = "Not configured";
+            textHeadManvPrefix = "ID: ";
+
+            dropzoneText = "Drag employees from the right list here to assign to this department.";
+
+            emptyDeptIn = "This department has no employees.";
+            emptyDeptOut = "There are no employees outside this department.";
+
+            btnViewProfile = "View profile";
+            btnPromoteHead = "Promote to Head";
+            btnRemove = "Remove";
+
+            section2Title = "Employees not in this department";
+            section2Sub = "Drag employees from this list to the left box to assign them. Employees who are heads of any department will not appear here.";
+
+            textCurrentDeptPrefix = "Current dept:";
+            textNoDept = "Not assigned to any dept";
+
+            toastEmpIdInvalid = "Employee ID is invalid.";
+            toastMissingToken = "Missing antiforgery token.";
+            toastAddSuccess = "Employee has been added to the department.";
+            toastAddFail = "Could not add employee.";
+            toastAddSystemError = "System error when adding employee.";
+            toastInvalidData = "Invalid data.";
+            toastRemoveSuccess = "Employee has been removed from the department.";
+            toastRemoveFail = "Could not remove employee.";
+            toastRemoveSystemError = "System error when removing employee.";
+            toastPromoteSuccess = "Employee has been promoted to Head.";
+            toastPromoteFail = "Could not promote employee.";
+            toastPromoteSystemError = "System error when promoting head.";
+            break;
+
+        case "jp_JP":
+            txtHeaderCodeLabel = "コード:";
+            txtHeaderLocationLabel = "拠点コード:";
+            txtBackToList = "← 一覧に戻る";
+
+            txtSection1Title = "部署情報";
+            txtSection1Sub = "この部署に所属している社員一覧です。部署長はプロフィール閲覧のみ、一般社員は部署長に昇格または部署から削除できます。";
+
+            lblDeptCode = "部署コード";
+            lblDeptName = "部署名";
+            lblHeadManv = "部署長（ID）";
+            lblLocationCode = "拠点コード";
+
+            statInLabel = "部署内社員数";
+            statInNote = "部署長を含む（設定済みの場合）";
+            statHeadLabel = "部署長";
+            statHeadNoteNoHead = "一覧から昇格できます";
+            statOutLabel = "部署外社員";
+            statOutNote = "ドラッグして部署に割り当て";
+
+            textNotSetShort = "未設定";
+            textNotSetHead = "未設定";
+            textHeadManvPrefix = "ID: ";
+
+            dropzoneText = "右側の一覧からドラッグして、この部署に割り当ててください。";
+
+            emptyDeptIn = "この部署には社員がいません。";
+            emptyDeptOut = "この部署外の社員はいません。";
+
+            btnViewProfile = "プロフィール";
+            btnPromoteHead = "部署長に昇格";
+            btnRemove = "削除";
+
+            section2Title = "この部署に所属していない社員";
+            section2Sub = "この一覧から左のボックスへドラッグして、部署に割り当てます。どこかの部署で部署長になっている社員はここに表示されません。";
+
+            textCurrentDeptPrefix = "現在の部署:";
+            textNoDept = "まだ部署に所属していません";
+
+            toastEmpIdInvalid = "社員IDが正しくありません。";
+            toastMissingToken = "CSRFトークンがありません。";
+            toastAddSuccess = "社員を部署に追加しました。";
+            toastAddFail = "社員を追加できませんでした。";
+            toastAddSystemError = "社員追加時にシステムエラーが発生しました。";
+            toastInvalidData = "データが正しくありません。";
+            toastRemoveSuccess = "社員を部署から削除しました。";
+            toastRemoveFail = "社員を削除できませんでした。";
+            toastRemoveSystemError = "社員削除時にシステムエラーが発生しました。";
+            toastPromoteSuccess = "社員を部署長に昇格しました。";
+            toastPromoteFail = "部署長に昇格できませんでした。";
+            toastPromoteSystemError = "部署長昇格時にシステムエラーが発生しました。";
+            break;
+
+        case "kr_KR":
+            txtHeaderCodeLabel = "코드:";
+            txtHeaderLocationLabel = "지역 코드:";
+            txtBackToList = "← 목록으로 돌아가기";
+
+            txtSection1Title = "부서 정보";
+            txtSection1Sub = "현재 이 부서에 속한 직원 목록입니다. 부서장은 프로필만 조회 가능하며, 일반 직원은 부서장으로 승진하거나 부서에서 제거할 수 있습니다.";
+
+            lblDeptCode = "부서 코드";
+            lblDeptName = "부서명";
+            lblHeadManv = "부서장 (ID)";
+            lblLocationCode = "지역 코드";
+
+            statInLabel = "부서 내 인원";
+            statInNote = "부서장 포함 (설정된 경우)";
+            statHeadLabel = "부서장";
+            statHeadNoteNoHead = "목록에서 승진시킬 수 있습니다";
+            statOutLabel = "부서 외 인원";
+            statOutNote = "드래그하여 이 부서에 배정";
+
+            textNotSetShort = "미설정";
+            textNotSetHead = "아직 설정되지 않음";
+            textHeadManvPrefix = "ID: ";
+
+            dropzoneText = "오른쪽 목록에서 직원을 드래그하여 이 부서에 배정하세요.";
+
+            emptyDeptIn = "이 부서에는 아직 직원이 없습니다.";
+            emptyDeptOut = "이 부서 밖에 있는 직원이 없습니다.";
+
+            btnViewProfile = "프로필";
+            btnPromoteHead = "부서장으로 승진";
+            btnRemove = "제거";
+
+            section2Title = "이 부서에 속하지 않은 직원";
+            section2Sub = "이 목록에서 왼쪽 박스로 드래그하여 부서에 배정합니다. 어떤 부서의 부서장인 직원은 여기 표시되지 않습니다.";
+
+            textCurrentDeptPrefix = "현재 부서:";
+            textNoDept = "어느 부서에도 속하지 않음";
+
+            toastEmpIdInvalid = "직원 ID가 올바르지 않습니다.";
+            toastMissingToken = "CSRF 토큰이 없습니다.";
+            toastAddSuccess = "직원을 부서에 추가했습니다.";
+            toastAddFail = "직원을 추가할 수 없습니다.";
+            toastAddSystemError = "직원 추가 중 시스템 오류가 발생했습니다.";
+            toastInvalidData = "데이터가 올바르지 않습니다.";
+            toastRemoveSuccess = "직원을 부서에서 제거했습니다.";
+            toastRemoveFail = "직원을 제거할 수 없습니다.";
+            toastRemoveSystemError = "직원 제거 중 시스템 오류가 발생했습니다.";
+            toastPromoteSuccess = "직원을 부서장으로 승진시켰습니다.";
+            toastPromoteFail = "부서장으로 승진할 수 없습니다.";
+            toastPromoteSystemError = "부서장 승진 중 시스템 오류가 발생했습니다.";
+            break;
+
+        case "cn_CN":
+            txtHeaderCodeLabel = "代码:";
+            txtHeaderLocationLabel = "地点代码:";
+            txtBackToList = "← 返回列表";
+
+            txtSection1Title = "部门信息";
+            txtSection1Sub = "当前部门员工列表。部门负责人只能查看资料，一般员工可以被提升为负责人或从部门中移除。";
+
+            lblDeptCode = "部门代码";
+            lblDeptName = "部门名称";
+            lblHeadManv = "部门负责人（ID）";
+            lblLocationCode = "地点代码";
+
+            statInLabel = "部门内员工";
+            statInNote = "如已设置则包含负责人";
+            statHeadLabel = "部门负责人";
+            statHeadNoteNoHead = "可从列表中提升";
+            statOutLabel = "部门外员工";
+            statOutNote = "拖动以分配到本部门";
+
+            textNotSetShort = "未设置";
+            textNotSetHead = "尚未设置";
+            textHeadManvPrefix = "ID: ";
+
+            dropzoneText = "从右侧列表拖动员工到此，将其分配到本部门。";
+
+            emptyDeptIn = "本部门暂无任何员工。";
+            emptyDeptOut = "没有在本部门之外的员工。";
+
+            btnViewProfile = "查看资料";
+            btnPromoteHead = "提升为负责人";
+            btnRemove = "移除";
+
+            section2Title = "不在本部门的员工";
+            section2Sub = "从此列表拖动到左侧框中分配到本部门。任何部门的负责人将不会出现在这里。";
+
+            textCurrentDeptPrefix = "当前部门:";
+            textNoDept = "尚未分配部门";
+
+            toastEmpIdInvalid = "员工 ID 无效。";
+            toastMissingToken = "缺少防伪令牌。";
+            toastAddSuccess = "员工已加入该部门。";
+            toastAddFail = "无法添加员工。";
+            toastAddSystemError = "添加员工时系统错误。";
+            toastInvalidData = "数据无效。";
+            toastRemoveSuccess = "员工已从部门中移除。";
+            toastRemoveFail = "无法移除员工。";
+            toastRemoveSystemError = "移除员工时系统错误。";
+            toastPromoteSuccess = "员工已被提升为部门负责人。";
+            toastPromoteFail = "无法提升员工为负责人。";
+            toastPromoteSystemError = "提升负责人时系统错误。";
+            break;
+
+        default: // vi_VN
+            txtHeaderCodeLabel = "Mã:";
+            txtHeaderLocationLabel = "Mã địa điểm:";
+            txtBackToList = "← Quay lại danh sách";
+
+            txtSection1Title = "Thông tin phòng ban";
+            txtSection1Sub = "Danh sách nhân viên hiện tại của phòng ban. Trưởng phòng chỉ có thể xem hồ sơ, nhân viên thường có thể thăng chức thành Trưởng phòng hoặc xoá khỏi phòng.";
+
+            lblDeptCode = "Mã phòng ban";
+            lblDeptName = "Tên phòng ban";
+            lblHeadManv = "Trưởng phòng (MANV)";
+            lblLocationCode = "Mã địa điểm";
+
+            statInLabel = "Nhân viên trong phòng";
+            statInNote = "Gồm Trưởng phòng (nếu có)";
+            statHeadLabel = "Trưởng phòng";
+            statHeadNoteNoHead = "Có thể thăng chức từ danh sách";
+            statOutLabel = "Nhân viên ngoài phòng";
+            statOutNote = "Có thể kéo sang để gán phòng ban";
+
+            textNotSetShort = "Chưa có";
+            textNotSetHead = "Chưa thiết lập";
+            textHeadManvPrefix = "MANV: ";
+
+            dropzoneText = "Kéo nhân viên từ danh sách bên phải vào đây để gán cho phòng ban.";
+
+            emptyDeptIn = "Phòng ban chưa có nhân viên.";
+            emptyDeptOut = "Không có nhân viên nào ngoài phòng ban này.";
+
+            btnViewProfile = "Xem hồ sơ";
+            btnPromoteHead = "Thăng chức Trưởng phòng";
+            btnRemove = "Xoá khỏi phòng";
+
+            section2Title = "Nhân viên không thuộc phòng ban này";
+            section2Sub = "Kéo nhân viên từ danh sách này vào khung bên trái để gán cho phòng ban. Nhân viên đang là Trưởng phòng ở bất kỳ đâu sẽ không hiển thị ở đây.";
+
+            textCurrentDeptPrefix = "PB hiện tại:";
+            textNoDept = "Chưa thuộc phòng ban";
+
+            toastEmpIdInvalid = "Mã nhân viên không hợp lệ.";
+            toastMissingToken = "Thiếu mã bảo mật.";
+            toastAddSuccess = "Đã thêm nhân viên vào phòng ban.";
+            toastAddFail = "Không thể thêm nhân viên.";
+            toastAddSystemError = "Lỗi hệ thống khi thêm nhân viên.";
+            toastInvalidData = "Dữ liệu không hợp lệ.";
+            toastRemoveSuccess = "Đã xoá nhân viên khỏi phòng ban.";
+            toastRemoveFail = "Không thể xoá nhân viên.";
+            toastRemoveSystemError = "Lỗi hệ thống khi xoá nhân viên.";
+            toastPromoteSuccess = "Đã thăng chức Trưởng phòng.";
+            toastPromoteFail = "Không thể thăng chức.";
+            toastPromoteSystemError = "Lỗi hệ thống khi thăng chức Trưởng phòng.";
+            break;
+    }
+}
+
+<style>
+    :root {
+        --dept-theme-color: @themeColor;
+    }
+
+    .dept-detail-page {
+        padding:22px;
+        font-family:@fontFamily;
+        font-size:@(fontSize);
+        color:@mainTextColor;
+        @*background:@pageBg;*@
+        min-height:calc(100vh - 80px);
+    }
+
+    .dept-detail-header {
+        display:flex;
+        justify-content:space-between;
+        align-items:flex-start;
+        gap:16px;
+        flex-wrap:wrap;
+        margin-bottom:16px;
+    }
+
+    .dept-detail-title {
+        font-size:22px;
+        font-weight:650;
+        letter-spacing:.04em;
+        text-transform:uppercase;
+        color:@themeColor;
+    }
+
+    .dept-detail-sub {
+        font-size:13px;
+        color:@subTextColor;
+        margin-top:4px;
+    }
+
+    .dept-detail-actions {
+        display:flex;
+        gap:8px;
+        flex-wrap:wrap;
+    }
+
+    .btn-secondary {
+        border-radius:999px;
+        padding:7px 14px;
+        font-size:13px;
+        border:1px solid @borderColor;
+        background:transparent;
+        color:@subTextColor;
+        text-decoration:none;
+        cursor:pointer;
+    }
+
+    .btn-secondary:hover {
+        border-color:@themeColor;
+        color:@themeColor;
+    }
+
+    .dept-detail-layout {
+        display:grid;
+        grid-template-columns:1.3fr 1fr;
+        gap:16px;
+    }
+
+    @@media(max-width: 992px) {
+        .dept-detail-layout {
+            grid-template-columns:minmax(0,1fr);
+        }
+        .dept-detail-page {
+            padding:12px 10px;
+        }
+    }
+
+    .card-detail {
+        background:@cardBg;
+        border-radius:16px;
+        border:1px solid @borderColor;
+        padding:14px;
+        box-shadow:0 16px 36px rgba(15,23,42,0.5);
+    }
+
+    .section-title {
+        font-size:15px;
+        font-weight:600;
+        margin-bottom:8px;
+    }
+
+    .section-sub {
+        font-size:12px;
+        color:@subTextColor;
+        margin-bottom:10px;
+    }
+
+    .dept-info-grid {
+        display:grid;
+        grid-template-columns:repeat(2, minmax(0,1fr));
+        gap:8px;
+        font-size:13px;
+    }
+
+    .dept-info-label {
+        font-size:12px;
+        color:@subTextColor;
+    }
+
+    .dept-info-value {
+        font-size:13px;
+    }
+
+    .dept-stat-grid {
+        margin-top:12px;
+        display:grid;
+        grid-template-columns:repeat(3, minmax(0,1fr));
+        gap:8px;
+    }
+
+    @@media(max-width: 768px) {
+        .dept-stat-grid {
+            grid-template-columns:repeat(2, minmax(0,1fr));
+        }
+    }
+
+    .dept-stat-card {
+        border-radius: 12px;
+        border: 1px solid rgba(148,163,184,0.8);
+        padding: 8px 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+
+    .dept-stat-label {
+        font-size:11px;
+        color:@subTextColor;
+        text-transform:uppercase;
+        letter-spacing:.08em;
+    }
+
+    .dept-stat-value {
+        font-size:15px;
+        font-weight:600;
+    }
+
+    .dept-stat-note {
+        font-size:11px;
+        color:@subTextColor;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+    }
+
+    .emp-dropzone {
+        margin-top:12px;
+        padding:10px;
+        border-radius:12px;
+        border:1px dashed rgba(148,163,184,0.8);
+        background:rgba(15,23,42,0.3);
+        font-size:12px;
+        color:@subTextColor;
+        text-align:center;
+        transition:all .2s ease;
+    }
+
+    .emp-dropzone.drop-over {
+        border-color:@themeColor;
+        background:rgba(34,197,94,0.15);
+        color:#bbf7d0;
+    }
+
+    .emp-list {
+        margin-top:10px;
+        display:flex;
+        flex-direction:column;
+        gap:8px;
+        max-height:360px;
+        overflow-y:auto;
+        padding-right:4px;
+    }
+
+    /* Scrollbar gradient theo themeColor */
+    .emp-list::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .emp-list::-webkit-scrollbar-track {
+        background: rgba(15,23,42,0.9);
+        border-radius:999px;
+    }
+
+    .emp-list::-webkit-scrollbar-thumb {
+        border-radius:999px;
+        background-image: linear-gradient(
+            to bottom,
+            var(--dept-theme-color) 0%,
+            rgba(148,163,184,0.5) 100%
+        );
+    }
+
+    .emp-list::-webkit-scrollbar-thumb:hover {
+        background-image: linear-gradient(
+            to bottom,
+            var(--dept-theme-color) 0%,
+            rgba(248,250,252,0.8) 100%
+        );
+    }
+
+    .emp-card {
+        border-radius:12px;
+        border:1px solid rgba(148,163,184,0.7);
+        padding:8px 10px;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:8px;
+        font-size:13px;
+        transition:background .15s ease;
+        background:rgba(15,23,42,0.4);
+    }
+
+    .emp-card-main {
+        display:flex;
+        flex-direction:column;
+        gap:2px;
+    }
+
+    .emp-name {
+        font-weight:600;
+    }
+
+    .emp-code {
+        font-size:11px;
+        color:@subTextColor;
+    }
+
+    .emp-role-badge {
+        display:inline-block;
+        margin-top:2px;
+        padding:2px 8px;
+        border-radius:999px;
+        font-size:10px;
+        text-transform:uppercase;
+        letter-spacing:.08em;
+        background:rgba(52,211,153,0.12);
+        color:#6ee7b7;
+        border:1px solid rgba(16,185,129,0.7);
+    }
+
+    .emp-actions {
+        display:flex;
+        gap:6px;
+        flex-wrap:wrap;
+        justify-content:flex-end;
+    }
+
+    .btn-small,
+    .btn-danger,
+    .btn-promote {
+        border-radius:999px;
+        padding:4px 9px;
+        font-size:11px;
+        border:1px solid rgba(148,163,184,0.9);
+        background:transparent;
+        color:@subTextColor;
+        cursor:pointer;
+        text-decoration:none;
+        display:inline-flex;
+        align-items:center;
+        gap:4px;
+    }
+
+    .btn-small:hover {
+        border-color:@themeColor;
+        color:@themeColor;
+    }
+
+    .btn-promote {
+        border-color:#22c55e;
+        color:#bbf7d0;
+    }
+
+    .btn-promote:hover {
+        background:rgba(34,197,94,0.15);
+    }
+
+    .btn-danger {
+        border-color:#f97316;
+        color:#fed7aa;
+    }
+
+    .btn-danger:hover {
+        background:rgba(248,113,22,0.15);
+    }
+
+    .emp-card-outside {
+        cursor:grab;
+    }
+
+    .emp-card-outside.dragging {
+        opacity:.6;
+        transform:scale(.98);
+    }
+
+    .dept-toast {
+        position:fixed;
+        left:50%;
+        top:-70px;
+        transform:translateX(-50%);
+        padding:9px 15px;
+        background:#0b1120;
+        border-radius:999px;
+        border:1px solid @themeColor;
+        color:#e5e7eb;
+        font-size:13px;
+        box-shadow:0 12px 30px rgba(15,23,42,0.7);
+        opacity:0;
+        transition:all .3s ease;
+        z-index:9999;
+        max-width:80vw;
+        text-align:center;
+    }
+
+    .dept-toast.show {
+        top:22px;
+        opacity:1;
+    }
+
+    .empty-text {
+        font-size:12px;
+        color:@subTextColor;
+        text-align:center;
+        margin-top:6px;
+    }
+</style>
+
+<div class="dept-detail-page">
+    @Html.AntiForgeryToken()
+
+    <div class="dept-detail-header">
+        <div>
+            <div class="dept-detail-title">
+                @pb.TENPB
+            </div>
+            <div class="dept-detail-sub">
+                @txtHeaderCodeLabel <b>@pb.MAPB</b> · @txtHeaderLocationLabel <b>@pb.DIADIEM</b>
+            </div>
+        </div>
+
+        <div class="dept-detail-actions">
+            <a href="@Url.Action("Information", "Department", new { area = "HR" })"
+               class="btn-secondary">@txtBackToList</a>
+        </div>
+    </div>
+
+    <div class="dept-detail-layout">
+        <div class="card-detail">
+            <div class="section-title">@txtSection1Title</div>
+            <div class="section-sub">
+                @txtSection1Sub
+            </div>
+
+            <div class="dept-info-grid">
+                <div>
+                    <div class="dept-info-label">@lblDeptCode</div>
+                    <div class="dept-info-value">@pb.MAPB</div>
+                </div>
+                <div>
+                    <div class="dept-info-label">@lblDeptName</div>
+                    <div class="dept-info-value">@pb.TENPB</div>
+                </div>
+                <div>
+                    <div class="dept-info-label">@lblHeadManv</div>
+                    <div class="dept-info-value">
+                        @if (!string.IsNullOrEmpty(pb.MATRG_PHG))
+                        {
+                            @pb.MATRG_PHG
+                        }
+                        else
+                        {
+                            @textNotSetShort
+                        }
+                    </div>
+                </div>
+                <div>
+                    <div class="dept-info-label">@lblLocationCode</div>
+                    <div class="dept-info-value">@pb.DIADIEM</div>
+                </div>
+            </div>
+
+            <div class="dept-stat-grid">
+                <div class="dept-stat-card">
+                    <div class="dept-stat-label">@statInLabel</div>
+                    <div class="dept-stat-value">@totalIn</div>
+                    <div class="dept-stat-note">@statInNote</div>
+                </div>
+                <div class="dept-stat-card">
+                    <div class="dept-stat-label">@statHeadLabel</div>
+                    <div class="dept-stat-value">
+                        @if (headEmp != null)
+                        {
+                            @(headEmp.HOLOT + " " + headEmp.TENNV)
+                        }
+                        else if (!string.IsNullOrEmpty(pb.MATRG_PHG))
+                        {
+                            @pb.MATRG_PHG
+                        }
+                        else
+                        {
+                            @textNotSetHead
+                        }
+                    </div>
+                    <div class="dept-stat-note">
+                        @if (headEmp != null)
+                        {
+                            @textHeadManvPrefix @headEmp.MANV
+                        }
+                        else
+                        {
+                            @statHeadNoteNoHead
+                        }
+                    </div>
+                </div>
+                <div class="dept-stat-card">
+                    <div class="dept-stat-label">@statOutLabel</div>
+                    <div class="dept-stat-value">@totalOut</div>
+                    <div class="dept-stat-note">@statOutNote</div>
+                </div>
+            </div>
+
+            <div class="emp-dropzone" id="empDropZone"
+                 data-mapb="@pb.MAPB">
+                @dropzoneText
+            </div>
+
+            <div class="emp-list" id="empListIn">
+                @if (!employeesIn.Any())
+                {
+                    <div class="empty-text">@emptyDeptIn</div>
+                }
+                else
+                {
+                    foreach (var nv in employeesIn)
+                    {
+                        var fullName = nv.HOLOT + " " + nv.TENNV;
+                        bool isHead = (!string.IsNullOrEmpty(pb.MATRG_PHG) && pb.MATRG_PHG == nv.MANV);
+                        <div class="emp-card" data-manv="@nv.MANV">
+                            <div class="emp-card-main">
+                                <div class="emp-name">@fullName</div>
+                                <div class="emp-code">@textHeadManvPrefix @nv.MANV</div>
+                                @if (isHead)
+                                {
+                                    <span class="emp-role-badge">@statHeadLabel</span>
+                                }
+                            </div>
+                            <div class="emp-actions">
+                                <a class="btn-small"
+                                   href="@Url.Action("Profile", "Employee", new { area = "HR", id = nv.MANV })">
+                                    @btnViewProfile
+                                </a>
+
+                                @if (!isHead)
+                                {
+                                    <button type="button"
+                                            class="btn-promote btnPromoteHead"
+                                            data-manv="@nv.MANV"
+                                            data-mapb="@pb.MAPB">
+                                        @btnPromoteHead
+                                    </button>
+
+                                    <button type="button"
+                                            class="btn-danger btnRemoveFromDept"
+                                            data-manv="@nv.MANV"
+                                            data-mapb="@pb.MAPB">
+                                        @btnRemove
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+
+        <div class="card-detail">
+            <div class="section-title">@section2Title</div>
+            <div class="section-sub">
+                @section2Sub
+            </div>
+
+            <div class="emp-list" id="empListOut">
+                @if (!employeesOut.Any())
+                {
+                    <div class="empty-text">@emptyDeptOut</div>
+                }
+                else
+                {
+                    foreach (var nv in employeesOut)
+                    {
+                        var fullName = nv.HOLOT + " " + nv.TENNV;
+                        <div class="emp-card emp-card-outside"
+                             draggable="true"
+                             data-manv="@nv.MANV"
+                             data-mapb="@nv.MAPB">
+                            <div class="emp-card-main">
+                                <div class="emp-name">@fullName</div>
+                                <div class="emp-code">
+                                    @textHeadManvPrefix @nv.MANV
+                                    @if (!string.IsNullOrEmpty(nv.MAPB))
+                                    {
+                                        <span> · @textCurrentDeptPrefix @nv.MAPB</span>
+                                    }
+                                    else
+                                    {
+                                        <span> · @textNoDept</span>
+                                    }
+                                </div>
+                            </div>
+                            <div class="emp-actions">
+                                <a class="btn-small"
+                                   href="@Url.Action("Profile", "Employee", new { area = "HR", id = nv.MANV })">
+                                    @btnViewProfile
+                                </a>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+    <div id="deptToast" class="dept-toast"></div>
+</div>
+
+<script>
+    (function () {
+        var toast = document.getElementById("deptToast");
+        var dropZone = document.getElementById("empDropZone");
+        var tokenInput = document.querySelector("input[name='__RequestVerificationToken']");
+        var token = tokenInput ? tokenInput.value : "";
+        var mapb = dropZone ? dropZone.getAttribute("data-mapb") : "";
+
+        // Đa ngôn ngữ cho toast
+        var msgEmpIdInvalid = '@toastEmpIdInvalid';
+        var msgMissingToken = '@toastMissingToken';
+        var msgAddSuccess = '@toastAddSuccess';
+        var msgAddFail = '@toastAddFail';
+        var msgAddSystemError = '@toastAddSystemError';
+        var msgInvalidData = '@toastInvalidData';
+        var msgRemoveSuccess = '@toastRemoveSuccess';
+        var msgRemoveFail = '@toastRemoveFail';
+        var msgRemoveSystemError = '@toastRemoveSystemError';
+        var msgPromoteSuccess = '@toastPromoteSuccess';
+        var msgPromoteFail = '@toastPromoteFail';
+        var msgPromoteSystemError = '@toastPromoteSystemError';
+
+        function showToast(msg) {
+            if (!toast) return;
+            toast.textContent = msg;
+            toast.classList.add("show");
+            setTimeout(function () {
+                toast.classList.remove("show");
+            }, 2200);
+        }
+
+        var outsideCards = document.querySelectorAll(".emp-card-outside");
+        outsideCards.forEach(function (card) {
+            card.addEventListener("dragstart", function (e) {
+                var manv = this.getAttribute("data-manv");
+                e.dataTransfer.setData("text/plain", manv);
+                this.classList.add("dragging");
+            });
+
+            card.addEventListener("dragend", function () {
+                this.classList.remove("dragging");
+            });
+        });
+
+        if (dropZone) {
+            dropZone.addEventListener("dragover", function (e) {
+                e.preventDefault();
+                dropZone.classList.add("drop-over");
+            });
+
+            dropZone.addEventListener("dragleave", function () {
+                dropZone.classList.remove("drop-over");
+            });
+
+            dropZone.addEventListener("drop", function (e) {
+                e.preventDefault();
+                dropZone.classList.remove("drop-over");
+
+                var manv = e.dataTransfer.getData("text/plain");
+                if (!manv) {
+                    showToast(msgEmpIdInvalid);
+                    return;
+                }
+                if (!token) {
+                    showToast(msgMissingToken);
+                    return;
+                }
+
+                var url = '@Url.Action("AddEmployee", "Department", new { area = "HR" })';
+
+                fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+                    },
+                    body: "__RequestVerificationToken=" + encodeURIComponent(token) +
+                        "&mapb=" + encodeURIComponent(mapb) +
+                        "&manv=" + encodeURIComponent(manv)
+                })
+                    .then(function (r) { return r.json(); })
+                    .then(function (res) {
+                        if (res && res.success) {
+                            showToast(res.message || msgAddSuccess);
+                            setTimeout(function () {
+                                window.location.reload();
+                            }, 800);
+                        } else {
+                            showToast((res && res.message) || msgAddFail);
+                        }
+                    })
+                    .catch(function () {
+                        showToast(msgAddSystemError);
+                    });
+            });
+        }
+
+        var removeBtns = document.querySelectorAll(".btnRemoveFromDept");
+        removeBtns.forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                var manv = this.getAttribute("data-manv");
+                var mapbBtn = this.getAttribute("data-mapb") || mapb;
+
+                if (!manv || !mapbBtn) {
+                    showToast(msgInvalidData);
+                    return;
+                }
+                if (!token) {
+                    showToast(msgMissingToken);
+                    return;
+                }
+
+                var url = '@Url.Action("RemoveEmployee", "Department", new { area = "HR" })';
+
+                fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+                    },
+                    body: "__RequestVerificationToken=" + encodeURIComponent(token) +
+                        "&mapb=" + encodeURIComponent(mapbBtn) +
+                        "&manv=" + encodeURIComponent(manv)
+                })
+                    .then(function (r) { return r.json(); })
+                    .then(function (res) {
+                        if (res && res.success) {
+                            showToast(res.message || msgRemoveSuccess);
+                            setTimeout(function () {
+                                window.location.reload();
+                            }, 800);
+                        } else {
+                            showToast((res && res.message) || msgRemoveFail);
+                        }
+                    })
+                    .catch(function () {
+                        showToast(msgRemoveSystemError);
+                    });
+            });
+        });
+
+        // Promote head
+        var promoteBtns = document.querySelectorAll(".btnPromoteHead");
+        promoteBtns.forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                var manv = this.getAttribute("data-manv");
+                var mapbBtn = this.getAttribute("data-mapb") || mapb;
+
+                if (!manv || !mapbBtn) {
+                    showToast(msgInvalidData);
+                    return;
+                }
+                if (!token) {
+                    showToast(msgMissingToken);
+                    return;
+                }
+
+                var url = '@Url.Action("PromoteToHead", "Department", new { area = "HR" })';
+
+                fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+                    },
+                    body: "__RequestVerificationToken=" + encodeURIComponent(token) +
+                        "&mapb=" + encodeURIComponent(mapbBtn) +
+                        "&manv=" + encodeURIComponent(manv)
+                })
+                    .then(function (r) { return r.json(); })
+                    .then(function (res) {
+                        if (res && res.success) {
+                            showToast(res.message || msgPromoteSuccess);
+                            setTimeout(function () {
+                                window.location.reload();
+                            }, 800);
+                        } else {
+                            showToast((res && res.message) || msgPromoteFail);
+                        }
+                    })
+                    .catch(function () {
+                        showToast(msgPromoteSystemError);
+                    });
+            });
+        });
+
+    })();
+</script>

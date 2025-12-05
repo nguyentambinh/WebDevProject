@@ -1,0 +1,1172 @@
+﻿@model IEnumerable<QLNSVATC.Models.CandidateViewModel>
+@using QLNSVATC.Models
+
+@{
+    Layout = "~/Areas/HR/Views/Shared/_LayoutHR.cshtml";
+
+    var settings = ViewBag.Settings as UserViewBagModel;
+
+    string themeColor = (settings != null && !string.IsNullOrEmpty(settings.ThemeHex))
+        ? settings.ThemeHex
+        : "#f8b500";
+
+    string fontFamily = (settings != null && !string.IsNullOrEmpty(settings.FontFamily))
+        ? settings.FontFamily
+        : "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
+    int fontSize = (settings != null && settings.FontSize > 0)
+        ? settings.FontSize
+        : 16;
+    if (fontSize < 18) { fontSize = 24; }
+    if (fontSize > 18) { fontSize = 24; }
+
+    bool isDarkMode = settings != null ? settings.DarkMode : true;
+
+    string pageBg = isDarkMode ? "#020617" : "#f3f4f6";
+    string cardBg = isDarkMode ? "#020617" : "#ffffff";
+    string borderColor = isDarkMode ? "#1f2937" : "#e5e7eb";
+    string mainTextColor = isDarkMode ? "#e5e7eb" : "#111827";
+    string subTextColor = isDarkMode ? "#9ca3af" : "#6b7280";
+
+    string keyword = ViewBag.Keyword as string ?? "";
+    string fromDate = ViewBag.FromDate as string ?? "";
+    string toDate = ViewBag.ToDate as string ?? "";
+
+    string currentLang = (settings != null && !string.IsNullOrEmpty(settings.Lang))
+        ? settings.Lang
+        : "en_US";
+}
+
+@functions {
+    public string CandText(string key, string lang)
+    {
+        if (string.IsNullOrEmpty(lang)) lang = "en_US";
+
+        // Vietnamese
+        if (lang == "vi_VN")
+        {
+            switch (key)
+            {
+                case "Title": return "Ứng viên tuyển dụng";
+                case "SubTitle": return "Duyệt hồ sơ và gửi lời mời phỏng vấn nhanh chóng.";
+                case "BtnExport": return "✔ Xác nhận đã phỏng vấn & xuất PDF";
+                case "FilterKeyword": return "Tìm theo tên / email";
+                case "FilterKeywordPlaceholder": return "Nhập tên hoặc email ứng viên...";
+                case "FilterFrom": return "Từ ngày";
+                case "FilterTo": return "Đến ngày";
+                case "FilterApply": return "Áp dụng lọc";
+                case "FilterClear": return "Xóa lọc";
+                case "ColId": return "ID";
+                case "ColCandidate": return "Ứng viên";
+                case "ColEmail": return "Email";
+                case "ColSubmitted": return "Ngày nộp";
+                case "ColInfo": return "Hồ sơ";
+                case "ColDegree": return "Bằng cấp";
+                case "ColOther": return "Tài liệu khác";
+                case "ColActions": return "Thao tác";
+                case "NoRecords": return "Không có ứng viên nào.";
+                case "BtnInvite": return "Mời phỏng vấn";
+                case "BtnDownload": return "Tải tất cả (zip)";
+                case "ConfirmTitle": return "Xác nhận xóa";
+                case "ConfirmContent": return "Bạn sắp tạo file PDF tổng hợp và xóa vĩnh viễn {0} ứng viên khỏi hệ thống. Hành động này không thể hoàn tác.";
+                case "ConfirmCancel": return "Hủy";
+                case "ConfirmOk": return "Xác nhận";
+                case "ModalInterviewTitle": return "Mời phỏng vấn";
+                case "ModalInterviewCandidate": return "Ứng viên";
+                case "ModalInterviewDate": return "Ngày phỏng vấn";
+                case "ModalInterviewTime": return "Giờ phỏng vấn (hh:mm)";
+                case "ModalInterviewNote": return "Ghi chú thêm (không bắt buộc)";
+                case "ModalInterviewNotePlaceholder": return "Ví dụ: Phỏng vấn online qua Google Meet, mang theo portfolio...";
+                case "ModalInterviewCancel": return "Hủy";
+                case "ModalInterviewSend": return "Gửi email mời phỏng vấn";
+                case "ToastSelect": return "Vui lòng chọn ít nhất một ứng viên.";
+                case "ToastNoSelected": return "Chưa có ứng viên nào được chọn.";
+                case "ToastInvalidId": return "Mã ứng viên không hợp lệ.";
+                case "ToastFailedSend": return "Gửi email mời phỏng vấn thất bại.";
+                case "ToastSystemError": return "Lỗi hệ thống khi gửi email mời phỏng vấn.";
+                case "ToastInterviewSentFallback": return "Email mời phỏng vấn đã được gửi.";
+            }
+        }
+
+        // Japanese
+        if (lang == "jp_JP")
+        {
+            switch (key)
+            {
+                case "Title": return "応募者一覧";
+                case "SubTitle": return "テーブル のデータ – 書類確認と面接案内を素早く行います。";
+                case "BtnExport": return "✔ 面接済みにして PDF を出力";
+                case "FilterKeyword": return "氏名 / メールで検索";
+                case "FilterKeywordPlaceholder": return "応募者の氏名またはメールを入力...";
+                case "FilterFrom": return "開始日";
+                case "FilterTo": return "終了日";
+                case "FilterApply": return "フィルター適用";
+                case "FilterClear": return "クリア";
+                case "ColId": return "ID";
+                case "ColCandidate": return "応募者";
+                case "ColEmail": return "メール";
+                case "ColSubmitted": return "応募日時";
+                case "ColInfo": return "情報ファイル";
+                case "ColDegree": return "学位ファイル";
+                case "ColOther": return "その他ファイル";
+                case "ColActions": return "操作";
+                case "NoRecords": return "応募者データがありません。";
+                case "BtnInvite": return "面接案内";
+                case "BtnDownload": return "全てダウンロード (zip)";
+                case "ConfirmTitle": return "削除の確認";
+                case "ConfirmContent": return "{0} 名の応募者を PDF にまとめてシステムから完全に削除します。この操作は元に戻せません。";
+                case "ConfirmCancel": return "キャンセル";
+                case "ConfirmOk": return "確認";
+                case "ModalInterviewTitle": return "面接案内メール";
+                case "ModalInterviewCandidate": return "応募者";
+                case "ModalInterviewDate": return "面接日";
+                case "ModalInterviewTime": return "面接時間 (hh:mm)";
+                case "ModalInterviewNote": return "補足メモ (任意)";
+                case "ModalInterviewNotePlaceholder": return "例: Google Meet によるオンライン面接、ポートフォリオ持参 など";
+                case "ModalInterviewCancel": return "キャンセル";
+                case "ModalInterviewSend": return "案内メールを送信";
+                case "ToastSelect": return "少なくとも 1 名の応募者を選択してください。";
+                case "ToastNoSelected": return "選択された応募者がありません。";
+                case "ToastInvalidId": return "応募者IDが無効です。";
+                case "ToastFailedSend": return "面接案内メールの送信に失敗しました。";
+                case "ToastSystemError": return "面接案内メールの送信中にシステムエラーが発生しました。";
+                case "ToastInterviewSentFallback": return "面接案内メールを送信しました。";
+            }
+        }
+
+        // Korean
+        if (lang == "kr_KR")
+        {
+            switch (key)
+            {
+                case "Title": return "지원자 목록";
+                case "SubTitle": return "테이블의 데이터로 지원서 확인 및 면접 초대를 빠르게 진행합니다.";
+                case "BtnExport": return "✔ 면접 완료 처리 및 PDF 내보내기";
+                case "FilterKeyword": return "이름 / 이메일 검색";
+                case "FilterKeywordPlaceholder": return "지원자 이름 또는 이메일을 입력하세요...";
+                case "FilterFrom": return "시작일";
+                case "FilterTo": return "종료일";
+                case "FilterApply": return "필터 적용";
+                case "FilterClear": return "초기화";
+                case "ColId": return "ID";
+                case "ColCandidate": return "지원자";
+                case "ColEmail": return "이메일";
+                case "ColSubmitted": return "제출 일시";
+                case "ColInfo": return "정보 파일";
+                case "ColDegree": return "학위 파일";
+                case "ColOther": return "기타 파일";
+                case "ColActions": return "작업";
+                case "NoRecords": return "지원자 기록이 없습니다.";
+                case "BtnInvite": return "면접 초대";
+                case "BtnDownload": return "전체 다운로드 (zip)";
+                case "ConfirmTitle": return "삭제 확인";
+                case "ConfirmContent": return "{0}명의 지원자를 PDF로 생성하고 시스템에서 완전히 삭제합니다. 이 작업은 되돌릴 수 없습니다.";
+                case "ConfirmCancel": return "취소";
+                case "ConfirmOk": return "확인";
+                case "ModalInterviewTitle": return "면접 초대";
+                case "ModalInterviewCandidate": return "지원자";
+                case "ModalInterviewDate": return "면접 날짜";
+                case "ModalInterviewTime": return "면접 시간 (hh:mm)";
+                case "ModalInterviewNote": return "추가 메모 (선택 사항)";
+                case "ModalInterviewNotePlaceholder": return "예: Google Meet 온라인 면접, 포트폴리오 지참 등";
+                case "ModalInterviewCancel": return "취소";
+                case "ModalInterviewSend": return "초대 이메일 보내기";
+                case "ToastSelect": return "최소 한 명의 지원자를 선택하세요.";
+                case "ToastNoSelected": return "선택된 지원자가 없습니다.";
+                case "ToastInvalidId": return "지원자 ID가 올바르지 않습니다.";
+                case "ToastFailedSend": return "면접 초대 이메일 전송에 실패했습니다.";
+                case "ToastSystemError": return "면접 초대 이메일 전송 중 시스템 오류가 발생했습니다.";
+                case "ToastInterviewSentFallback": return "면접 초대 이메일이 전송되었습니다.";
+            }
+        }
+
+        // Chinese 
+        if (lang == "cn_CN")
+        {
+            switch (key)
+            {
+                case "Title": return "应聘者列表";
+                case "SubTitle": return "来自 表的数据 – 快速浏览简历并发送面试邀请。";
+                case "BtnExport": return "✔ 标记为已面试并导出 PDF";
+                case "FilterKeyword": return "按姓名 / 邮箱搜索";
+                case "FilterKeywordPlaceholder": return "输入应聘者姓名或邮箱...";
+                case "FilterFrom": return "开始日期";
+                case "FilterTo": return "结束日期";
+                case "FilterApply": return "应用筛选";
+                case "FilterClear": return "清空";
+                case "ColId": return "ID";
+                case "ColCandidate": return "应聘者";
+                case "ColEmail": return "邮箱";
+                case "ColSubmitted": return "提交时间";
+                case "ColInfo": return "信息文件";
+                case "ColDegree": return "学历文件";
+                case "ColOther": return "其他文件";
+                case "ColActions": return "操作";
+                case "NoRecords": return "暂无应聘者记录。";
+                case "BtnInvite": return "邀请面试";
+                case "BtnDownload": return "全部下载 (zip)";
+                case "ConfirmTitle": return "删除确认";
+                case "ConfirmContent": return "将生成 PDF 汇总并从系统中永久删除 {0} 名应聘者，此操作无法恢复。";
+                case "ConfirmCancel": return "取消";
+                case "ConfirmOk": return "确认";
+                case "ModalInterviewTitle": return "面试邀请";
+                case "ModalInterviewCandidate": return "应聘者";
+                case "ModalInterviewDate": return "面试日期";
+                case "ModalInterviewTime": return "面试时间 (hh:mm)";
+                case "ModalInterviewNote": return "附加说明 (可选)";
+                case "ModalInterviewNotePlaceholder": return "例如: 通过 Google Meet 在线面试, 自带作品集等";
+                case "ModalInterviewCancel": return "取消";
+                case "ModalInterviewSend": return "发送邀请邮件";
+                case "ToastSelect": return "请至少选择一名应聘者。";
+                case "ToastNoSelected": return "尚未选择任何应聘者。";
+                case "ToastInvalidId": return "应聘者编号无效。";
+                case "ToastFailedSend": return "发送面试邀请邮件失败。";
+                case "ToastSystemError": return "发送面试邀请邮件时发生系统错误。";
+                case "ToastInterviewSentFallback": return "面试邀请邮件已发送。";
+            }
+        }
+
+        // Default: English
+        switch (key)
+        {
+            case "Title": return "Job candidates";
+            case "SubTitle": return "Quickly browse files and send interview invitations.";
+            case "BtnExport": return "✔ Confirm interviewed & export PDF";
+            case "FilterKeyword": return "Search by name / email";
+            case "FilterKeywordPlaceholder": return "Type candidate name or email...";
+            case "FilterFrom": return "From date";
+            case "FilterTo": return "To date";
+            case "FilterApply": return "Apply filter";
+            case "FilterClear": return "Clear";
+            case "ColId": return "ID";
+            case "ColCandidate": return "Candidate";
+            case "ColEmail": return "Email";
+            case "ColSubmitted": return "Submitted date";
+            case "ColInfo": return "Info file";
+            case "ColDegree": return "Degree file";
+            case "ColOther": return "Other file";
+            case "ColActions": return "Actions";
+            case "NoRecords": return "No candidate records.";
+            case "BtnInvite": return "Invite to interview";
+            case "BtnDownload": return "Download files (zip)";
+            case "ConfirmTitle": return "Confirm deletion";
+            case "ConfirmContent": return "You are about to generate a PDF summary and permanently delete {0} candidate(s) from the system. This action cannot be undone.";
+            case "ConfirmCancel": return "Cancel";
+            case "ConfirmOk": return "Confirm";
+            case "ModalInterviewTitle": return "Invite to interview";
+            case "ModalInterviewCandidate": return "Candidate";
+            case "ModalInterviewDate": return "Interview date";
+            case "ModalInterviewTime": return "Interview time (hh:mm)";
+            case "ModalInterviewNote": return "Additional note (optional)";
+            case "ModalInterviewNotePlaceholder": return "For example: Online via Google Meet, bring portfolio...";
+            case "ModalInterviewCancel": return "Cancel";
+            case "ModalInterviewSend": return "Send invitation email";
+            case "ToastSelect": return "Please select at least one candidate.";
+            case "ToastNoSelected": return "No candidate has been selected.";
+            case "ToastInvalidId": return "Candidate id is not valid.";
+            case "ToastFailedSend": return "Failed to send interview invitation.";
+            case "ToastSystemError": return "System error when sending interview invitation.";
+            case "ToastInterviewSentFallback": return "Interview invitation has been sent.";
+        }
+
+        return key;
+    }
+}
+
+<style>
+    .candidate-page {
+        padding: 22px;
+        font-family: @fontFamily;
+        font-size: @(fontSize);
+        color: @mainTextColor;
+        min-height: calc(100vh - 80px);
+        --theme-color: @themeColor;
+    }
+
+    .candidate-header {
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        margin-bottom:12px;
+        gap:12px;
+        flex-wrap:wrap;
+    }
+
+    .candidate-title {
+        font-size:22px;
+        font-weight:650;
+        letter-spacing:.04em;
+        text-transform:uppercase;
+        color:@themeColor;
+    }
+
+    .candidate-sub {
+        font-size:13px;
+        color:@subTextColor;
+        margin-top:4px;
+    }
+
+    .candidate-actions {
+        display:flex;
+        gap:8px;
+        flex-wrap:wrap;
+    }
+
+    .btn-main, .btn-secondary {
+        border-radius:999px;
+        padding:7px 14px;
+        font-size:13px;
+        border:1px solid transparent;
+        cursor:pointer;
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+        text-decoration:none;
+    }
+
+    .btn-main {
+        background:@themeColor;
+        color:#111827;
+        font-weight:600;
+        box-shadow:0 0 12px rgba(248,181,0,0.7);
+    }
+
+    .btn-main:hover {
+        box-shadow:0 0 18px rgba(248,181,0,1);
+    }
+
+    .btn-secondary {
+        background:transparent;
+        color:@subTextColor;
+        border-color:@borderColor;
+    }
+
+    .btn-secondary:hover {
+        border-color:@themeColor;
+        color:@themeColor;
+    }
+
+    .candidate-layout {
+        display:grid;
+        grid-template-columns:minmax(0,1fr);
+        gap:18px;
+    }
+
+    @@media(max-width: 992px) {
+        .candidate-layout {
+            grid-template-columns:minmax(0,1fr);
+        }
+    }
+
+    .card {
+        background:@cardBg;
+        border-radius:18px;
+        border:1px solid @borderColor;
+        box-shadow:0 18px 40px rgba(15,23,42,0.4);
+        padding:16px;
+    }
+
+    .candidate-filter {
+        display:flex;
+        flex-wrap:wrap;
+        gap:8px;
+        margin-bottom:10px;
+        align-items:flex-end;
+    }
+
+    .candidate-filter-group {
+        display:flex;
+        flex-direction:column;
+        gap:4px;
+        font-size:12px;
+        color:@subTextColor;
+    }
+
+    .candidate-filter-input {
+        min-width:180px;
+        padding:6px 8px;
+        border-radius:999px;
+        border:1px solid @borderColor;
+        background:transparent;
+        color:@mainTextColor;
+        font-size:13px;
+        outline:none;
+    }
+
+    .candidate-filter-input[type="date"] {
+        padding-right:4px;
+    }
+
+    .candidate-table-wrap {
+        width:100%;
+        overflow-x:auto;
+        scrollbar-color:@themeColor transparent;
+        scrollbar-width:thin;
+    }
+
+    .candidate-table-wrap::-webkit-scrollbar {
+        height:6px;
+    }
+
+    .candidate-table-wrap::-webkit-scrollbar-track {
+        background:rgba(15,23,42,0.9);
+        border-radius:999px;
+    }
+
+    .candidate-table-wrap::-webkit-scrollbar-thumb {
+        background: linear-gradient(90deg, var(--theme-color), #0f172a);
+        border-radius: 999px;
+    }
+
+    .candidate-table {
+        width:100%;
+        border-collapse:collapse;
+        font-size:13px;
+    }
+
+    .candidate-table thead {
+        background:linear-gradient(135deg,rgba(248,181,0,0.16),transparent);
+    }
+
+    .candidate-table th,
+    .candidate-table td {
+        padding:8px 10px;
+        border-bottom:1px solid rgba(148,163,184,0.2);
+        text-align:left;
+        vertical-align:middle;
+    }
+
+    .candidate-table th {
+        font-size:12px;
+        text-transform:uppercase;
+        letter-spacing:.06em;
+        color:@subTextColor;
+    }
+
+    .candidate-table tbody tr:hover {
+        background:rgba(15,23,42,0.45);
+    }
+
+    .candidate-name {
+        font-weight:600;
+    }
+
+    .candidate-email {
+        font-size:12px;
+        color:@subTextColor;
+    }
+
+    .file-chip {
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        padding:4px 10px;
+        border-radius:999px;
+        border:1px solid rgba(148,163,184,0.4);
+        font-size:11px;
+        color:@subTextColor;
+        min-width:60px;
+    }
+
+    .file-chip-link {
+        text-decoration:none;
+    }
+
+    .file-chip-link:hover .file-chip {
+        background:rgba(248,181,0,0.12);
+        border-color:rgba(248,181,0,0.7);
+    }
+
+    .tag-type {
+        text-transform:uppercase;
+        font-size:10px;
+        letter-spacing:.08em;
+        color:@themeColor;
+    }
+
+    .candidate-toast {
+        position:fixed;
+        left:50%;
+        top:-80px;
+        transform:translateX(-50%);
+        padding:10px 16px;
+        background:#0b1120;
+        border-radius:999px;
+        border:1px solid @themeColor;
+        color:#e5e7eb;
+        font-size:13px;
+        box-shadow:0 12px 30px rgba(15,23,42,0.7);
+        opacity:0;
+        transition:all .3s ease;
+        z-index:9999;
+        max-width:80vw;
+        text-align:center;
+    }
+
+    .candidate-toast.show {
+        top:24px;
+        opacity:1;
+    }
+
+    .candidate-badge-empty {
+        font-size:12px;
+        color:@subTextColor;
+    }
+
+    .modal-backdrop {
+        position:fixed;
+        inset:0;
+        background:rgba(15,23,42,0.75);
+        display:none;
+        align-items:center;
+        justify-content:center;
+        z-index:9998;
+    }
+
+    .modal-backdrop.show {
+        display:flex;
+    }
+
+    .modal-header {
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        margin-bottom:8px;
+        gap:8px;
+    }
+
+    .modal-title {
+        font-size:15px;
+        font-weight:600;
+    }
+
+    .modal-close {
+        border:none;
+        background:transparent;
+        color:#9ca3af;
+        font-size:18px;
+        cursor:pointer;
+    }
+
+    .modal-box {
+        width:380px;
+        max-width:95vw;
+        border-radius:16px;
+        background:#020617;
+        border:1px solid rgba(148,163,184,0.7);
+        box-shadow:0 20px 50px rgba(0,0,0,0.85);
+        padding:16px 18px 14px;
+        color:#e5e7eb;
+        font-size:13px;
+    }
+
+    .modal-group {
+        margin-top:8px;
+    }
+
+    .modal-label {
+        font-size:12px;
+        color:@subTextColor;
+        margin-bottom:2px;
+    }
+
+    .modal-input,
+    .modal-textarea {
+        width:100%;
+        border-radius:10px;
+        border:1px solid rgba(148,163,184,0.7);
+        background:#020617;
+        color:#e5e7eb;
+        padding:6px 8px;
+        font-size:13px;
+        box-sizing:border-box;
+        outline:none;
+    }
+
+    .modal-textarea {
+        min-height:70px;
+        resize:vertical;
+    }
+
+    .modal-footer {
+        margin-top:10px;
+        display:flex;
+        justify-content:flex-end;
+        gap:8px;
+    }
+
+    .btn-modal-cancel,
+    .btn-modal-send {
+        border-radius:999px;
+        padding:6px 13px;
+        font-size:13px;
+        border:1px solid transparent;
+        cursor:pointer;
+    }
+
+    .btn-modal-cancel {
+        background:transparent;
+        color:@subTextColor;
+        border-color:rgba(148,163,184,0.8);
+    }
+
+    .btn-modal-send {
+        background:@themeColor;
+        color:#111827;
+        font-weight:600;
+        box-shadow:0 0 12px rgba(248,181,0,0.9);
+    }
+
+    .candidate-actions-cell {
+        display:flex;
+        flex-direction:column;
+        align-items:flex-start;
+        gap:4px;
+    }
+
+    .btn-row {
+        border-radius:999px;
+        padding:4px 9px;
+        font-size:11px;
+        border:1px solid rgba(248,181,0,0.5);
+        background:transparent;
+        color:@themeColor;
+        cursor:pointer;
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        gap:4px;
+        margin:0;
+    }
+
+    .btn-row:hover {
+        background:rgba(248,181,0,0.12);
+    }
+
+    .btn-icon {
+        display:inline-block;
+        line-height:1;
+    }
+
+    .btn-text {
+        display:inline-block;
+    }
+
+    @@media(max-width: 768px) {
+        .candidate-page {
+            padding: 12px 10px;
+            font-size: 15px;
+        }
+
+        .candidate-header {
+            align-items: flex-start;
+        }
+
+        .candidate-title {
+            font-size: 18px;
+        }
+
+        .candidate-sub {
+            font-size: 11px;
+        }
+
+        .card {
+            padding: 10px;
+            box-shadow: 0 10px 24px rgba(15,23,42,0.6);
+        }
+
+        .candidate-filter {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .candidate-filter-group {
+            width: 100%;
+        }
+
+        .candidate-filter-input {
+            width: 100%;
+            min-width: 0;
+        }
+
+        .candidate-table {
+            font-size: 12px;
+            min-width: 720px;
+        }
+
+        .candidate-table th,
+        .candidate-table td {
+            padding: 6px 6px;
+        }
+
+        .candidate-actions-cell {
+            flex-direction:row;
+            align-items:center;
+            gap:6px;
+        }
+
+        .btn-row {
+            width:32px;
+            height:32px;
+            padding:0;
+            border-radius:999px;
+            justify-content:center;
+        }
+
+        .btn-text {
+            display:none;
+        }
+
+        .btn-icon {
+            font-size:16px;
+            line-height:1;
+        }
+    }
+</style>
+
+<div class="candidate-page">
+    <div class="candidate-header">
+        <div>
+            <div class="candidate-title">@CandText("Title", currentLang)</div>
+            <div class="candidate-sub">
+                @CandText("SubTitle", currentLang)
+            </div>
+        </div>
+
+        <div class="candidate-actions">
+            <button type="button" id="btnExportDelete" class="btn-main">
+                @CandText("BtnExport", currentLang)
+            </button>
+        </div>
+    </div>
+
+    <div class="card" style="margin-bottom:14px;">
+        <form method="get" action="@Url.Action("Candidate", "Employee", new { area = "HR" })" class="candidate-filter">
+            <div class="candidate-filter-group">
+                <label>@CandText("FilterKeyword", currentLang)</label>
+                <input type="text"
+                       name="keyword"
+                       class="candidate-filter-input"
+                       placeholder="@CandText("FilterKeywordPlaceholder", currentLang)"
+                       value="@keyword" />
+            </div>
+            <div class="candidate-filter-group">
+                <label>@CandText("FilterFrom", currentLang)</label>
+                <input type="date"
+                       name="fromDate"
+                       class="candidate-filter-input"
+                       value="@fromDate" />
+            </div>
+            <div class="candidate-filter-group">
+                <label>@CandText("FilterTo", currentLang)</label>
+                <input type="date"
+                       name="toDate"
+                       class="candidate-filter-input"
+                       value="@toDate" />
+            </div>
+            <div class="candidate-filter-group">
+                <label>&nbsp;</label>
+                <button type="submit" class="btn-secondary">
+                    @CandText("FilterApply", currentLang)
+                </button>
+            </div>
+            <div class="candidate-filter-group">
+                <label>&nbsp;</label>
+                <a href="@Url.Action("Candidate", "Employee", new { area = "HR" })" class="btn-secondary">
+                    @CandText("FilterClear", currentLang)
+                </a>
+            </div>
+        </form>
+    </div>
+
+    @if (TempData["CandidateError"] != null)
+    {
+        <span id="serverCandidateError" style="display:none;">@TempData["CandidateError"]</span>
+    }
+
+    <div class="candidate-layout">
+        <div class="card">
+            <div class="candidate-table-wrap">
+                <table class="candidate-table">
+                    <thead>
+                        <tr>
+                            <th style="width:32px;">
+                                <input type="checkbox" id="chkAll" />
+                            </th>
+                            <th style="width:48px;">@CandText("ColId", currentLang)</th>
+                            <th>@CandText("ColCandidate", currentLang)</th>
+                            <th>@CandText("ColEmail", currentLang)</th>
+                            <th style="width:150px;">@CandText("ColSubmitted", currentLang)</th>
+                            <th>@CandText("ColInfo", currentLang)</th>
+                            <th>@CandText("ColDegree", currentLang)</th>
+                            <th>@CandText("ColOther", currentLang)</th>
+                            <th style="width:150px;">@CandText("ColActions", currentLang)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="9" style="text-align:center;padding:14px 10px;">
+                                    <span class="candidate-badge-empty">@CandText("NoRecords", currentLang)</span>
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr data-id="@item.ID">
+                                    <td>
+                                        <input type="checkbox" class="chkCandidate" value="@item.ID" />
+                                    </td>
+                                    <td>@item.ID</td>
+                                    <td>
+                                        <div class="candidate-name">@item.TenUngVien</div>
+                                    </td>
+                                    <td>
+                                        <div class="candidate-email">@item.Email</div>
+                                    </td>
+                                    <td>
+                                        @if (item.SubmittedAt.HasValue)
+                                        {
+                                            @item.SubmittedAt.Value.ToString("dd/MM/yyyy HH:mm")
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.FileThongTin) && !string.IsNullOrEmpty(item.FileThongTinUrl))
+                                        {
+                                            <a href="@item.FileThongTinUrl"
+                                               class="file-chip-link"
+                                               download>
+                                                <span class="file-chip">
+                                                    <span class="tag-type">INFO</span>
+                                                </span>
+                                            </a>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.FileBangCap) && !string.IsNullOrEmpty(item.FileBangCapUrl))
+                                        {
+                                            <a href="@item.FileBangCapUrl"
+                                               class="file-chip-link"
+                                               download>
+                                                <span class="file-chip">
+                                                    <span class="tag-type">DEG</span>
+                                                </span>
+                                            </a>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.FileKhac) && !string.IsNullOrEmpty(item.FileKhacUrl))
+                                        {
+                                            <a href="@item.FileKhacUrl"
+                                               class="file-chip-link"
+                                               download>
+                                                <span class="file-chip">
+                                                    <span class="tag-type">OTH</span>
+                                                </span>
+                                            </a>
+                                        }
+                                    </td>
+                                    <td class="candidate-actions-cell">
+                                        <button type="button"
+                                                class="btn-row btnInterview"
+                                                data-id="@item.ID"
+                                                data-name="@item.TenUngVien">
+                                            <span class="btn-icon">+</span>
+                                            <span class="btn-text">@CandText("BtnInvite", currentLang)</span>
+                                        </button>
+                                        <button type="button"
+                                                class="btn-row btnDownload"
+                                                data-id="@item.ID">
+                                            <span class="btn-icon">✔</span>
+                                            <span class="btn-text">@CandText("BtnDownload", currentLang)</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <form id="exportForm"
+          method="post"
+          action="@Url.Action("ExportAndDelete", "Employee", new { area = "HR" })"
+          style="display:none;">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="selectedIds" id="selectedIds" />
+    </form>
+
+    <form id="downloadForm"
+          method="post"
+          action="@Url.Action("DownloadCandidateFiles", "Employee", new { area = "HR" })"
+          style="display:none;">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" id="downloadId" />
+    </form>
+
+    <div class="modal-backdrop" id="confirmModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title">
+                    @CandText("ConfirmTitle", currentLang)
+                </div>
+            </div>
+            <div id="confirmMessage"
+                 style="font-size:13px;color:@subTextColor;margin-bottom:12px;">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-modal-cancel" id="btnCancelConfirm">
+                    @CandText("ConfirmCancel", currentLang)
+                </button>
+                <button type="button" class="btn-modal-send" id="btnConfirmDelete">
+                    @CandText("ConfirmOk", currentLang)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="modalInterview">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title">
+                    @CandText("ModalInterviewTitle", currentLang)
+                </div>
+                <button type="button" class="modal-close" id="btnCloseModal">×</button>
+            </div>
+            <form id="interviewForm" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" id="interviewCandidateId" />
+                <div class="modal-group">
+                    <div class="modal-label">@CandText("ModalInterviewCandidate", currentLang)</div>
+                    <div id="interviewCandidateName" style="font-size:13px;font-weight:600;"></div>
+                </div>
+                <div class="modal-group">
+                    <div class="modal-label">@CandText("ModalInterviewDate", currentLang)</div>
+                    <input type="date" name="interviewDate" class="modal-input" />
+                </div>
+                <div class="modal-group">
+                    <div class="modal-label">@CandText("ModalInterviewTime", currentLang)</div>
+                    <input type="time" name="interviewTime" class="modal-input" />
+                </div>
+                <div class="modal-group">
+                    <div class="modal-label">@CandText("ModalInterviewNote", currentLang)</div>
+                    <textarea name="note" class="modal-textarea"
+                              placeholder="@CandText("ModalInterviewNotePlaceholder", currentLang)"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-modal-cancel" id="btnCancelModal">
+                        @CandText("ModalInterviewCancel", currentLang)
+                    </button>
+                    <button type="submit" class="btn-modal-send">
+                        @CandText("ModalInterviewSend", currentLang)
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="candidateToast" class="candidate-toast"></div>
+</div>
+
+<script>
+    (function () {
+        var toast = document.getElementById("candidateToast");
+
+        var msgSelectAtLeastOne = '@CandText("ToastSelect", currentLang)';
+        var msgNoSelected = '@CandText("ToastNoSelected", currentLang)';
+        var msgInvalidId = '@CandText("ToastInvalidId", currentLang)';
+        var msgFailedSend = '@CandText("ToastFailedSend", currentLang)';
+        var msgSystemError = '@CandText("ToastSystemError", currentLang)';
+        var msgInterviewSentFallback = '@CandText("ToastInterviewSentFallback", currentLang)';
+        var confirmTemplate = '@CandText("ConfirmContent", currentLang)';
+
+        function showToast(msg) {
+            if (!toast) return;
+            toast.textContent = msg;
+            toast.classList.add("show");
+            setTimeout(function () {
+                toast.classList.remove("show");
+            }, 2200);
+        }
+
+        var serverErr = document.getElementById("serverCandidateError");
+        if (serverErr && serverErr.textContent.trim().length > 0) {
+            showToast(serverErr.textContent.trim());
+        }
+
+        var chkAll = document.getElementById("chkAll");
+        if (chkAll) {
+            chkAll.addEventListener("change", function () {
+                var checked = this.checked;
+                document.querySelectorAll(".chkCandidate").forEach(function (c) {
+                    c.checked = checked;
+                });
+            });
+        }
+
+        var btnExportDelete = document.getElementById("btnExportDelete");
+        var exportForm = document.getElementById("exportForm");
+        var selectedIdsInput = document.getElementById("selectedIds");
+
+        var confirmModal = document.getElementById("confirmModal");
+        var confirmMessage = document.getElementById("confirmMessage");
+        var btnCancelConfirm = document.getElementById("btnCancelConfirm");
+        var btnConfirmDelete = document.getElementById("btnConfirmDelete");
+
+        var pendingIds = [];
+
+        function formatConfirmMessage(template, count) {
+            return template.replace("{0}", count);
+        }
+
+        function openConfirmModal(count) {
+            if (!confirmModal) return;
+            if (confirmMessage) {
+                confirmMessage.textContent =
+                    formatConfirmMessage(confirmTemplate, count);
+            }
+            confirmModal.classList.add("show");
+        }
+
+        function closeConfirmModal() {
+            if (confirmModal) {
+                confirmModal.classList.remove("show");
+            }
+        }
+
+        if (btnExportDelete && exportForm && selectedIdsInput) {
+            btnExportDelete.addEventListener("click", function () {
+                var ids = [];
+                document.querySelectorAll(".chkCandidate:checked").forEach(function (c) {
+                    ids.push(c.value);
+                });
+
+                if (ids.length === 0) {
+                    showToast(msgSelectAtLeastOne);
+                    return;
+                }
+
+                pendingIds = ids;
+                openConfirmModal(ids.length);
+            });
+        }
+
+        if (btnConfirmDelete && exportForm && selectedIdsInput) {
+            btnConfirmDelete.addEventListener("click", function () {
+                if (!pendingIds || pendingIds.length === 0) {
+                    showToast(msgNoSelected);
+                    closeConfirmModal();
+                    return;
+                }
+                selectedIdsInput.value = pendingIds.join(",");
+                closeConfirmModal();
+                exportForm.submit();
+            });
+        }
+
+        if (btnCancelConfirm) {
+            btnCancelConfirm.addEventListener("click", function () {
+                closeConfirmModal();
+            });
+        }
+
+        if (confirmModal) {
+            confirmModal.addEventListener("click", function (e) {
+                if (e.target === confirmModal) {
+                    closeConfirmModal();
+                }
+            });
+        }
+
+        var downloadForm = document.getElementById("downloadForm");
+        var downloadIdInput = document.getElementById("downloadId");
+
+        if (downloadForm && downloadIdInput) {
+            document.querySelectorAll(".btnDownload").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    var id = this.getAttribute("data-id");
+                    if (!id) {
+                        showToast(msgInvalidId);
+                        return;
+                    }
+                    downloadIdInput.value = id;
+                    downloadForm.submit();
+                });
+            });
+        }
+
+        var modal = document.getElementById("modalInterview");
+        var btnCloseModal = document.getElementById("btnCloseModal");
+        var btnCancelModal = document.getElementById("btnCancelModal");
+        var interviewForm = document.getElementById("interviewForm");
+        var candidateIdInput = document.getElementById("interviewCandidateId");
+        var candidateNameEl = document.getElementById("interviewCandidateName");
+
+        function openInterviewModal(id, name) {
+            if (!modal) return;
+            candidateIdInput.value = id;
+            candidateNameEl.textContent = name || "";
+            modal.classList.add("show");
+        }
+
+        function closeInterviewModal() {
+            if (modal) {
+                modal.classList.remove("show");
+            }
+        }
+
+        document.querySelectorAll(".btnInterview").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                var id = this.getAttribute("data-id");
+                var name = this.getAttribute("data-name");
+                openInterviewModal(id, name);
+            });
+        });
+
+        if (btnCloseModal) btnCloseModal.addEventListener("click", closeInterviewModal);
+        if (btnCancelModal) btnCancelModal.addEventListener("click", function (e) {
+            e.preventDefault();
+            closeInterviewModal();
+        });
+
+        if (modal) {
+            modal.addEventListener("click", function (e) {
+                if (e.target === modal) {
+                    closeInterviewModal();
+                }
+            });
+        }
+
+        if (interviewForm) {
+            interviewForm.addEventListener("submit", function (e) {
+                e.preventDefault();
+
+                var formData = new FormData(interviewForm);
+                var url = '@Url.Action("SendInterviewEmail", "Employee", new { area = "HR" })';
+
+                fetch(url, {
+                    method: "POST",
+                    body: formData
+                })
+                    .then(function (r) { return r.json(); })
+                    .then(function (res) {
+                        if (res && res.success) {
+                            showToast(res.message || msgInterviewSentFallback);
+                            closeInterviewModal();
+                        } else {
+                            showToast((res && res.message) || msgFailedSend);
+                        }
+                    })
+                    .catch(function () {
+                        showToast(msgSystemError);
+                    });
+            });
+        }
+
+    })();
+</script>

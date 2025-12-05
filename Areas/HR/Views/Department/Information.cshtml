@@ -1,0 +1,1324 @@
+﻿@model IEnumerable<QLNSVATC.Models.PHONGBAN>
+@using QLNSVATC.Models
+
+@{
+    Layout = "~/Areas/HR/Views/Shared/_LayoutHR.cshtml";
+
+    var settings = ViewBag.Settings as UserViewBagModel;
+
+    string themeColor = (settings != null && !string.IsNullOrEmpty(settings.ThemeHex))
+        ? settings.ThemeHex
+        : "#f97316";
+
+    string fontFamily = (settings != null && !string.IsNullOrEmpty(settings.FontFamily))
+        ? settings.FontFamily
+        : "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
+    int fontSize = (settings != null && settings.FontSize > 0) ? settings.FontSize : 16;
+    bool isDarkMode = settings != null ? settings.DarkMode : true;
+
+    string pageBg = isDarkMode ? "#020617" : "#f3f4f6";
+    string cardBg = isDarkMode ? "#020617" : "#ffffff";
+    string borderColor = isDarkMode ? "#1f2937" : "#e5e7eb";
+    string mainTextColor = isDarkMode ? "#e5e7eb" : "#111827";
+    string subTextColor = isDarkMode ? "#9ca3af" : "#6b7280";
+
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int totalDepartments = ViewBag.TotalDepartments ?? 0;
+
+    var empCountDict = ViewBag.EmployeeCountByDept as IDictionary<string, int>
+                       ?? new Dictionary<string, int>();
+    var headNameDict = ViewBag.HeadNameByDept as IDictionary<string, string>
+                       ?? new Dictionary<string, string>();
+    var areaNameDict = ViewBag.AreaNameByDept as IDictionary<string, string>
+                       ?? new Dictionary<string, string>();
+
+    var areaList = ViewBag.AreaList as List<DTTHEOKV>
+                   ?? new List<DTTHEOKV>();
+
+    // Ngôn ngữ
+    string currentLang = (settings != null && !string.IsNullOrEmpty(settings.Lang))
+        ? settings.Lang
+        : "vi_VN";
+
+    string txtDeptTitle;
+    string txtAddDeptBtn;
+
+    string txtEmpLabel;
+    string txtHeadLabel;
+    string txtLocLabel;
+    string txtCodeLabel;
+    string txtLocNA;
+
+    string txtHeadNotSet;
+    string txtViewDetails;
+
+    string txtDeleteBoxTitle;
+    string txtDeleteBoxDesc;
+
+    string txtPageLabel;
+    string txtTotalLabel;
+    string txtPrev;
+    string txtNext;
+
+    string txtCreateTitle;
+    string txtCreateDeptNameLabel;
+    string txtCreateLocLabel;
+    string txtCreateLocPlaceholder;
+    string txtCreateCancel;
+    string txtCreateSubmit;
+
+    string txtEditTitle;
+    string txtEditDeptNameLabel;
+    string txtEditLocLabel;
+    string txtEditLocPlaceholder;
+    string txtEditCancel;
+    string txtEditSubmit;
+
+    string txtMobileDeleteBtn;
+
+    string txtConfirmTitle;
+    string txtConfirmMessage;
+    string txtConfirmCancel;
+    string txtConfirmOk;
+    string msgDeptIdInvalid;
+    string msgMissingToken;
+    string msgDeleteSuccess;
+    string msgDeleteFail;
+    string msgDeleteSystemError;
+
+    string msgCreateNameRequired;
+    string msgCreateLocRequired;
+    string msgCreateSuccess;
+    string msgCreateFail;
+    string msgCreateSystemError;
+
+    string msgUpdateIdInvalid;
+    string msgUpdateSuccess;
+    string msgUpdateFail;
+    string msgUpdateSystemError;
+
+    switch (currentLang)
+    {
+        case "en_US":
+            txtDeptTitle = "Departments";
+            txtAddDeptBtn = "Add department";
+
+            txtEmpLabel = "Employees";
+            txtHeadLabel = "Head";
+            txtLocLabel = "Location";
+            txtCodeLabel = "Code";
+            txtLocNA = "N/A";
+            txtHeadNotSet = "Not set";
+            txtViewDetails = "View details";
+
+            txtDeleteBoxTitle = "Delete";
+            txtDeleteBoxDesc = "Drag a department here to remove it.";
+
+            txtPageLabel = "Page";
+            txtTotalLabel = "Total";
+            txtPrev = "Prev";
+            txtNext = "Next";
+
+            txtCreateTitle = "Add new department";
+            txtCreateDeptNameLabel = "Department name";
+            txtCreateLocLabel = "Location (province)";
+            txtCreateLocPlaceholder = "-- Select area --";
+            txtCreateCancel = "Cancel";
+            txtCreateSubmit = "Create";
+
+            txtEditTitle = "Edit department";
+            txtEditDeptNameLabel = "Department name";
+            txtEditLocLabel = "Location (province)";
+            txtEditLocPlaceholder = "-- Select area --";
+            txtEditCancel = "Cancel";
+            txtEditSubmit = "Save changes";
+
+            txtMobileDeleteBtn = "✕";
+
+            txtConfirmTitle = "Confirm deletion";
+            txtConfirmMessage = "Are you sure you want to delete this department? Related settings may be affected.";
+            txtConfirmCancel = "Cancel";
+            txtConfirmOk = "Delete";
+
+            msgDeptIdInvalid = "Department ID is invalid.";
+            msgMissingToken = "Missing antiforgery token.";
+            msgDeleteSuccess = "Deleted.";
+            msgDeleteFail = "Cannot delete this department.";
+            msgDeleteSystemError = "System error when deleting department.";
+
+            msgCreateNameRequired = "Please enter department name.";
+            msgCreateLocRequired = "Please select location.";
+            msgCreateSuccess = "Department created.";
+            msgCreateFail = "Cannot create department.";
+            msgCreateSystemError = "System error when creating department.";
+
+            msgUpdateIdInvalid = "Department ID is invalid.";
+            msgUpdateSuccess = "Department updated.";
+            msgUpdateFail = "Cannot update department.";
+            msgUpdateSystemError = "System error when updating department.";
+            break;
+
+        case "jp_JP":
+            txtDeptTitle = "部署一覧";
+            txtAddDeptBtn = "部署を追加";
+
+            txtEmpLabel = "社員数";
+            txtHeadLabel = "部署長";
+            txtLocLabel = "拠点";
+            txtCodeLabel = "コード";
+            txtLocNA = "未設定";
+            txtHeadNotSet = "未設定";
+            txtViewDetails = "詳細を見る";
+
+            txtDeleteBoxTitle = "削除";
+            txtDeleteBoxDesc = "削除したい部署をここにドラッグします。";
+
+            txtPageLabel = "ページ";
+            txtTotalLabel = "合計";
+            txtPrev = "前へ";
+            txtNext = "次へ";
+
+            txtCreateTitle = "新しい部署を追加";
+            txtCreateDeptNameLabel = "部署名";
+            txtCreateLocLabel = "拠点（都道府県）";
+            txtCreateLocPlaceholder = "-- 拠点を選択 --";
+            txtCreateCancel = "キャンセル";
+            txtCreateSubmit = "作成";
+
+            txtEditTitle = "部署を編集";
+            txtEditDeptNameLabel = "部署名";
+            txtEditLocLabel = "拠点（都道府県）";
+            txtEditLocPlaceholder = "-- 拠点を選択 --";
+            txtEditCancel = "キャンセル";
+            txtEditSubmit = "保存";
+
+            txtMobileDeleteBtn = "✕";
+
+            txtConfirmTitle = "削除の確認";
+            txtConfirmMessage = "この部署を削除しますか？関連する設定に影響が出る可能性があります。";
+            txtConfirmCancel = "キャンセル";
+            txtConfirmOk = "削除する";
+
+            msgDeptIdInvalid = "部署IDが正しくありません。";
+            msgMissingToken = "セキュリティトークンがありません。";
+            msgDeleteSuccess = "削除しました。";
+            msgDeleteFail = "この部署を削除できません。";
+            msgDeleteSystemError = "部署削除時にシステムエラーが発生しました。";
+
+            msgCreateNameRequired = "部署名を入力してください。";
+            msgCreateLocRequired = "拠点を選択してください。";
+            msgCreateSuccess = "部署を作成しました。";
+            msgCreateFail = "部署を作成できません。";
+            msgCreateSystemError = "部署作成時にシステムエラーが発生しました。";
+
+            msgUpdateIdInvalid = "部署IDが正しくありません。";
+            msgUpdateSuccess = "部署を更新しました。";
+            msgUpdateFail = "部署を更新できません。";
+            msgUpdateSystemError = "部署更新時にシステムエラーが発生しました。";
+            break;
+
+        case "kr_KR":
+            txtDeptTitle = "부서 목록";
+            txtAddDeptBtn = "부서 추가";
+
+            txtEmpLabel = "직원수";
+            txtHeadLabel = "부서장";
+            txtLocLabel = "지역";
+            txtCodeLabel = "코드";
+            txtLocNA = "미설정";
+            txtHeadNotSet = "미설정";
+            txtViewDetails = "자세히 보기";
+
+            txtDeleteBoxTitle = "삭제";
+            txtDeleteBoxDesc = "삭제할 부서를 여기로 드래그하세요.";
+
+            txtPageLabel = "페이지";
+            txtTotalLabel = "총";
+            txtPrev = "이전";
+            txtNext = "다음";
+
+            txtCreateTitle = "새 부서 추가";
+            txtCreateDeptNameLabel = "부서명";
+            txtCreateLocLabel = "지역(도/시)";
+            txtCreateLocPlaceholder = "-- 지역 선택 --";
+            txtCreateCancel = "취소";
+            txtCreateSubmit = "생성";
+
+            txtEditTitle = "부서 수정";
+            txtEditDeptNameLabel = "부서명";
+            txtEditLocLabel = "지역(도/시)";
+            txtEditLocPlaceholder = "-- 지역 선택 --";
+            txtEditCancel = "취소";
+            txtEditSubmit = "저장";
+
+            txtMobileDeleteBtn = "✕";
+
+            txtConfirmTitle = "삭제 확인";
+            txtConfirmMessage = "이 부서를 삭제하시겠습니까? 관련 설정에 영향을 줄 수 있습니다.";
+            txtConfirmCancel = "취소";
+            txtConfirmOk = "삭제";
+
+            msgDeptIdInvalid = "부서 ID가 올바르지 않습니다.";
+            msgMissingToken = "보안 토큰이 없습니다.";
+            msgDeleteSuccess = "삭제되었습니다.";
+            msgDeleteFail = "이 부서를 삭제할 수 없습니다.";
+            msgDeleteSystemError = "부서 삭제 중 시스템 오류가 발생했습니다.";
+
+            msgCreateNameRequired = "부서명을 입력하세요.";
+            msgCreateLocRequired = "지역을 선택하세요.";
+            msgCreateSuccess = "부서를 생성했습니다.";
+            msgCreateFail = "부서를 생성할 수 없습니다.";
+            msgCreateSystemError = "부서 생성 중 시스템 오류가 발생했습니다.";
+
+            msgUpdateIdInvalid = "부서 ID가 올바르지 않습니다.";
+            msgUpdateSuccess = "부서를 수정했습니다.";
+            msgUpdateFail = "부서를 수정할 수 없습니다.";
+            msgUpdateSystemError = "부서 수정 중 시스템 오류가 발생했습니다.";
+            break;
+
+        case "cn_CN":
+            txtDeptTitle = "部门列表";
+            txtAddDeptBtn = "新增部门";
+
+            txtEmpLabel = "员工数";
+            txtHeadLabel = "负责人";
+            txtLocLabel = "地区";
+            txtCodeLabel = "代码";
+            txtLocNA = "无";
+            txtHeadNotSet = "未设置";
+            txtViewDetails = "查看详情";
+
+            txtDeleteBoxTitle = "删除";
+            txtDeleteBoxDesc = "将要删除的部门拖到这里。";
+
+            txtPageLabel = "页";
+            txtTotalLabel = "总计";
+            txtPrev = "上一页";
+            txtNext = "下一页";
+
+            txtCreateTitle = "新增部门";
+            txtCreateDeptNameLabel = "部门名称";
+            txtCreateLocLabel = "地区（省/市）";
+            txtCreateLocPlaceholder = "-- 选择地区 --";
+            txtCreateCancel = "取消";
+            txtCreateSubmit = "创建";
+
+            txtEditTitle = "编辑部门";
+            txtEditDeptNameLabel = "部门名称";
+            txtEditLocLabel = "地区（省/市）";
+            txtEditLocPlaceholder = "-- 选择地区 --";
+            txtEditCancel = "取消";
+            txtEditSubmit = "保存";
+
+            txtMobileDeleteBtn = "✕";
+
+            txtConfirmTitle = "确认删除";
+            txtConfirmMessage = "确定要删除此部门吗？相关设置可能会受到影响。";
+            txtConfirmCancel = "取消";
+            txtConfirmOk = "删除";
+
+            msgDeptIdInvalid = "部门 ID 无效。";
+            msgMissingToken = "缺少防伪令牌。";
+            msgDeleteSuccess = "已删除。";
+            msgDeleteFail = "无法删除此部门。";
+            msgDeleteSystemError = "删除部门时发生系统错误。";
+
+            msgCreateNameRequired = "请输入部门名称。";
+            msgCreateLocRequired = "请选择地区。";
+            msgCreateSuccess = "部门已创建。";
+            msgCreateFail = "无法创建部门。";
+            msgCreateSystemError = "创建部门时发生系统错误。";
+
+            msgUpdateIdInvalid = "部门 ID 无效。";
+            msgUpdateSuccess = "部门已更新。";
+            msgUpdateFail = "无法更新部门。";
+            msgUpdateSystemError = "更新部门时发生系统错误。";
+            break;
+
+        default: // vi_VN
+            txtDeptTitle = "Phòng ban";
+            txtAddDeptBtn = "Thêm phòng ban";
+
+            txtEmpLabel = "Nhân viên";
+            txtHeadLabel = "Trưởng phòng";
+            txtLocLabel = "Địa điểm";
+            txtCodeLabel = "Mã";
+            txtLocNA = "N/A";
+            txtHeadNotSet = "Chưa thiết lập";
+            txtViewDetails = "Xem chi tiết";
+
+            txtDeleteBoxTitle = "Xoá";
+            txtDeleteBoxDesc = "Kéo phòng ban vào đây để xoá.";
+
+            txtPageLabel = "Trang";
+            txtTotalLabel = "Tổng";
+            txtPrev = "Trước";
+            txtNext = "Sau";
+
+            txtCreateTitle = "Thêm phòng ban mới";
+            txtCreateDeptNameLabel = "Tên phòng ban";
+            txtCreateLocLabel = "Địa điểm (tỉnh)";
+            txtCreateLocPlaceholder = "-- Chọn khu vực --";
+            txtCreateCancel = "Hủy";
+            txtCreateSubmit = "Tạo mới";
+
+            txtEditTitle = "Sửa thông tin phòng ban";
+            txtEditDeptNameLabel = "Tên phòng ban";
+            txtEditLocLabel = "Địa điểm (tỉnh)";
+            txtEditLocPlaceholder = "-- Chọn khu vực --";
+            txtEditCancel = "Hủy";
+            txtEditSubmit = "Lưu thay đổi";
+
+            txtMobileDeleteBtn = "✕";
+
+            txtConfirmTitle = "Xác nhận xoá";
+            txtConfirmMessage = "Bạn có chắc chắn muốn xoá phòng ban này? Các thiết lập liên quan có thể bị ảnh hưởng.";
+            txtConfirmCancel = "Hủy";
+            txtConfirmOk = "Xoá";
+
+            msgDeptIdInvalid = "Mã phòng ban không hợp lệ.";
+            msgMissingToken = "Thiếu mã bảo mật.";
+            msgDeleteSuccess = "Đã xoá.";
+            msgDeleteFail = "Không thể xoá phòng ban này.";
+            msgDeleteSystemError = "Lỗi hệ thống khi xoá phòng ban.";
+
+            msgCreateNameRequired = "Vui lòng nhập tên phòng ban.";
+            msgCreateLocRequired = "Vui lòng chọn địa điểm.";
+            msgCreateSuccess = "Đã tạo phòng ban mới.";
+            msgCreateFail = "Không thể tạo phòng ban.";
+            msgCreateSystemError = "Lỗi hệ thống khi tạo phòng ban.";
+
+            msgUpdateIdInvalid = "Mã phòng ban không hợp lệ.";
+            msgUpdateSuccess = "Đã cập nhật phòng ban.";
+            msgUpdateFail = "Không thể cập nhật phòng ban.";
+            msgUpdateSystemError = "Lỗi hệ thống khi cập nhật phòng ban.";
+            break;
+    }
+}
+
+<style>
+    .dept-page {
+        padding: 22px;
+        font-family: @fontFamily;
+        font-size: @(fontSize);
+        color: @mainTextColor;
+        @*background:@pageBg;*@
+        min-height: calc(100vh - 80px);
+    }
+
+    .dept-header {
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:12px;
+        flex-wrap:wrap;
+        margin-bottom:16px;
+    }
+
+    .dept-title {
+        font-size:22px;
+        font-weight:650;
+        letter-spacing:.04em;
+        text-transform:uppercase;
+        color:@themeColor;
+    }
+
+    .dept-sub {
+        font-size:13px;
+        color:@subTextColor;
+        margin-top:4px;
+    }
+
+    .dept-actions {
+        display:flex;
+        gap:8px;
+        flex-wrap:wrap;
+    }
+
+    .btn-main,
+    .btn-secondary {
+        border-radius:999px;
+        padding:7px 14px;
+        font-size:13px;
+        border:1px solid transparent;
+        cursor:pointer;
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+        text-decoration:none;
+    }
+
+    .btn-main {
+        background:@themeColor;
+        color:#111827;
+        font-weight:600;
+        box-shadow:0 0 14px rgba(249,115,22,0.7);
+    }
+
+    .btn-secondary {
+        background:transparent;
+        color:@subTextColor;
+        border-color:@borderColor;
+    }
+
+    .dept-grid {
+        display:grid;
+        grid-template-columns:repeat(5, minmax(0, 1fr));
+        gap:12px;
+    }
+
+    @@media (max-width: 1200px) {
+        .dept-grid { grid-template-columns:repeat(4, minmax(0, 1fr)); }
+    }
+    @@media (max-width: 992px) {
+        .dept-grid { grid-template-columns:repeat(3, minmax(0, 1fr)); }
+    }
+    @@media (max-width: 768px) {
+        .dept-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); }
+        .dept-page { padding: 12px 10px; }
+    }
+    @@media (max-width: 480px) {
+        .dept-grid { grid-template-columns:repeat(1, minmax(0, 1fr)); }
+    }
+
+    .dept-card,
+    .dept-delete-card {
+        background:@cardBg;
+        border-radius:16px;
+        border:1px solid @borderColor;
+        padding:12px;
+        min-height:140px;
+        box-shadow:0 14px 30px rgba(15,23,42,0.5);
+        display:flex;
+        flex-direction:column;
+        justify-content:space-between;
+        transition:all .2s ease;
+    }
+
+    .dept-card {
+        cursor:grab;
+        position:relative;
+        padding-bottom:26px;
+    }
+
+    .dept-card.dragging {
+        opacity:.6;
+        transform:scale(.98);
+    }
+
+    .dept-top {
+        display:flex;
+        justify-content:space-between;
+        align-items:flex-start;
+        gap:6px;
+    }
+
+    .dept-name {
+        font-size:15px;
+        font-weight:600;
+        margin-bottom:4px;
+    }
+
+    .dept-code {
+        font-size:11px;
+        text-transform:uppercase;
+        letter-spacing:.08em;
+        color:@subTextColor;
+    }
+
+    .dept-edit-btn {
+        border:none;
+        background:transparent;
+        cursor:pointer;
+        font-size:14px;
+        color:@subTextColor;
+        padding:2px;
+    }
+
+    .dept-edit-btn:hover {
+        color:@themeColor;
+    }
+
+    .dept-meta {
+        margin-top:6px;
+        font-size:11px;
+        display:flex;
+        flex-direction:column;
+        gap:2px;
+    }
+
+    .dept-meta-row {
+        display:flex;
+        justify-content:space-between;
+        gap:4px;
+    }
+
+    .dept-meta-label {
+        color:@subTextColor;
+        white-space:nowrap;
+    }
+
+    .dept-meta-value {
+        text-align:right;
+        flex:1;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        white-space:nowrap;
+    }
+
+    .dept-footer {
+        margin-top:8px;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+    }
+
+    .dept-link {
+        font-size:12px;
+        color:@themeColor;
+        text-decoration:none;
+    }
+
+    .dept-link:hover {
+        text-decoration:underline;
+    }
+
+    .dept-delete-card {
+        border-style:dashed;
+        border-color:#b91c1c;
+        background:rgba(153,27,27,0.1);
+        align-items:center;
+        justify-content:center;
+        text-align:center;
+        color:#fecaca;
+    }
+
+    .dept-delete-card h4 {
+        margin:0;
+        font-size:15px;
+        font-weight:600;
+    }
+
+    .dept-delete-card p {
+        margin-top:6px;
+        font-size:11px;
+    }
+
+    .dept-delete-card.drop-over {
+        background:rgba(220,38,38,0.2);
+        border-color:#f87171;
+    }
+
+    .dept-pagination {
+        margin-top:16px;
+        display:flex;
+        justify-content:flex-end;
+        align-items:center;
+        gap:8px;
+        font-size:12px;
+        color:@subTextColor;
+    }
+
+    .dept-pagination button {
+        border-radius:999px;
+        border:1px solid @borderColor;
+        background:transparent;
+        padding:4px 10px;
+        cursor:pointer;
+        font-size:12px;
+        color:@subTextColor;
+    }
+
+    .dept-pagination button[disabled] {
+        opacity:.5;
+        cursor:default;
+    }
+
+    .dept-toast {
+        position:fixed;
+        left:50%;
+        top:-70px;
+        transform:translateX(-50%);
+        padding:9px 15px;
+        background:#0b1120;
+        border-radius:999px;
+        border:1px solid @themeColor;
+        color:#e5e7eb;
+        font-size:13px;
+        box-shadow:0 12px 30px rgba(15,23,42,0.7);
+        opacity:0;
+        transition:all .3s ease;
+        z-index:9999;
+        max-width:80vw;
+        text-align:center;
+    }
+
+    .dept-toast.show {
+        top:22px;
+        opacity:1;
+    }
+
+    /* Nút xóa cho mobile */
+    .dept-delete-mobile {
+        position:absolute;
+        right:6px;
+        bottom:6px;
+        border-radius:999px;
+        border:1px solid rgba(248,113,22,0.7);
+        background:rgba(15,23,42,0.85);
+        font-size:12px;
+        padding:3px 9px;
+        color:#fed7aa;
+        cursor:pointer;
+        display:none;
+    }
+
+    @@media (max-width: 768px) {
+        .dept-delete-mobile {
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+        }
+    }
+
+    /* Modal create / edit / confirm */
+    .dept-modal-backdrop {
+        position:fixed;
+        inset:0;
+        background:rgba(15,23,42,0.75);
+        display:none;
+        align-items:center;
+        justify-content:center;
+        z-index:9998;
+    }
+
+    .dept-modal-backdrop.show {
+        display:flex;
+    }
+
+    .dept-modal-box {
+        width:380px;
+        max-width:95vw;
+        border-radius:16px;
+        background:#020617;
+        border:1px solid rgba(148,163,184,0.7);
+        box-shadow:0 20px 50px rgba(0,0,0,0.85);
+        padding:16px 18px 14px;
+        color:#e5e7eb;
+        font-size:13px;
+    }
+
+    .dept-modal-header {
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        margin-bottom:8px;
+        gap:8px;
+    }
+
+    .dept-modal-title {
+        font-size:15px;
+        font-weight:600;
+    }
+
+    .dept-modal-close {
+        border:none;
+        background:transparent;
+        color:#9ca3af;
+        font-size:18px;
+        cursor:pointer;
+    }
+
+    .dept-modal-group {
+        margin-top:8px;
+    }
+
+    .dept-modal-label {
+        font-size:12px;
+        color:@subTextColor;
+        margin-bottom:2px;
+    }
+
+    .dept-modal-input,
+    .dept-modal-select {
+        width:100%;
+        border-radius:10px;
+        border:1px solid rgba(148,163,184,0.7);
+        background:#020617;
+        color:#e5e7eb;
+        padding:6px 8px;
+        font-size:13px;
+        box-sizing:border-box;
+        outline:none;
+    }
+
+    .dept-modal-footer {
+        margin-top:10px;
+        display:flex;
+        justify-content:flex-end;
+        gap:8px;
+    }
+
+    .btn-modal-secondary,
+    .btn-modal-primary {
+        border-radius:999px;
+        padding:6px 13px;
+        font-size:13px;
+        border:1px solid transparent;
+        cursor:pointer;
+    }
+
+    .btn-modal-secondary {
+        background:transparent;
+        color:@subTextColor;
+        border-color:rgba(148,163,184,0.8);
+    }
+
+    .btn-modal-primary {
+        background:@themeColor;
+        color:#111827;
+        font-weight:600;
+        box-shadow:0 0 12px rgba(248,181,0,0.9);
+    }
+</style>
+
+<div class="dept-page">
+    @Html.AntiForgeryToken()
+
+    <div class="dept-header">
+        <div>
+            <div class="dept-title">@txtDeptTitle</div>
+        </div>
+
+        <div class="dept-actions">
+            <button type="button" id="btnOpenCreate" class="btn-main">
+                + @txtAddDeptBtn
+            </button>
+        </div>
+    </div>
+
+    <div class="dept-grid" id="deptGrid">
+        @foreach (var pb in Model)
+        {
+            var mapb = pb.MAPB;
+            int empCount = empCountDict.ContainsKey(mapb) ? empCountDict[mapb] : 0;
+            string headName = headNameDict.ContainsKey(mapb) ? headNameDict[mapb] : "";
+            string areaName = areaNameDict.ContainsKey(mapb) ? areaNameDict[mapb] : "";
+
+            <div class="dept-card"
+                 draggable="true"
+                 data-id="@pb.MAPB">
+                <div>
+                    <div class="dept-top">
+                        <div>
+                            <div class="dept-name">@pb.TENPB</div>
+                            <div class="dept-code">@txtCodeLabel: @pb.MAPB</div>
+                        </div>
+                        <button type="button"
+                                class="dept-edit-btn deptEditBtn"
+                                data-id="@pb.MAPB"
+                                data-name="@pb.TENPB"
+                                data-diadiem="@(pb.DIADIEM.HasValue ? pb.DIADIEM.Value.ToString() : "")">
+                            ✎
+                        </button>
+                    </div>
+
+                    <div class="dept-meta">
+                        <div class="dept-meta-row">
+                            <span class="dept-meta-label">👥 @txtEmpLabel</span>
+                            <span class="dept-meta-value">@empCount</span>
+                        </div>
+                        <div class="dept-meta-row">
+                            <span class="dept-meta-label">👤 @txtHeadLabel</span>
+                            <span class="dept-meta-value">
+                                @(
+                                    !string.IsNullOrEmpty(headName)
+                                        ? headName
+                                        : (!string.IsNullOrEmpty(pb.MATRG_PHG) ? pb.MATRG_PHG : txtHeadNotSet)
+                                 )
+                            </span>
+                        </div>
+                        <div class="dept-meta-row">
+                            <span class="dept-meta-label">📍 @txtLocLabel</span>
+                            <span class="dept-meta-value">
+                                @{
+                                    string locationDisplay;
+                                    if (!string.IsNullOrEmpty(areaName))
+                                    {
+                                        locationDisplay = areaName;
+                                    }
+                                    else if (pb.DIADIEM.HasValue)
+                                    {
+                                        locationDisplay = pb.DIADIEM.Value.ToString();
+                                    }
+                                    else
+                                    {
+                                        locationDisplay = txtLocNA;
+                                    }
+                                }
+                                @locationDisplay
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="dept-footer">
+                    <a class="dept-link" style="list-style:none"
+                       href="@Url.Action("Details", "Department", new { area = "HR", id = pb.MAPB })">
+                        @txtViewDetails →
+                    </a>
+                </div>
+
+                <!-- Nút xóa cho mobile -->
+                <button type="button"
+                        class="dept-delete-mobile deptDeleteMobileBtn"
+                        data-id="@pb.MAPB">
+                    @txtMobileDeleteBtn
+                </button>
+            </div>
+        }
+
+        <div class="dept-delete-card" id="deptDeleteBox">
+            <h4>@txtDeleteBoxTitle</h4>
+            <p>@txtDeleteBoxDesc</p>
+        </div>
+    </div>
+
+    <div class="dept-pagination">
+        <span>
+            @txtPageLabel @currentPage / @totalPages &nbsp;|&nbsp; @txtTotalLabel: @totalDepartments
+        </span>
+        <form method="get" style="display:inline;">
+            <button type="submit"
+                    name="page"
+                    value="@(currentPage - 1)"
+                    @(currentPage <= 1 ? "disabled" : "")>
+                « @txtPrev
+            </button>
+            <button type="submit"
+                    name="page"
+                    value="@(currentPage + 1)"
+                    @(currentPage >= totalPages ? "disabled" : "")>
+                @txtNext »
+            </button>
+        </form>
+    </div>
+
+    <div id="deptToast" class="dept-toast"></div>
+</div>
+
+<!-- Modal tạo phòng ban -->
+<div class="dept-modal-backdrop" id="deptCreateModal">
+    <div class="dept-modal-box">
+        <div class="dept-modal-header">
+            <div class="dept-modal-title">@txtCreateTitle</div>
+            <button type="button" class="dept-modal-close" id="btnCloseCreate">×</button>
+        </div>
+        <form id="deptCreateForm">
+            <div class="dept-modal-group">
+                <div class="dept-modal-label">@txtCreateDeptNameLabel</div>
+                <input type="text" id="createDeptName" name="tenpb"
+                       class="dept-modal-input"
+                       placeholder="@txtCreateDeptNameLabel..." />
+            </div>
+            <div class="dept-modal-group">
+                <div class="dept-modal-label">@txtCreateLocLabel</div>
+                <select id="createDeptArea" name="diadiemCode" class="dept-modal-select">
+                    <option value="">@txtCreateLocPlaceholder</option>
+                    @foreach (var kv in areaList)
+                    {
+                        <option value="@kv.MAKV">@kv.TENTINH</option>
+                    }
+                </select>
+            </div>
+            <div class="dept-modal-footer">
+                <button type="button" class="btn-modal-secondary" id="btnCancelCreate">@txtCreateCancel</button>
+                <button type="submit" class="btn-modal-primary">@txtCreateSubmit</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal sửa phòng ban -->
+<div class="dept-modal-backdrop" id="deptEditModal">
+    <div class="dept-modal-box">
+        <div class="dept-modal-header">
+            <div class="dept-modal-title">@txtEditTitle</div>
+            <button type="button" class="dept-modal-close" id="btnCloseEdit">×</button>
+        </div>
+        <form id="deptEditForm">
+            <input type="hidden" id="editDeptId" name="mapb" />
+            <div class="dept-modal-group">
+                <div class="dept-modal-label">@txtEditDeptNameLabel</div>
+                <input type="text" id="editDeptName" name="tenpb"
+                       class="dept-modal-input" />
+            </div>
+            <div class="dept-modal-group">
+                <div class="dept-modal-label">@txtEditLocLabel</div>
+                <select id="editDeptArea" name="diadiemCode" class="dept-modal-select">
+                    <option value="">@txtEditLocPlaceholder</option>
+                    @foreach (var kv in areaList)
+                    {
+                        <option value="@kv.MAKV">@kv.TENTINH</option>
+                    }
+                </select>
+            </div>
+            <div class="dept-modal-footer">
+                <button type="button" class="btn-modal-secondary" id="btnCancelEdit">@txtEditCancel</button>
+                <button type="submit" class="btn-modal-primary">@txtEditSubmit</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal confirm xoá -->
+<div class="dept-modal-backdrop" id="deptConfirmModal">
+    <div class="dept-modal-box">
+        <div class="dept-modal-header">
+            <div class="dept-modal-title">@txtConfirmTitle</div>
+            <button type="button" class="dept-modal-close" id="btnCloseConfirm">×</button>
+        </div>
+        <div class="dept-modal-group">
+            <div id="deptConfirmText">
+                @txtConfirmMessage
+            </div>
+        </div>
+        <div class="dept-modal-footer">
+            <button type="button" class="btn-modal-secondary" id="btnConfirmCancel">@txtConfirmCancel</button>
+            <button type="button" class="btn-modal-primary" id="btnConfirmOk">@txtConfirmOk</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        var toast = document.getElementById("deptToast");
+        var deleteBox = document.getElementById("deptDeleteBox");
+        var cards = document.querySelectorAll(".dept-card");
+        var tokenInput = document.querySelector("input[name='__RequestVerificationToken']");
+        var token = tokenInput ? tokenInput.value : "";
+
+        var msgDeptIdInvalid = '@msgDeptIdInvalid';
+        var msgMissingToken = '@msgMissingToken';
+        var msgDeleteSuccess = '@msgDeleteSuccess';
+        var msgDeleteFail = '@msgDeleteFail';
+        var msgDeleteSystemError = '@msgDeleteSystemError';
+
+        var msgCreateNameRequired = '@msgCreateNameRequired';
+        var msgCreateLocRequired = '@msgCreateLocRequired';
+        var msgCreateSuccess = '@msgCreateSuccess';
+        var msgCreateFail = '@msgCreateFail';
+        var msgCreateSystemError = '@msgCreateSystemError';
+
+        var msgUpdateIdInvalid = '@msgUpdateIdInvalid';
+        var msgUpdateSuccess = '@msgUpdateSuccess';
+        var msgUpdateFail = '@msgUpdateFail';
+        var msgUpdateSystemError = '@msgUpdateSystemError';
+
+        // Confirm modal
+        var confirmModal = document.getElementById("deptConfirmModal");
+        var btnCloseConfirm = document.getElementById("btnCloseConfirm");
+        var btnConfirmCancel = document.getElementById("btnConfirmCancel");
+        var btnConfirmOk = document.getElementById("btnConfirmOk");
+        var deleteTargetId = null;
+
+        function showToast(msg) {
+            if (!toast) return;
+            toast.textContent = msg;
+            toast.classList.add("show");
+            setTimeout(function () {
+                toast.classList.remove("show");
+            }, 2200);
+        }
+
+        function openModal(el) {
+            if (el) el.classList.add("show");
+        }
+        function closeModal(el) {
+            if (el) el.classList.remove("show");
+        }
+
+        function openConfirm(id) {
+            deleteTargetId = id || null;
+            if (!deleteTargetId) {
+                showToast(msgDeptIdInvalid);
+                return;
+            }
+            openModal(confirmModal);
+        }
+
+        function callDeleteDept(id) {
+            if (!id) {
+                showToast(msgDeptIdInvalid);
+                return;
+            }
+            if (!token) {
+                showToast(msgMissingToken);
+                return;
+            }
+
+            var urlDelete = '@Url.Action("Delete", "Department", new { area = "HR" })';
+
+            fetch(urlDelete, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+                },
+                body: "__RequestVerificationToken=" + encodeURIComponent(token) +
+                    "&id=" + encodeURIComponent(id)
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    if (res && res.success) {
+                        showToast(res.message || msgDeleteSuccess);
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 800);
+                    } else {
+                        showToast((res && res.message) || msgDeleteFail);
+                    }
+                })
+                .catch(function () {
+                    showToast(msgDeleteSystemError);
+                });
+        }
+
+        // Confirm modal events
+        if (btnCloseConfirm) {
+            btnCloseConfirm.addEventListener("click", function () {
+                closeModal(confirmModal);
+                deleteTargetId = null;
+            });
+        }
+        if (btnConfirmCancel) {
+            btnConfirmCancel.addEventListener("click", function () {
+                closeModal(confirmModal);
+                deleteTargetId = null;
+            });
+        }
+        if (confirmModal) {
+            confirmModal.addEventListener("click", function (e) {
+                if (e.target === confirmModal) {
+                    closeModal(confirmModal);
+                    deleteTargetId = null;
+                }
+            });
+        }
+        if (btnConfirmOk) {
+            btnConfirmOk.addEventListener("click", function () {
+                if (deleteTargetId) {
+                    var id = deleteTargetId;
+                    deleteTargetId = null;
+                    closeModal(confirmModal);
+                    callDeleteDept(id);
+                } else {
+                    closeModal(confirmModal);
+                }
+            });
+        }
+
+        // Drag delete (desktop) -> mở confirm
+        cards.forEach(function (card) {
+            card.addEventListener("dragstart", function (e) {
+                var id = this.getAttribute("data-id");
+                e.dataTransfer.setData("text/plain", id);
+                this.classList.add("dragging");
+            });
+
+            card.addEventListener("dragend", function () {
+                this.classList.remove("dragging");
+            });
+        });
+
+        if (deleteBox) {
+            deleteBox.addEventListener("dragover", function (e) {
+                e.preventDefault();
+                deleteBox.classList.add("drop-over");
+            });
+
+            deleteBox.addEventListener("dragleave", function () {
+                deleteBox.classList.remove("drop-over");
+            });
+
+            deleteBox.addEventListener("drop", function (e) {
+                e.preventDefault();
+                deleteBox.classList.remove("drop-over");
+
+                var id = e.dataTransfer.getData("text/plain");
+                openConfirm(id);
+            });
+        }
+
+        // Nút xóa mobile -> mở confirm
+        var mobileDeleteBtns = document.querySelectorAll(".deptDeleteMobileBtn");
+        mobileDeleteBtns.forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                var id = this.getAttribute("data-id");
+                openConfirm(id);
+            });
+        });
+
+        // -------- Modal create ----------
+        var createModal = document.getElementById("deptCreateModal");
+        var btnOpenCreate = document.getElementById("btnOpenCreate");
+        var btnCloseCreate = document.getElementById("btnCloseCreate");
+        var btnCancelCreate = document.getElementById("btnCancelCreate");
+        var createForm = document.getElementById("deptCreateForm");
+        var createNameInput = document.getElementById("createDeptName");
+        var createAreaSelect = document.getElementById("createDeptArea");
+
+        if (btnOpenCreate) {
+            btnOpenCreate.addEventListener("click", function () {
+                if (createNameInput) createNameInput.value = "";
+                if (createAreaSelect) createAreaSelect.value = "";
+                openModal(createModal);
+            });
+        }
+        if (btnCloseCreate) btnCloseCreate.addEventListener("click", function () { closeModal(createModal); });
+        if (btnCancelCreate) btnCancelCreate.addEventListener("click", function (e) {
+            e.preventDefault();
+            closeModal(createModal);
+        });
+        if (createModal) {
+            createModal.addEventListener("click", function (e) {
+                if (e.target === createModal) closeModal(createModal);
+            });
+        }
+
+        if (createForm) {
+            createForm.addEventListener("submit", function (e) {
+                e.preventDefault();
+                var name = createNameInput ? createNameInput.value.trim() : "";
+                var areaCode = createAreaSelect ? createAreaSelect.value : "";
+
+                if (!name) {
+                    showToast(msgCreateNameRequired);
+                    return;
+                }
+                if (!areaCode) {
+                    showToast(msgCreateLocRequired);
+                    return;
+                }
+                if (!token) {
+                    showToast(msgMissingToken);
+                    return;
+                }
+
+                var urlCreate = '@Url.Action("CreateInline", "Department", new { area = "HR" })';
+
+                fetch(urlCreate, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+                    },
+                    body: "__RequestVerificationToken=" + encodeURIComponent(token) +
+                        "&tenpb=" + encodeURIComponent(name) +
+                        "&diadiemCode=" + encodeURIComponent(areaCode)
+                })
+                    .then(function (r) { return r.json(); })
+                    .then(function (res) {
+                        if (res && res.success) {
+                            showToast(res.message || msgCreateSuccess);
+                            setTimeout(function () { window.location.reload(); }, 800);
+                        } else {
+                            showToast((res && res.message) || msgCreateFail);
+                        }
+                    })
+                    .catch(function () {
+                        showToast(msgCreateSystemError);
+                    });
+            });
+        }
+
+        // -------- Modal edit ----------
+        var editModal = document.getElementById("deptEditModal");
+        var btnCloseEdit = document.getElementById("btnCloseEdit");
+        var btnCancelEdit = document.getElementById("btnCancelEdit");
+        var editForm = document.getElementById("deptEditForm");
+        var editIdInput = document.getElementById("editDeptId");
+        var editNameInput = document.getElementById("editDeptName");
+        var editAreaSelect = document.getElementById("editDeptArea");
+        var editBtns = document.querySelectorAll(".deptEditBtn");
+
+        editBtns.forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                var id = this.getAttribute("data-id");
+                var name = this.getAttribute("data-name") || "";
+                var diadiem = this.getAttribute("data-diadiem") || "";
+
+                if (editIdInput) editIdInput.value = id || "";
+                if (editNameInput) editNameInput.value = name;
+
+                if (editAreaSelect) {
+                    editAreaSelect.value = "";
+                    if (diadiem) {
+                        for (var i = 0; i < editAreaSelect.options.length; i++) {
+                            if (editAreaSelect.options[i].value === diadiem) {
+                                editAreaSelect.selectedIndex = i;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                openModal(editModal);
+            });
+        });
+
+        if (btnCloseEdit) btnCloseEdit.addEventListener("click", function () { closeModal(editModal); });
+        if (btnCancelEdit) btnCancelEdit.addEventListener("click", function (e) {
+            e.preventDefault();
+            closeModal(editModal);
+        });
+        if (editModal) {
+            editModal.addEventListener("click", function (e) {
+                if (e.target === editModal) closeModal(editModal);
+            });
+        }
+
+        if (editForm) {
+            editForm.addEventListener("submit", function (e) {
+                e.preventDefault();
+                var id = editIdInput ? editIdInput.value : "";
+                var name = editNameInput ? editNameInput.value.trim() : "";
+                var areaCode = editAreaSelect ? editAreaSelect.value : "";
+
+                if (!id) {
+                    showToast(msgUpdateIdInvalid);
+                    return;
+                }
+                if (!token) {
+                    showToast(msgMissingToken);
+                    return;
+                }
+
+                var urlUpdate = '@Url.Action("UpdateInfo", "Department", new { area = "HR" })';
+
+                var body = "__RequestVerificationToken=" + encodeURIComponent(token) +
+                    "&mapb=" + encodeURIComponent(id) +
+                    "&tenpb=" + encodeURIComponent(name || "") +
+                    "&diadiemCode=" + encodeURIComponent(areaCode || "");
+
+                fetch(urlUpdate, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
+                    body: body
+                })
+                    .then(function (r) { return r.json(); })
+                    .then(function (res) {
+                        if (res && res.success) {
+                            showToast(res.message || msgUpdateSuccess);
+                            setTimeout(function () { window.location.reload(); }, 800);
+                        } else {
+                            showToast((res && res.message) || msgUpdateFail);
+                        }
+                    })
+                    .catch(function () {
+                        showToast(msgUpdateSystemError);
+                    });
+            });
+        }
+
+    })();
+</script>

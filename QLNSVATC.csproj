@@ -58,6 +58,21 @@
     <Reference Include="Azure.Identity, Version=1.11.4.0, Culture=neutral, PublicKeyToken=92742159e12e44c8, processorArchitecture=MSIL">
       <HintPath>packages\Azure.Identity.1.11.4\lib\netstandard2.0\Azure.Identity.dll</HintPath>
     </Reference>
+    <Reference Include="BouncyCastle.Crypto, Version=1.8.9.0, Culture=neutral, PublicKeyToken=0e99375e54769942">
+      <HintPath>packages\BouncyCastle.1.8.9\lib\BouncyCastle.Crypto.dll</HintPath>
+    </Reference>
+    <Reference Include="ClosedXML, Version=0.105.0.0, Culture=neutral, PublicKeyToken=fd1eb21b62ae805b, processorArchitecture=MSIL">
+      <HintPath>packages\ClosedXML.0.105.0\lib\netstandard2.0\ClosedXML.dll</HintPath>
+    </Reference>
+    <Reference Include="ClosedXML.Parser, Version=1.0.0.0, Culture=neutral, PublicKeyToken=1d5f7376574c51ec, processorArchitecture=MSIL">
+      <HintPath>packages\ClosedXML.Parser.2.0.0\lib\netstandard2.0\ClosedXML.Parser.dll</HintPath>
+    </Reference>
+    <Reference Include="DocumentFormat.OpenXml, Version=3.1.1.0, Culture=neutral, PublicKeyToken=8fb06cb64d019a17, processorArchitecture=MSIL">
+      <HintPath>packages\DocumentFormat.OpenXml.3.1.1\lib\net46\DocumentFormat.OpenXml.dll</HintPath>
+    </Reference>
+    <Reference Include="DocumentFormat.OpenXml.Framework, Version=3.1.1.0, Culture=neutral, PublicKeyToken=8fb06cb64d019a17, processorArchitecture=MSIL">
+      <HintPath>packages\DocumentFormat.OpenXml.Framework.3.1.1\lib\net46\DocumentFormat.OpenXml.Framework.dll</HintPath>
+    </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>packages\EntityFramework.6.5.1\lib\net45\EntityFramework.dll</HintPath>
     </Reference>
@@ -69,9 +84,18 @@
     </Reference>
     <Reference Include="EPPlus.Interfaces, Version=8.1.0.0, Culture=neutral, PublicKeyToken=a694d7f3b0907a61, processorArchitecture=MSIL">
       <HintPath>packages\EPPlus.Interfaces.8.1.0\lib\net462\EPPlus.Interfaces.dll</HintPath>
+	</Reference>
+    <Reference Include="ExcelNumberFormat, Version=1.1.0.0, Culture=neutral, PublicKeyToken=23c6f5d73be07eca, processorArchitecture=MSIL">
+      <HintPath>packages\ExcelNumberFormat.1.1.0\lib\net20\ExcelNumberFormat.dll</HintPath>
+    </Reference>
+    <Reference Include="itextsharp, Version=5.5.13.3, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <HintPath>packages\iTextSharp.5.5.13.3\lib\itextsharp.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.Bcl.AsyncInterfaces.1.1.1\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Bcl.HashCode, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Bcl.HashCode.1.1.1\lib\net461\Microsoft.Bcl.HashCode.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Data.SqlClient, Version=5.0.0.0, Culture=neutral, PublicKeyToken=23ec7fc2d6eaa4a5, processorArchitecture=MSIL">
@@ -105,6 +129,12 @@
       <HintPath>packages\Microsoft.IO.RecyclableMemoryStream.3.0.1\lib\netstandard2.0\Microsoft.IO.RecyclableMemoryStream.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
+    <Reference Include="RBush, Version=4.0.0.0, Culture=neutral, PublicKeyToken=c77e27b81f4d0187, processorArchitecture=MSIL">
+      <HintPath>packages\RBush.Signed.4.0.0\lib\net47\RBush.dll</HintPath>
+    </Reference>
+    <Reference Include="SixLabors.Fonts, Version=1.0.0.0, Culture=neutral, PublicKeyToken=d998eea7b14cab13, processorArchitecture=MSIL">
+      <HintPath>packages\SixLabors.Fonts.1.0.0\lib\netstandard2.0\SixLabors.Fonts.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
@@ -128,6 +158,8 @@
     <Reference Include="System.IdentityModel.Tokens.Jwt, Version=6.35.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>packages\System.IdentityModel.Tokens.Jwt.6.35.0\lib\net472\System.IdentityModel.Tokens.Jwt.dll</HintPath>
     </Reference>
+    <Reference Include="System.IO.Compression, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.IO.FileSystem.AccessControl, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>packages\System.IO.FileSystem.AccessControl.5.0.0\lib\net461\System.IO.FileSystem.AccessControl.dll</HintPath>
     </Reference>
@@ -255,19 +287,32 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Areas\Admin\AdminAreaRegistration.cs" />
+    <Compile Include="Areas\Admin\Controllers\ActivityController.cs" />
+    <Compile Include="Areas\Admin\Controllers\DataController.cs" />
     <Compile Include="Areas\Admin\Controllers\HomeController.cs" />
     <Compile Include="Areas\Employee\Controllers\HomeController.cs" />
     <Compile Include="Areas\Employee\EmployeeAreaRegistration.cs" />
     <Compile Include="Areas\FN\Controllers\ExpenseController.cs" />
     <Compile Include="Areas\FN\Controllers\RevenueController.cs" />
     <Compile Include="Areas\FN\Data\FN_Models\RevenueReportRowVM.cs" />
+    <Compile Include="Areas\Admin\Controllers\MenuController.cs" />
+    <Compile Include="Areas\Admin\Controllers\RoleController.cs" />
+    <Compile Include="Areas\Admin\Data\ActivityViewModel.cs" />
+    <Compile Include="Areas\Admin\Data\AdminModel.cs" />
     <Compile Include="Areas\FN\FNAreaRegistration.cs" />
     <Compile Include="Areas\HR\Controllers\DepartmentController.cs" />
     <Compile Include="Areas\HR\Controllers\EmployeeController.cs" />
     <Compile Include="Areas\HR\Controllers\HomeController.cs" />
     <Compile Include="Areas\HR\Controllers\ProjectController.cs" />
-    <Compile Include="Areas\OF\Controllers\HomeController.cs" />
-    <Compile Include="Areas\OF\OFAreaRegistration.cs" />
+    <Compile Include="Areas\HR\Controllers\WorkController.cs" />
+    <Compile Include="Areas\HR\Data\DepartmentDetailsViewModel.cs" />
+    <Compile Include="Areas\HR\Data\EmployeeOnProjectViewModel.cs" />
+    <Compile Include="Areas\HR\Data\ProjectCreateViewModel.cs" />
+    <Compile Include="Areas\HR\Data\ProjectDetailViewModel.cs" />
+    <Compile Include="Areas\HR\Data\ProjectInformationViewModel.cs" />
+    <Compile Include="Areas\HR\Data\ProjectItemViewModel.cs" />
+    <Compile Include="Areas\HR\Data\ProjectSectionViewModel.cs" />
+    <Compile Include="Areas\HR\Data\WorkViewModel.cs" />
     <Compile Include="Areas\HR\HRAreaRegistration.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Areas\FN\Controllers\HomeController.cs" />
@@ -297,6 +342,7 @@
     <Compile Include="Models\BIENDONGTHITRUONG.cs">
       <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
     </Compile>
+    <Compile Include="Areas\HR\Data\CandidateViewModel.cs" />
     <Compile Include="Models\CHAMCONG.cs">
       <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
     </Compile>
@@ -358,8 +404,8 @@
     <Compile Include="Models\HOSOVIECLAM.cs">
       <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\HRDashboardViewModel.cs" />
-    <Compile Include="Models\HREmployeeInformationViewModel.cs" />
+    <Compile Include="Areas\HR\Data\HRDashboardViewModel.cs" />
+    <Compile Include="Areas\HR\Data\HREmployeeInformationViewModel.cs" />
     <Compile Include="Models\KHACHHANG.cs">
       <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
     </Compile>
@@ -751,6 +797,17 @@
     <Content Include="Areas\HR\Views\Employee\Profile.cshtml" />
     <Content Include="Areas\Employee\Views\Home\Information.cshtml" />
     <Content Include="Areas\FN\Views\Expense\NewExpense.cshtml" />
+    <Content Include="Areas\HR\Views\Employee\Information.cshtml" />
+    <Content Include="Areas\HR\Views\Employee\Profile.cshtml" />
+    <Content Include="Areas\HR\Views\Employee\Candidate.cshtml" />
+    <Content Include="Areas\HR\Views\Department\Information.cshtml" />
+    <Content Include="Areas\HR\Views\Department\Details.cshtml" />
+    <Content Include="Areas\HR\Views\Project\Details.cshtml" />
+    <Content Include="Areas\HR\Views\Work\Index.cshtml" />
+    <Content Include="Areas\HR\Views\Project\Information.cshtml" />
+    <Content Include="Areas\Admin\Views\Menu\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Activity\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Role\Index.cshtml" />
     <None Include="packages\jQuery.3.7.0\Content\Scripts\jquery-3.7.0-vsdoc.js" />
     <Content Include="packages\jQuery.3.7.0\Content\Scripts\jquery-3.7.0.js" />
     <Content Include="packages\jQuery.3.7.0\Content\Scripts\jquery-3.7.0.min.js" />
@@ -873,8 +930,6 @@
     <Content Include="Areas\Admin\Views\web.config" />
     <Content Include="Areas\HR\Views\web.config" />
     <Content Include="Areas\FN\Views\web.config" />
-    <Content Include="Areas\Employee\Views\web.config" />
-    <Content Include="Areas\OF\Views\web.config" />
     <EntityDeploy Include="Models\QLNSVATCEntities.edmx">
       <Generator>EntityModelCodeGenerator</Generator>
       <LastGenOutput>QLNSVATCEntities.Designer.cs</LastGenOutput>
@@ -882,20 +937,14 @@
     <Content Include="Models\QLNSVATCEntities.edmx.diagram">
       <DependentUpon>QLNSVATCEntities.edmx</DependentUpon>
     </Content>
-    <Content Include="Areas\OF\Views\Home\Index.cshtml" />
     <Content Include="Areas\Admin\Views\Home\Index.cshtml" />
-    <Content Include="Areas\Employee\Views\Home\Index.cshtml" />
     <Content Include="Areas\FN\Views\Home\Index.cshtml" />
     <Content Include="Areas\HR\Views\Home\Index.cshtml" />
     <Content Include="Areas\Admin\Views\Shared\_LayoutAdmin.cshtml" />
-    <Content Include="Areas\Employee\Views\Shared\_LayoutEmployee.cshtml" />
     <Content Include="Areas\FN\Views\Shared\_LayoutFN.cshtml" />
     <Content Include="Areas\HR\Views\Shared\_LayoutHR.cshtml" />
-    <Content Include="Areas\OF\Views\Shared\_LayoutOF.cshtml" />
     <Content Include="Areas\Admin\Views\Shared\Error.cshtml" />
-    <Content Include="Areas\Employee\Views\Shared\Error.cshtml" />
     <Content Include="Areas\FN\Views\Shared\Error.cshtml" />
-    <Content Include="Areas\OF\Views\Shared\Error.cshtml" />
     <Content Include="Areas\HR\Views\Shared\Error.cshtml" />
     <Content Include="packages\Antlr.3.5.0.2\.signature.p7s" />
     <Content Include="packages\Antlr.3.5.0.2\Antlr.3.5.0.2.nupkg" />
@@ -1049,6 +1098,18 @@
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
+    <Content Include="Uploads\HoSoUngVien\2025120116_1234cfrfcrcfr\z7279096394342_3cf1075f9429fa3ca961898334721e66.jpg" />
+    <Content Include="Uploads\HoSoUngVien\2025120116_1234cfrfcrcfr\z7279114463625_f449a2205acfa1d86d18b0ab0fd077ea.jpg" />
+    <Content Include="Uploads\HoSoUngVien\2025120116_beo\Untitled Diagram-Đăng ký.drawio.png" />
+    <Content Include="Uploads\HoSoUngVien\2025120116_beo\z7279105512234_df8136f358f605ddd9a46d97861d6acf.jpg" />
+    <Content Include="Uploads\HoSoUngVien\2025120121_thien_hoang\thienhoang_filebangcap_20251201212450.png" />
+    <Content Include="Uploads\HoSoUngVien\2025120121_thien_hoang\thienhoang_filethongtin_20251201212450.png" />
+    <Content Include="Uploads\HoSoUngVien\2025120408_NGUYEN_TAN_SANG\nguyentansang_filebangcap_20251204081612.jpg" />
+    <Content Include="Uploads\HoSoUngVien\2025120408_NGUYEN_TAN_SANG\nguyentansang_filethongtin_20251204081612.jpg" />
+    <Content Include="Uploads\HoSoUngVien\2025120409_NGUYEN_TAN_LOC\nguyentanloc_filebangcap_20251204092208.jpg" />
+    <Content Include="Uploads\HoSoUngVien\2025120409_NGUYEN_TAN_LOC\nguyentanloc_filethongtin_20251204092208.jpg" />
+    <Content Include="Uploads\HoSoUngVien\2025120409_NGUYEN_TAN_SANG\nguyentansang_filebangcap_20251204091433.jpg" />
+    <Content Include="Uploads\HoSoUngVien\2025120409_NGUYEN_TAN_SANG\nguyentansang_filethongtin_20251204091433.jpg" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -1078,7 +1139,14 @@
     <Folder Include="Areas\HR\Data\" />
     <Folder Include="Areas\HR\Views\Department\" />
     <Folder Include="Areas\HR\Views\Project\" />
-    <Folder Include="Areas\OF\Data\" />
+    <Content Include="Uploads\HoSoUngVien\2025120408_NGUYEN_TAN_SANG\nguyentansang_filekhac_20251204081612.docx" />
+    <Content Include="Uploads\HoSoUngVien\2025120409_NGUYEN_TAN_LOC\nguyentanloc_filekhac_20251204092208.docx" />
+    <Content Include="Uploads\HoSoUngVien\2025120409_NGUYEN_TAN_SANG\nguyentansang_filekhac_20251204091433.docx" />
+    <Content Include="Views\Account\Profile.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Areas\Admin\Views\Data\" />
+    <Folder Include="Areas\FN\Data\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />

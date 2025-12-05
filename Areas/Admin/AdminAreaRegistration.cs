@@ -12,6 +12,50 @@ namespace QLNSVATC.Areas.Admin
         public override void RegisterArea(AreaRegistrationContext context)
         {
             context.MapRoute(
+                name: "AD_QLHD",
+                url: "AD/ql-hoat-dong",
+                defaults: new
+                {
+                    controller = "Activity",
+                    action = "Index",
+                    codeBus = UrlParameter.Optional
+                },
+                namespaces: new[] { "QLNSVATC.Areas.Admin.Controllers" }
+            );
+            context.MapRoute(
+                name: "AD_QLMN",
+                url: "AD/ql-menu",
+                defaults: new
+                {
+                    controller = "Menu",
+                    action = "Index",
+                    codeBus = UrlParameter.Optional
+                },
+                namespaces: new[] { "QLNSVATC.Areas.Admin.Controllers" }
+            );
+            context.MapRoute(
+                name: "AD_QLDT",
+                url: "AD/ql-du-lieu",
+                defaults: new
+                {
+                    controller = "Data",
+                    action = "Index",
+                    codeBus = UrlParameter.Optional
+                },
+                namespaces: new[] { "QLNSVATC.Areas.Admin.Controllers" }
+            );
+            context.MapRoute(
+                name: "AD_Home",
+                url: "AD/trang-chu",
+                defaults: new
+                {
+                    controller = "Home",
+                    action = "Index",
+                    codeBus = UrlParameter.Optional
+                },
+                namespaces: new[] { "QLNSVATC.Areas.Admin.Controllers" }
+            );
+            context.MapRoute(
                 name: "Admin_default",
                 url: "Admin/{controller}/{action}/{id}",
                 defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional },
