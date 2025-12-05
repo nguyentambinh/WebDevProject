@@ -272,8 +272,8 @@
     .pf-gauge-wrap {
         position: relative;
         width: 100%;
-        max-width: 240px; /* nhỏ hơn để không đè xuống legend */
-        margin: 4px auto 18px auto; /* cách legend 1 khoảng */
+        max-width: 240px;
+        margin: 4px auto 18px auto;
     }
 
     .pf-gauge-center {
@@ -289,7 +289,6 @@
         font-weight: 700;
     }
 
-    /* tổng doanh thu / lợi nhuận dưới gauge */
     .pf-legend-gauge {
         display: flex;
         justify-content: space-between;
@@ -313,12 +312,11 @@
             display: block;
             font-weight: 600;
         }
-    /* --- STAT CARD (Revenue / Cost / Profit) --- */
 
     .pf-card-stats {
         display: flex;
         flex-direction: column;
-        justify-content: space-between; /* mỗi khối cách đều, không dồn vào một góc */
+        justify-content: space-between;
         gap: 14px;
     }
 
@@ -330,11 +328,9 @@
     }
 
     .pf-stat .value {
-        font-size: 24px; /* số to hơn, dễ đọc */
+        font-size: 24px;
         font-weight: 700;
     }
-
-    /* --- PIPELINE DONUT --- */
 
     .pf-card-pipeline {
         position: relative;
@@ -353,7 +349,7 @@
         gap: 6px;
         align-items: flex-start;
         font-size: 13px;
-        background: transparent; /* override nếu bị kế thừa */
+        background: transparent;
         border: none;
         padding: 0;
     }
@@ -376,7 +372,6 @@
             opacity: .85;
         }
 
-    /* --- BOTTOM CARDS (CHARTS) --- */
 
     .pf-card-wide {
         min-height: 320px;
@@ -392,7 +387,7 @@
     .pf-chart-wrap {
         position: relative;
         width: 100%;
-        height: 260px; /* vừa đủ, không tràn lên header */
+        height: 260px;
     }
     @@media (max-width: 1100px) {
         .pf-grid-top {
