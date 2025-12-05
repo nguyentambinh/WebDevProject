@@ -39,6 +39,14 @@
         { "kr_KR", "재무 대시보드" },
         { "cn_CN", "财务概览" }
     };
+    var txtExportOverview = L(new Dictionary<string, string> {
+    { "vi_VN", "Xuất báo cáo Excel" },
+    { "en_US", "Export Excel report" },
+    { "jp_JP", "Excelレポートを出力" },
+    { "kr_KR", "Excel 보고서 내보내기" },
+    { "cn_CN", "导出 Excel 报表" }
+});
+
 
     var textDashboardTitle = L(langDashboardTitle);
 }
@@ -47,10 +55,13 @@
     <div class="fn-main">
         <div class="fn-header-row">
             <h2 class="fn-title">@textDashboardTitle</h2>
-            <a class="btn btn-sm btn-outline"
-               href="@Url.Action("ExportRevenueOverview", "Revenue", new { area = "FN" })">
-                Xuất báo cáo tổng
-            </a>
+            <div class="fn-export-wrap">
+                <a href="@Url.Action("ExportRevenueOverview", "Revenue", new { area = "FN" })"
+                   class="fn-btn-export">
+                    <i class="fa-solid fa-file-excel"></i>
+                    <span>@txtExportOverview</span>
+                </a>
+            </div>
         </div>
         
 

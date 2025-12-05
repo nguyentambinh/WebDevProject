@@ -40,7 +40,13 @@
         { "kr_KR", "프로젝트 매출 요약" },
         { "cn_CN", "项目收入概览" }
     });
-
+    var txtExportProject = L(new Dictionary<string, string> {
+        { "vi_VN", "Xuất báo cáo dự án" },
+        { "en_US", "Export project report" },
+        { "jp_JP", "プロジェクトレポートを出力" },
+        { "kr_KR", "프로젝트 보고서 내보내기" },
+        { "cn_CN", "导出项目报表" }
+    });
     var txtTotalRevenue = L(new Dictionary<string, string> {
         { "vi_VN", "Tổng doanh thu dự án" },
         { "en_US", "Total project revenue" }
@@ -137,10 +143,13 @@
                 @Model.FromDate.ToString("dd/MM/yyyy") – @Model.ToDate.ToString("dd/MM/yyyy")
             </p>
         </div>
-        <a class="btn btn-sm btn-primary"
-           href="@Url.Action("ExportProjectRevenue", "Revenue", new { area = "FN", from = Model.FromDate, to = Model.ToDate })">
-            Xuất báo cáo Excel
-        </a>
+        <div class="fn-export-wrap">
+            <a href="@Url.Action("ExportProjectRevenue", "Revenue", new { area = "FN" })"
+               class="fn-btn-export">
+                <i class="fa-solid fa-file-excel"></i>
+                <span>@txtExportProject</span>
+            </a>
+        </div>
     </div>
 
     <div class="rev-top-cards">

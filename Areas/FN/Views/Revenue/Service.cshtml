@@ -55,7 +55,6 @@
         { "en_US", "Average order value" }
     });
 
-    // TIÊU ĐỀ BIỂU ĐỒ MỚI
     var txtChartTitle = L(new Dictionary<string, string> {
         { "vi_VN", "Cơ cấu doanh thu theo loại dịch vụ" },
         { "en_US", "Revenue by service type" }
@@ -85,8 +84,15 @@
         { "vi_VN", "Doanh thu" },
         { "en_US", "Revenue" }
     });
+    var txtExportService = L(new Dictionary<string, string> {
+    { "vi_VN", "Xuất báo cáo dịch vụ" },
+    { "en_US", "Export service report" },
+    { "jp_JP", "サービスレポートを出力" },
+    { "kr_KR", "서비스 보고서 내보내기" },
+    { "cn_CN", "导出服务报表" }
+});
 
-    // DỮ LIỆU CHO BIỂU ĐỒ TRÒN – DÙNG TOP SERVICES
+
     var svcTypeLabels = Model.TopServices
         .Select(s => s.ServiceType)
         .ToList();
@@ -106,10 +112,13 @@
                 @Model.FromDate.ToString("dd/MM/yyyy") – @Model.ToDate.ToString("dd/MM/yyyy")
             </p>
         </div>
-        <a class="btn btn-sm btn-primary"
-           href="@Url.Action("ExportServiceRevenue", "Revenue", new { area = "FN", from = Model.FromDate, to = Model.ToDate })">
-            Xuất báo cáo Excel
-        </a>
+        <div class="fn-export-wrap">
+            <a href="@Url.Action("ExportServiceRevenue", "Revenue", new { area = "FN" })"
+               class="fn-btn-export">
+                <i class="fa-solid fa-file-excel"></i>
+                <span>@txtExportService</span>
+            </a>
+        </div>
     </div>
 
     <div class="rev-top-cards">
