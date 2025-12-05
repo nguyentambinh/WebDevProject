@@ -4,7 +4,6 @@ namespace QLNSVATC.Helper
 {
     public static class CheckAccess
     {
-        // Kiểm tra phân quyền: "AD", "HR", "FN", "EM", "OF",...
         public static bool Role(string requiredPrefix)
         {
             var context = HttpContext.Current;
