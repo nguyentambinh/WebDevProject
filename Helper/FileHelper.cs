@@ -19,18 +19,10 @@ namespace QLNSVATC.Helpers
             return Path.GetFileNameWithoutExtension(filePath);
         }
 
-<<<<<<< HEAD
-=======
-        // Hàm bỏ dấu Unicode khỏi chuỗi
->>>>>>> origin/hr-work
         public static string RemoveDiacritics(string text)
         {
             if (string.IsNullOrWhiteSpace(text))
                 return text;
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/hr-work
             var normalized = text.Normalize(NormalizationForm.FormD);
             var sb = new StringBuilder();
 
@@ -42,10 +34,6 @@ namespace QLNSVATC.Helpers
                     sb.Append(ch);
                 }
             }
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/hr-work
             return sb.ToString().Normalize(NormalizationForm.FormC);
         }
 
@@ -81,22 +69,12 @@ namespace QLNSVATC.Helpers
         {
             if (string.IsNullOrWhiteSpace(raw))
                 return "Unknown";
-<<<<<<< HEAD
-
             raw = RemoveDiacritics(raw);
-=======
-            raw = RemoveDiacritics(raw);  
->>>>>>> origin/hr-work
-
             var invalidChars = Path.GetInvalidFileNameChars();
 
             string cleaned = raw.Trim();
             while (cleaned.Contains("  "))
                 cleaned = cleaned.Replace("  ", " ");
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/hr-work
             cleaned = new string(cleaned
                 .Select(ch =>
                 {
@@ -109,13 +87,6 @@ namespace QLNSVATC.Helpers
             return cleaned;
         }
 
-<<<<<<< HEAD
-        public static string BuildCandidateFolderName(string candidateName, DateTime time)
-        {
-            string safeName = candidateName.ToSafeName();
-            return $"{time:yyyyMMddHH}_{safeName}";
-=======
-        // Tạo tên folder: yyyyMMddHH_Ho_ten_ung_vien 
         public static string BuildCandidateFolderName(string fullName, DateTime time)
         {
             string name = fullName ?? "";
@@ -124,7 +95,6 @@ namespace QLNSVATC.Helpers
 
             string prefix = time.ToString("yyyyMMddHHmmss");
             return $"{prefix}_{name}";
->>>>>>> origin/hr-work
         }
 
         public static string GetReportTypeCode(string areaName)

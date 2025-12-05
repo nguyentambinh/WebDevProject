@@ -1,0 +1,313 @@
+﻿@using System.Collections.Generic
+@using QLNSVATC.Areas.FN.Data.FN_Models
+@using QLNSVATC.Helpers
+@using QLNSVATC.Models
+
+@model TransportExpenseViewModel
+
+@{
+    Layout = "~/Areas/FN/Views/Shared/_LayoutFN.cshtml";
+
+    var st = ViewBag.Settings as UserViewBagModel;
+    string theme = st?.ThemeHex ?? "#22c55e";
+    bool dark = st?.DarkMode ?? true;
+
+    string bg = dark ? "#020617" : "#f5f5f7";
+    string cardBg = dark ? "#020617" : "#ffffff";
+    string text = dark ? "#e5e7eb" : "#020617";
+    string textSoft = dark ? "#9ca3af" : "#6b7280";
+    string border = dark ? "#1f2937" : "#d1d5db";
+
+    string font = !string.IsNullOrEmpty(st?.FontFamily)
+        ? st.FontFamily
+        : "Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
+    int fz = st?.FontSize ?? 16;
+
+    string lang = ViewBag.CurrentLang as string ?? st?.Lang ?? "vi_VN";
+
+    Func<Dictionary<string, string>, string> L = d =>
+    {
+        if (d.ContainsKey(lang)) return d[lang];
+        if (d.ContainsKey("en_US")) return d["en_US"];
+        return d.Values.First();
+    };
+
+    var txtTitle = L(new Dictionary<string, string> {
+        { "vi_VN","Chi phí vận chuyển NVL" },
+        { "en_US","Raw material transport expenses" },
+        { "jp_JP","原材料輸送費用" },
+        { "kr_KR","원자재 운송 비용" },
+        { "cn_CN","原材料运输费用" }
+    });
+
+    var txtDetails = L(new Dictionary<string, string> {
+        { "vi_VN","Chi tiết" },
+        { "en_US","Details" },
+        { "jp_JP","詳細" },
+        { "kr_KR","세부 정보" },
+        { "cn_CN","明细" }
+    });
+
+    var txtMaterial = L(new Dictionary<string, string> {
+        { "vi_VN","Nguyên vật liệu" },
+        { "en_US","Material" },
+        { "jp_JP","資材" },
+        { "kr_KR","자재" },
+        { "cn_CN","材料" }
+    });
+
+    var txtProject = L(new Dictionary<string, string> {
+        { "vi_VN","Dự án" },
+        { "en_US","Project" },
+        { "jp_JP","プロジェクト" },
+        { "kr_KR","프로젝트" },
+        { "cn_CN","项目" }
+    });
+
+    var txtAmount = L(new Dictionary<string, string> {
+        { "vi_VN","Chi phí" },
+        { "en_US","Amount" },
+        { "jp_JP","金額" },
+        { "kr_KR","금액" },
+        { "cn_CN","金额" }
+    });
+
+    var txtStatus = L(new Dictionary<string, string> {
+        { "vi_VN","Trạng thái" },
+        { "en_US","Status" },
+        { "jp_JP","状態" },
+        { "kr_KR","상태" },
+        { "cn_CN","状态" }
+    });
+
+    var txtExport = L(new Dictionary<string, string> {
+        { "vi_VN","Xuất báo cáo Excel" },
+        { "en_US","Export Excel report" },
+        { "jp_JP","Excel レポート出力" },
+        { "kr_KR","엑셀 보고서 내보내기" },
+        { "cn_CN","导出 Excel 报表" }
+    });
+
+    var txtFilterAll = L(new Dictionary<string, string> {
+        { "vi_VN","Tất cả" },
+        { "en_US","All" },
+        { "jp_JP","すべて" },
+        { "kr_KR","전체" },
+        { "cn_CN","全部" }
+    });
+
+    var txtFilterDone = L(new Dictionary<string, string> {
+        { "vi_VN","Đã hạch toán" },
+        { "en_US","Posted" },
+        { "jp_JP","計上済み" },
+        { "kr_KR","기록 완료" },
+        { "cn_CN","已入账" }
+    });
+
+    var txtFilterPending = L(new Dictionary<string, string> {
+        { "vi_VN","Chờ xử lý" },
+        { "en_US","Pending" },
+        { "jp_JP","保留" },
+        { "kr_KR","대기 중" },
+        { "cn_CN","待处理" }
+    });
+
+    var txtSearchPlaceholder = L(new Dictionary<string, string> {
+        { "vi_VN","Tìm mã vận chuyển, NVL..." },
+        { "en_US","Search transport code, material..." },
+        { "jp_JP","輸送コード・資材を検索..." },
+        { "kr_KR","운송 코드, 자재 검색..." },
+        { "cn_CN","搜索运输编号、物料..." }
+    });
+
+    var txtStatusDone = L(new Dictionary<string, string> {
+        { "vi_VN","Đã hạch toán" },
+        { "en_US","Posted" },
+        { "jp_JP","計上済み" },
+        { "kr_KR","기록 완료" },
+        { "cn_CN","已入账" }
+    });
+
+    var txtStatusPending = L(new Dictionary<string, string> {
+        { "vi_VN","Chờ xử lý" },
+        { "en_US","Pending" },
+        { "jp_JP","保留" },
+        { "kr_KR","대기 중" },
+        { "cn_CN","待处理" }
+    });
+
+    var txtEmpty = L(new Dictionary<string, string> {
+        { "vi_VN","Không có dữ liệu chi phí vận chuyển." },
+        { "en_US","No transport expense data." },
+        { "jp_JP","輸送費用のデータがありません。" },
+        { "kr_KR","운송 비용 데이터가 없습니다." },
+        { "cn_CN","暂无运输费用数据。" }
+    });
+
+    var txtPage = L(new Dictionary<string, string> {
+        { "vi_VN","Trang" },
+        { "en_US","Page" },
+        { "jp_JP","ページ" },
+        { "kr_KR","페이지" },
+        { "cn_CN","页" }
+    });
+
+    int totalPages = (int)Math.Ceiling(Model.TotalCount / (double)Model.PageSize);
+}
+
+<div class="texp-page">
+    <div class="texp-header">
+        <div>
+            <h2>@txtTitle</h2>
+            <p class="texp-sub">
+                @Model.TotalCost.ToShortCurrency(lang)
+            </p>
+        </div>
+
+        <div class="texp-toolbar">
+            <form method="get" class="texp-filter-form">
+                <input type="hidden" name="page" value="1" />
+
+                <div class="texp-filter-group">
+                    <select name="status" class="texp-select" onchange="this.form.submit()">
+                        <option value="">@txtFilterAll</option>
+                        <option value="done" @(Model.StatusFilter == "done" ? "selected" : "")>@txtFilterDone</option>
+                        <option value="pending" @(Model.StatusFilter == "pending" ? "selected" : "")>@txtFilterPending</option>
+                    </select>
+
+                    <input type="text"
+                           name="search"
+                           value="@Model.Search"
+                           class="texp-search"
+                           placeholder="@txtSearchPlaceholder" />
+                </div>
+
+                <a class="texp-report-btn"
+                   href="@Url.Action("ExportTransport", "Expense", new {
+                       area = "FN",
+                       from = Model.From,
+                       to = Model.To,
+                       status = Model.StatusFilter,
+                       search = Model.Search
+                   })">
+                    <span class="icon">⭳</span>
+                    <span class="label">@txtExport</span>
+                </a>
+            </form>
+        </div>
+    </div>
+
+    <div class="texp-table-wrap">
+        <table class="texp-table">
+            <thead>
+                <tr>
+                    <th class="col-details">@txtDetails</th>
+                    <th class="col-material">@txtMaterial</th>
+                    <th class="col-project">@txtProject</th>
+                    <th class="col-amount right">@txtAmount</th>
+                    <th class="col-status">@txtStatus</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Items != null && Model.Items.Any())
+                {
+                    foreach (var row in Model.Items)
+                    {
+                        var statusCss = row.StatusCode == "done"
+                            ? "status-pill status-done"
+                            : "status-pill status-pending";
+                        var statusText = row.StatusCode == "done"
+                            ? txtStatusDone
+                            : txtStatusPending;
+
+                        <tr>
+                            <td class="col-details">
+                                <div class="detail-main">
+                                    <div class="detail-icon"></div>
+                                    <div class="detail-text">
+                                        <div class="detail-date">
+                                            @(row.TransportDate?.ToString("dd/MM/yyyy") ?? "-")
+                                        </div>
+                                        <div class="detail-code">
+                                            @row.TransportCode
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="col-material">
+                                @(!string.IsNullOrEmpty(row.MaterialName) ? row.MaterialName : "-")
+                            </td>
+                            <td class="col-project">
+                                @(!string.IsNullOrEmpty(row.ProjectCode) ? row.ProjectCode : "-")
+                            </td>
+                            <td class="col-amount right">
+                                @row.Cost.ToShortCurrency(lang)
+                            </td>
+                            <td class="col-status">
+                                <span class="@statusCss">@statusText</span>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="texp-empty">
+                            @txtEmpty
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (totalPages > 1)
+    {
+        <div class="texp-pager">
+            <span class="texp-page-info">
+                @txtPage @Model.Page / @totalPages
+            </span>
+
+            @if (Model.Page > 1)
+            {
+                <a class="pg-btn"
+                   href="@Url.Action("Transport", "Expense", new { area = "FN", page = Model.Page - 1, status = Model.StatusFilter, search = Model.Search })">«</a>
+            }
+
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                if (i == Model.Page)
+                {
+                    <span class="pg-btn pg-active">@i</span>
+                }
+                else
+                {
+                    <a class="pg-btn"
+                       href="@Url.Action("Transport", "Expense", new { area = "FN", page = i, status = Model.StatusFilter, search = Model.Search })">@i</a>
+                }
+            }
+
+            @if (Model.Page < totalPages)
+            {
+                <a class="pg-btn"
+                   href="@Url.Action("Transport", "Expense", new { area = "FN", page = Model.Page + 1, status = Model.StatusFilter, search = Model.Search })">»</a>
+            }
+        </div>
+    }
+</div>
+
+<style>
+    :root {
+        --texp-bg: @bg;
+        --texp-card: @cardBg;
+        --texp-text: @text;
+        --texp-text-soft: @textSoft;
+        --texp-border: @border;
+        --texp-accent: @theme;
+        --texp-font: @font;
+        --texp-fz: @(fz)px;
+    }
+</style>
+
+<link href="~/Areas/FN/Data/CSS/Expense/TransportExpense.css" rel="stylesheet" />

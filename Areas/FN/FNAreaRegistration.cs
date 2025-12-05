@@ -12,6 +12,12 @@ namespace QLNSVATC.Areas.FN
         public override void RegisterArea(AreaRegistrationContext context)
         {
             context.MapRoute(
+                name: "FN_Expense_Transport",
+                url: "fn-quan-ly-chi/chi-van-chuyen-nvl",
+                defaults: new { controller = "Expense", action = "Transport", id = UrlParameter.Optional },
+                namespaces: new[] { "QLNSVATC.Areas.FN.Controllers" }
+            );
+            context.MapRoute(
                 name: "FN_Expense_Project",
                 url: "fn-quan-ly-chi/chi-du-an",
                 defaults: new { controller = "Expense", action = "Project", id = UrlParameter.Optional },

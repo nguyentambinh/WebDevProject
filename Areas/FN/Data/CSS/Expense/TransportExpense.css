@@ -1,0 +1,243 @@
+﻿.texp-page {
+    width: 95%;
+    margin: 24px auto 40px auto;
+    color: var(--texp-text);
+    font-family: var(--texp-font);
+    font-size: var(--texp-fz);
+}
+
+.texp-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+    .texp-header h2 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 600;
+    }
+
+.texp-sub {
+    margin: 4px 0 0 0;
+    font-size: 13px;
+    color: var(--texp-text-soft);
+}
+
+.texp-toolbar {
+    display: flex;
+    align-items: center;
+}
+
+.texp-filter-form {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.texp-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.texp-select {
+    background: var(--texp-card);
+    color: var(--texp-text);
+    border-radius: 999px;
+    border: 1px solid var(--texp-border);
+    padding: 4px 10px;
+    font-size: 12px;
+    outline: none;
+}
+
+.texp-search {
+    background: var(--texp-card);
+    color: var(--texp-text);
+    border-radius: 999px;
+    border: 1px solid var(--texp-border);
+    padding: 4px 10px;
+    font-size: 12px;
+    min-width: 210px;
+    outline: none;
+}
+
+    .texp-search::placeholder {
+        color: var(--texp-text-soft);
+    }
+
+/* nút xuất báo cáo */
+.texp-report-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(129, 230, 217, 0.9);
+    background: radial-gradient(circle at top left, var(--texp-accent), #22c55e);
+    color: #0b1120;
+    font-size: 12px;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.6);
+    transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+}
+
+    .texp-report-btn .icon {
+        font-size: 13px;
+    }
+
+    .texp-report-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 14px 30px rgba(0,0,0,0.8);
+        opacity: 0.95;
+    }
+
+/* bảng */
+
+.texp-table-wrap {
+    margin-top: 8px;
+    background: var(--texp-card);
+    border-radius: 18px;
+    border: 1px solid var(--texp-border);
+    overflow: hidden;
+}
+
+.texp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+    .texp-table thead th {
+        text-align: left;
+        padding: 10px 14px;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        font-size: 11px;
+        color: var(--texp-text-soft);
+        border-bottom: 1px solid var(--texp-border);
+    }
+
+    .texp-table .right {
+        text-align: right;
+    }
+
+    .texp-table tbody td {
+        padding: 10px 14px;
+        border-bottom: 1px solid rgba(15,23,42,0.7);
+    }
+
+    .texp-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+/* chi tiết cột đầu */
+
+.detail-main {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.detail-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    background: radial-gradient(circle at 30% 0, #22c55e, #15803d);
+    box-shadow: 0 6px 14px rgba(34,197,94,0.45);
+}
+
+.detail-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.detail-date {
+    font-size: 11px;
+    color: var(--texp-text-soft);
+}
+
+.detail-code {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+/* status pill */
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.status-done {
+    background: rgba(34,197,94,0.18);
+    color: #bbf7d0;
+}
+
+.status-pending {
+    background: rgba(248,250,252,0.08);
+    color: #fecaca;
+}
+
+/* pager */
+
+.texp-pager {
+    margin-top: 14px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 4px;
+    font-size: 12px;
+}
+
+.pg-btn,
+.pg-active {
+    min-width: 26px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--texp-border);
+    text-align: center;
+    cursor: pointer;
+    text-decoration: none;
+    color: var(--texp-text);
+}
+
+.pg-active {
+    background: var(--texp-accent);
+    border-color: var(--texp-accent);
+    color: #0b1120;
+    font-weight: 600;
+}
+
+.texp-empty {
+    text-align: center;
+    padding: 16px;
+    font-size: 12px;
+    color: var(--texp-text-soft);
+}
+
+/* responsive */
+
+@media (max-width: 992px) {
+    .texp-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .texp-filter-form {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+
+    .texp-search {
+        min-width: 160px;
+    }
+}

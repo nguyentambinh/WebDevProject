@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Data.Entity;
+using System.IO;
 using System.Linq;
 using System.Web.Mvc;
-using QLNSVATC.Models;
-using QLNSVATC.Helpers;
+using ClosedXML.Excel;
 using QLNSVATC.Areas.FN.Data.FN_Models;
-using System.Data.Entity;
-
+using QLNSVATC.Helpers;
+using QLNSVATC.Models;
 
 namespace QLNSVATC.Areas.FN.Controllers
 {
@@ -449,6 +450,188 @@ namespace QLNSVATC.Areas.FN.Controllers
             }
             num++;
             return $"VC{num:D4}";
+        }
+
+        public ActionResult Transport(
+            int page = 1,
+            string status = "",
+            string search = "",
+            DateTime? from = null,
+            DateTime? to = null)
+        {
+            string userId = Session["UserId"] as string;
+            var st = SettingsHelper.BuildViewBagData(db, userId);
+            ViewBag.Settings = st;
+            ViewBag.CurrentLang = st.Lang;
+
+            const int pageSize = 10;
+
+            var q = from cp in db.CPDUANs
+                    join vc in db.VANCHUYENNVLs
+                        on cp.MAVC equals vc.MAVC into vcJoin
+                    from vc in vcJoin.DefaultIfEmpty()
+                    join nh in db.NHAPNVLs
+                        on cp.MANHAP equals nh.MANHAP into nhJoin
+                    from nh in nhJoin.DefaultIfEmpty()
+                    where cp.MAVC != null
+                    select new { cp, vc, nh };
+
+            if (from.HasValue)
+                q = q.Where(x => x.vc.NGAYVC >= from.Value);
+            if (to.HasValue)
+                q = q.Where(x => x.vc.NGAYVC <= to.Value);
+
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                if (status == "done")
+                    q = q.Where(x => x.cp.CHIPHITONG.HasValue);
+                else if (status == "pending")
+                    q = q.Where(x => !x.cp.CHIPHITONG.HasValue);
+            }
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                string s = search.Trim();
+
+                q = q.Where(x =>
+                    (x.cp.MAVC ?? "").Contains(s) ||
+                    (x.cp.MADA ?? "").Contains(s) ||
+                    (x.nh.TENNVL ?? "").Contains(s));
+            }
+
+            int totalCount = q.Count();
+
+            decimal totalCost = q
+                .Select(x => (decimal?)(x.cp.CHIPHITONG ?? x.vc.CPVC ?? 0m))
+                .Sum() ?? 0m;
+
+            var data = q
+                .OrderByDescending(x => x.vc.NGAYVC)
+                .ThenByDescending(x => x.cp.MAVC)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var rows = data.Select(x =>
+            {
+                decimal cost = x.vc?.CPVC ?? x.cp.CHIPHITONG ?? 0m;
+
+                return new TransportExpenseRowVM
+                {
+                    TransportCode = x.cp.MAVC,
+                    TransportDate = x.vc?.NGAYVC,
+                    MaterialName = x.nh?.TENNVL,
+                    ProjectCode = x.cp.MADA,
+                    Cost = cost,
+                    StatusCode = x.cp.CHIPHITONG.HasValue ? "done" : "pending"
+                };
+            }).ToList();
+
+            var vm = new TransportExpenseViewModel
+            {
+                Items = rows,
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = totalCount,
+                TotalCost = totalCost,
+                StatusFilter = status,
+                Search = search,
+                From = from,
+                To = to
+            };
+
+            return View(vm);
+        }
+
+        [HttpGet]
+        public ActionResult ExportTransport(DateTime? from, DateTime? to)
+        {
+            var q = db.VANCHUYENNVLs
+                      .Include(v => v.CPDUANs.Select(c => c.NHAPNVL));
+
+            if (from.HasValue)
+                q = q.Where(v => v.NGAYVC >= from.Value);
+
+            if (to.HasValue)
+                q = q.Where(v => v.NGAYVC <= to.Value);
+
+            var data = q
+                .OrderBy(v => v.NGAYVC)
+                .ThenBy(v => v.MAVC)
+                .ToList();
+
+            using (var wb = new XLWorkbook())
+            {
+                var ws = wb.Worksheets.Add("VC_NVL");
+
+                ws.Cell(1, 1).Value = "Ngày vận chuyển";
+                ws.Cell(1, 2).Value = "Mã vận chuyển";
+                ws.Cell(1, 3).Value = "Nguyên vật liệu";
+                ws.Cell(1, 4).Value = "Mã dự án";
+                ws.Cell(1, 5).Value = "Chi phí vận chuyển";
+
+                int row = 2;
+                foreach (var v in data)
+                {
+                    var firstCp = v.CPDUANs.FirstOrDefault();
+
+                    string materialName = null;
+                    string projectCode = null;
+
+                    if (firstCp != null)
+                    {
+                        projectCode = firstCp.MADA;
+                        if (firstCp.NHAPNVL != null)
+                        {
+                            materialName = firstCp.NHAPNVL.TENNVL;
+                        }
+                    }
+
+                    ws.Cell(row, 1).Value = v.NGAYVC;
+                    ws.Cell(row, 1).Style.DateFormat.Format = "dd/MM/yyyy";
+
+                    ws.Cell(row, 2).Value = v.MAVC;
+                    ws.Cell(row, 3).Value = materialName ?? "";
+                    ws.Cell(row, 4).Value = projectCode ?? "";
+
+                    decimal cost = v.CPVC ?? 0m;
+                    ws.Cell(row, 5).Value = cost;
+                    ws.Cell(row, 5).Style.NumberFormat.Format = "#,##0";
+
+                    row++;
+                }
+
+                ws.Cell(row, 4).Value = "Tổng";
+                ws.Cell(row, 4).Style.Font.Bold = true;
+
+                ws.Cell(row, 5).FormulaA1 = $"SUM(E2:E{row - 1})";
+                ws.Cell(row, 5).Style.NumberFormat.Format = "#,##0";
+                ws.Cell(row, 5).Style.Font.Bold = true;
+
+                ws.Columns().AdjustToContents();
+
+                var now = DateTime.Now;
+
+                string serverFileName = FileHelper.BuildReportFileName("BCTC", now, "xlsx");
+                string serverFolder = Server.MapPath("~/Content/Uploads/BaoCao");
+                if (!Directory.Exists(serverFolder))
+                    Directory.CreateDirectory(serverFolder);
+
+                string serverPath = Path.Combine(serverFolder, serverFileName);
+                wb.SaveAs(serverPath);
+
+                using (var stream = new MemoryStream())
+                {
+                    wb.SaveAs(stream);
+                    stream.Position = 0;
+
+                    string downloadName = $"TransportExpenses_{now:yyyyMMddHHmmss}.xlsx";
+
+                    return File(stream.ToArray(),
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        downloadName);
+                }
+            }
         }
     }
 }

@@ -1,0 +1,548 @@
+﻿@using System.Collections.Generic
+@using QLNSVATC.Areas.FN.Data.FN_Models
+@using QLNSVATC.Helpers
+@using QLNSVATC.Models
+@model ProfitOverviewViewModel
+
+@{
+    Layout = "~/Areas/FN/Views/Shared/_LayoutFN.cshtml";
+
+    var st = ViewBag.Settings as UserViewBagModel;
+
+    string theme = st?.ThemeHex ?? "#22c55e";
+    bool dark = st?.DarkMode ?? true;
+
+    string bg = dark ? "#020617" : "#f5f7fb";
+    string cardBg = dark ? "#020617" : "#ffffff";
+    string border = dark ? "#1e293b" : "#e2e8f0";
+    string text = dark ? "#e5e7eb" : "#0f172a";
+    string textSoft = dark ? "#9ca3af" : "#64748b";
+
+    string font = !string.IsNullOrEmpty(st?.FontFamily)
+        ? st.FontFamily
+        : "Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
+    int fz = st?.FontSize ?? 16;
+
+    string lang = ViewBag.CurrentLang as string ?? st?.Lang ?? "vi_VN";
+
+    Func<Dictionary<string, string>, string> L = d =>
+    {
+        if (d.ContainsKey(lang)) return d[lang];
+        if (d.ContainsKey("en_US")) return d["en_US"];
+        return d.Values.First();
+    };
+
+    var txtQuarterTitle = L(new Dictionary<string, string> {
+        { "vi_VN","Tổng quan lợi nhuận" },
+        { "en_US","Profit overview" },
+        { "jp_JP","利益概要" },
+        { "kr_KR","이익 개요" },
+        { "cn_CN","利润概览" }
+    });
+
+    var txtOverview = L(new Dictionary<string, string> {
+        { "vi_VN","Tổng quan biên lợi nhuận" },
+        { "en_US","Profit margin overview" },
+        { "jp_JP","利益率概要" },
+        { "kr_KR","이익률 개요" },
+        { "cn_CN","利润率总览" }
+    });
+
+    var txtRevenue = L(new Dictionary<string, string> {
+        { "vi_VN","Tổng doanh thu" },
+        { "en_US","Total revenue" },
+        { "jp_JP","総売上" },
+        { "kr_KR","총 매출" },
+        { "cn_CN","总收入" }
+    });
+
+    var txtCost = L(new Dictionary<string, string> {
+        { "vi_VN","Tổng chi phí" },
+        { "en_US","Total cost" },
+        { "jp_JP","総費用" },
+        { "kr_KR","총 비용" },
+        { "cn_CN","总成本" }
+    });
+
+    var txtProfit = L(new Dictionary<string, string> {
+        { "vi_VN","Lợi nhuận" },
+        { "en_US","Profit" },
+        { "jp_JP","利益" },
+        { "kr_KR","이익" },
+        { "cn_CN","利润" }
+    });
+
+    var txtPipelineAgg = L(new Dictionary<string, string> {
+        { "vi_VN","Cơ cấu lợi nhuận theo nguồn" },
+        { "en_US","Profit aggregation by source" },
+        { "jp_JP","ソース別利益構成" },
+        { "kr_KR","원천별 이익 구성" },
+        { "cn_CN","按来源划分利润结构" }
+    });
+
+    var txtStats = L(new Dictionary<string, string> {
+        { "vi_VN","Thống kê lợi nhuận theo tháng" },
+        { "en_US","Monthly profit statistics" },
+        { "jp_JP","月次利益統計" },
+        { "kr_KR","월별 이익 통계" },
+        { "cn_CN","月度利润统计" }
+    });
+
+    var txtTargetVsActual = L(new Dictionary<string, string> {
+        { "vi_VN","Doanh thu vs Chi phí" },
+        { "en_US","Revenue vs Cost" },
+        { "jp_JP","売上 vs 費用" },
+        { "kr_KR","매출 vs 비용" },
+        { "cn_CN","收入 vs 成本" }
+    });
+
+    var txtProjects = L(new Dictionary<string, string> {
+        { "vi_VN","Dự án" },
+        { "en_US","Projects" },
+        { "jp_JP","プロジェクト" },
+        { "kr_KR","프로젝트" },
+        { "cn_CN","项目" }
+    });
+
+    var txtServices = L(new Dictionary<string, string> {
+        { "vi_VN","Dịch vụ" },
+        { "en_US","Services" },
+        { "jp_JP","サービス" },
+        { "kr_KR","서비스" },
+        { "cn_CN","服务" }
+    });
+
+    var trendLabels = Model.Trend?.Select(x => x.PeriodLabel).ToList() ?? new List<string>();
+    var trendProfit = Model.Trend?.Select(x => x.Profit).ToList() ?? new List<decimal>();
+    var trendRevenue = Model.Trend?.Select(x => x.Revenue).ToList() ?? new List<decimal>();
+    var trendCost = Model.Trend?.Select(x => x.Cost).ToList() ?? new List<decimal>();
+
+    var margin = Model.ProfitMargin * 100m;
+    if (margin < 0) { margin = 0; };
+    if (margin > 100) { margin = 100; };
+}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="pf-page">
+    <div class="pf-header">
+        <h2>@txtQuarterTitle</h2>
+    </div>
+
+    <div class="pf-grid-top">
+        <div class="pf-card pf-card-gauge">
+            <p class="pf-card-title">@txtOverview</p>
+            <div class="pf-gauge-wrap">
+                <canvas id="pfGaugeChart"></canvas>
+                <div class="pf-gauge-center">
+                    <span class="pf-gauge-value">@margin.ToString("0.#")%</span>
+                </div>
+            </div>
+            <div class="pf-legend pf-legend-gauge">
+                <div>
+                    <span class="label">@txtRevenue</span>
+                    <span class="value">@Model.TotalRevenue.ToShortCurrency(lang)</span>
+                </div>
+                <div>
+                    <span class="label">@txtProfit</span>
+                    <span class="value">@Model.TotalProfit.ToShortCurrency(lang)</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="pf-card pf-card-stats">
+            <div class="pf-stat">
+                <span class="label">@txtRevenue</span>
+                <span class="value">@Model.TotalRevenue.ToShortCurrency(lang)</span>
+            </div>
+            <div class="pf-stat">
+                <span class="label">@txtCost</span>
+                <span class="value">@Model.TotalCost.ToShortCurrency(lang)</span>
+            </div>
+            <div class="pf-stat">
+                <span class="label">@txtProfit</span>
+                <span class="value">@Model.TotalProfit.ToShortCurrency(lang)</span>
+            </div>
+        </div>
+
+        <div class="pf-card pf-card-pipeline">
+            <p class="pf-card-title">@txtPipelineAgg</p>
+            <div class="pf-donut-wrap">
+                <canvas id="pfSourceChart"></canvas>
+            </div>
+            <div class="pf-legend pf-legend-row">
+                <div>
+                    <span class="dot dot-project"></span>
+                    <span class="label">@txtProjects</span>
+                    <span class="value">@Model.ProjectProfit.ToShortCurrency(lang)</span>
+                </div>
+                <div>
+                    <span class="dot dot-service"></span>
+                    <span class="label">@txtServices</span>
+                    <span class="value">@Model.ServiceProfit.ToShortCurrency(lang)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="pf-grid-bottom">
+        <div class="pf-card pf-card-wide">
+            <div class="pf-card-header">
+                <span class="pf-card-title">@txtStats</span>
+            </div>
+            <div class="pf-chart-wrap">
+                <canvas id="pfTrendChart"></canvas>
+            </div>
+        </div>
+
+        <div class="pf-card pf-card-wide">
+            <div class="pf-card-header">
+                <span class="pf-card-title">@txtTargetVsActual</span>
+            </div>
+            <div class="pf-chart-wrap">
+                <canvas id="pfBarChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --pf-bg: @bg;
+        --pf-card: @cardBg;
+        --pf-border: @border;
+        --pf-text: @text;
+        --pf-text-soft: @textSoft;
+        --pf-accent: @theme;
+        --pf-font: @font;
+        --pf-fz: @(fz)px;
+    }
+
+    .pf-page {
+        width: 95%;
+        margin: 24px auto 40px auto;
+        font-family: var(--pf-font);
+        color: var(--pf-text);
+        font-size: var(--pf-fz);
+    }
+
+    .pf-header h2 {
+        margin: 0 0 16px 0;
+        font-size: 22px;
+        font-weight: 600;
+    }
+
+    .pf-grid-top {
+        display: grid;
+        grid-template-columns: 1.5fr 1.1fr 1.1fr;
+        gap: 18px;
+        margin-bottom: 20px;
+        align-items: stretch;
+    }
+
+    .pf-grid-bottom {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+        margin-top: 4px;
+    }
+
+    .pf-card {
+        background: var(--pf-card);
+        border-radius: 18px;
+        border: 1px solid var(--pf-border);
+        padding: 22px 24px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .pf-card-title {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0 0 16px 0;
+        color: var(--pf-accent);
+    }
+
+    .pf-card-gauge {
+        position: relative;
+        justify-content: flex-start;
+    }
+
+    .pf-gauge-wrap {
+        position: relative;
+        width: 100%;
+        max-width: 240px; /* nhỏ hơn để không đè xuống legend */
+        margin: 4px auto 18px auto; /* cách legend 1 khoảng */
+    }
+
+    .pf-gauge-center {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .pf-gauge-value {
+        font-size: 28px;
+        font-weight: 700;
+    }
+
+    /* tổng doanh thu / lợi nhuận dưới gauge */
+    .pf-legend-gauge {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 18px;
+        margin-top: auto;
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: rgba(15,23,42,0.9);
+        border: 1px solid rgba(148,163,184,0.35);
+        font-size: 13px;
+    }
+
+        .pf-legend-gauge .label {
+            display: block;
+            opacity: .85;
+            margin-bottom: 4px;
+        }
+
+        .pf-legend-gauge .value {
+            display: block;
+            font-weight: 600;
+        }
+    /* --- STAT CARD (Revenue / Cost / Profit) --- */
+
+    .pf-card-stats {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between; /* mỗi khối cách đều, không dồn vào một góc */
+        gap: 14px;
+    }
+
+    .pf-stat .label {
+        display: block;
+        font-size: 14px;
+        opacity: .85;
+        margin-bottom: 4px;
+    }
+
+    .pf-stat .value {
+        font-size: 24px; /* số to hơn, dễ đọc */
+        font-weight: 700;
+    }
+
+    /* --- PIPELINE DONUT --- */
+
+    .pf-card-pipeline {
+        position: relative;
+        align-items: center;
+    }
+
+    .pf-donut-wrap {
+        width: 190px;
+        margin: 0 auto 10px auto;
+    }
+
+    .pf-legend-row {
+        margin-top: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        align-items: flex-start;
+        font-size: 13px;
+        background: transparent; /* override nếu bị kế thừa */
+        border: none;
+        padding: 0;
+    }
+
+        .pf-legend-row .dot {
+            display: inline-block;
+            width: 9px;
+            height: 9px;
+            border-radius: 999px;
+            margin-right: 6px;
+        }
+
+        .pf-legend-row .label {
+            font-weight: 500;
+            opacity: .9;
+        }
+
+        .pf-legend-row .value {
+            margin-left: 16px;
+            opacity: .85;
+        }
+
+    /* --- BOTTOM CARDS (CHARTS) --- */
+
+    .pf-card-wide {
+        min-height: 320px;
+    }
+
+    .pf-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .pf-chart-wrap {
+        position: relative;
+        width: 100%;
+        height: 260px; /* vừa đủ, không tràn lên header */
+    }
+    @@media (max-width: 1100px) {
+        .pf-grid-top {
+            grid-template-columns: 1fr;
+        }
+
+        .pf-grid-bottom {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<script>
+    Chart.defaults.font.size = 11;
+    Chart.defaults.font.family = '@font';
+    (function () {
+        const margin = @margin.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        const ctxGauge = document.getElementById('pfGaugeChart');
+        if (ctxGauge) {
+            new Chart(ctxGauge, {
+                type: 'doughnut',
+                data: {
+                    labels: ['@txtProfit', '@txtRevenue'],
+                    datasets: [{
+                        data: [margin, 100 - margin],
+                        backgroundColor: ['@theme', 'rgba(148,163,184,0.25)'],
+                        borderWidth: 0,
+                        cutout: '70%'
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false }
+                    }
+                }
+            });
+        }
+
+        const ctxSource = document.getElementById('pfSourceChart');
+        if (ctxSource) {
+            new Chart(ctxSource, {
+                type: 'doughnut',
+                data: {
+                    labels: ['@txtProjects', '@txtServices'],
+                    datasets: [{
+                        data: [
+                            @Model.ProjectProfit.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                            @Model.ServiceProfit.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                        ],
+                        backgroundColor: ['#4f46e5', '#22c55e'],
+                        borderWidth: 0,
+                        cutout: '65%'
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        const labels = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(trendLabels));
+        const profit = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(trendProfit));
+        const rev = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(trendRevenue));
+        const cost = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(trendCost));
+
+        const ctxTrend = document.getElementById('pfTrendChart');
+        if (ctxTrend) {
+            new Chart(ctxTrend, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '@txtProfit',
+                            data: profit,
+                            borderColor: '@theme',
+                            backgroundColor: 'rgba(34,197,94,0.15)',
+                            tension: 0.35,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { font: { size: 11 } } }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function (value) {
+                                    if (value >= 1_000_000) return (value / 1_000_000).toFixed(1) + 'M';
+                                    if (value >= 1_000) return (value / 1_000).toFixed(1) + 'K';
+                                    return value;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        const ctxBar = document.getElementById('pfBarChart');
+        if (ctxBar) {
+            new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '@txtRevenue',
+                            data: rev,
+                            backgroundColor: 'rgba(59,130,246,0.85)',
+                            borderRadius: 8,
+                            maxBarThickness: 26
+                        },
+                        {
+                            label: '@txtCost',
+                            data: cost,
+                            backgroundColor: 'rgba(148,163,184,0.8)',
+                            borderRadius: 8,
+                            maxBarThickness: 26
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { font: { size: 11 } } }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function (value) {
+                                    if (value >= 1_000_000) return (value / 1_000_000).toFixed(1) + 'M';
+                                    if (value >= 1_000) return (value / 1_000).toFixed(1) + 'K';
+                                    return value;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    })();
+</script>
