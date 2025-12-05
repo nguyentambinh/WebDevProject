@@ -50,6 +50,18 @@ namespace QLNSVATC
                 namespaces: new[] { "QLNSVATC.Controllers" }
             );
             routes.MapRoute(
+                name: "Ho so",
+                url: "ho-so/{id}",
+                defaults: new
+                {
+                    controller = "Account",
+                    action = "Profile",
+                    id = UrlParameter.Optional
+                },
+                namespaces: new[] { "QLNSVATC.Controllers" }
+            );
+
+            routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",
                 defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional },

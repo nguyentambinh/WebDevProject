@@ -1,8 +1,133 @@
-﻿
+﻿@using QLNSVATC.Models
 @{
-    ViewBag.Title = "Index";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewBag.Title = "Admin Control Center";
+
+    var settings = ViewBag.Settings as UserViewBagModel;
+
+    string themeColor = settings?.ThemeHex ?? "#f59e0b"; 
+    string fontFamily = settings?.FontFamily ?? "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    int fontSize = settings?.FontSize > 0 ? settings.FontSize : 20;
+    bool isDark = settings?.DarkMode ?? true;
+
+    string pageBg = isDark ? "#020617" : "#f3f4f6";
+    string cardBg = isDark ? "#020617" : "#ffffff";
+    string subColor = isDark ? "#94a3b8" : "#6b7280";
+    string mainColor = isDark ? "#e2e8f0" : "#111827";
+
+    var today = DateTime.Today.ToString("dd/MM/yyyy");
 }
 
-<h2>Index</h2>
+<style>
+    :root {
+        --ad-theme: @themeColor;
+        --ad-bg: @pageBg;
+        --ad-card: @cardBg;
+        --ad-text: @mainColor;
+        --ad-sub: @subColor;
+    }
 
+    .ad-page {
+        padding: 26px;
+        font-family: @fontFamily;
+        font-size: @(fontSize);
+/*        background: var(--ad-bg);*/
+        color: var(--ad-text);
+        min-height: calc(100vh - 70px);
+        text-align: center;
+    }
+
+    .ad-title {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        color: var(--ad-theme);
+        letter-spacing: .06em;
+    }
+
+    .ad-sub {
+        font-size: 14px;
+        color: var(--ad-sub);
+        margin-bottom: 16px;
+    }
+
+    .ad-meta {
+        font-size: 13px;
+        color: var(--ad-sub);
+        margin-bottom: 24px;
+    }
+
+    .ad-card {
+        margin: 0 auto;
+        max-width: 520px;
+        background: var(--ad-card);
+        border-radius: 16px;
+        padding: 18px 22px;
+        border: 1px solid rgba(148,163,184,0.4);
+        box-shadow: 0 18px 40px rgba(0,0,0,0.65);
+        text-align: center;
+    }
+
+    .ad-card-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--ad-theme);
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+    }
+
+    .ad-card-text {
+        font-size: 13px;
+        color: var(--ad-sub);
+        line-height: 1.6;
+    }
+
+    @@media (max-width: 768px) {
+        .ad-page {
+            padding: 18px 12px;
+        }
+
+        .ad-title {
+            font-size: 22px;
+        }
+    }
+</style>
+
+<div class="ad-page">
+    <div class="ad-title">Welcome to Admin Center</div>
+
+    <div class="ad-sub">
+        Khu vực quản trị tập trung cho toàn bộ hệ thống TBT Center.
+    </div>
+
+    <div class="ad-meta">
+        Hôm nay: <strong>@today</strong>
+    </div>
+
+    <div class="ad-card">
+        <div class="ad-card-title">Giới thiệu về TBT Center</div>
+        <div class="ad-card-text">
+            <strong>TBT Center</strong> là doanh nghiệp hoạt động trong lĩnh vực xây dựng,
+            hiện đang mở rộng quy mô và hướng đến mục tiêu trở thành chuỗi doanh nghiệp
+            xây dựng trong tương lai gần.
+            <br /><br />
+
+            Trước nhu cầu quản lý ngày càng phức tạp về <strong>nhân sự, dự án và lợi nhuận</strong>,
+            doanh nghiệp mong muốn triển khai một hệ thống phần mềm quản trị chuyên nghiệp
+            thay thế toàn bộ quy trình thủ công truyền thống.
+            <br /><br />
+
+            Hệ thống được thiết kế nhằm đảm bảo:
+            <br />
+            – <strong>Độ chính xác cao</strong> trong quản lý dữ liệu,<br />
+            – <strong>Tự động hóa</strong> các nghiệp vụ quan trọng,<br />
+            – <strong>Khả năng mở rộng</strong> khi quy mô doanh nghiệp tăng trưởng.
+            <br /><br />
+
+            Trang Admin là trung tâm điều phối của toàn hệ thống, giúp bạn truy cập nhanh
+            vào các module quản lý và giám sát hoạt động của doanh nghiệp.
+        </div>
+    </div>
+</div>

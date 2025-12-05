@@ -1,0 +1,467 @@
+﻿@using QLNSVATC.Areas.Admin.Data
+@model IEnumerable<ActivityViewModel>
+
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewBag.Title = "User Activity";
+
+    string themeColor = "#f59e0b";
+    string fontFamily = "'Roboto', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    bool isDark = true;
+
+    string pageBg = isDark ? "#020617" : "#f3f4f6";
+    string cardBg = isDark ? "#020617" : "#ffffff";
+    string borderColor = isDark ? "#1f2937" : "#e5e7eb";
+    string textMain = isDark ? "#e5e7eb" : "#111827";
+    string textSub = isDark ? "#9ca3af" : "#6b7280";
+
+    string currentActionCode = Request["actionCode"] ?? "";
+    string currentUser = Request["user"] ?? "";
+    string fromValue = Request["from"] ?? "";
+    string toValue = Request["to"] ?? "";
+
+    var all = (Model ?? Enumerable.Empty<ActivityViewModel>()).ToList();
+    var actionCodes = all.Select(x => x.ActionCode).Where(x => x != null && x != "").Distinct().OrderBy(x => x).ToList();
+    var users = all.Select(x => x.PerformedBy).Where(x => x != null && x != "").Distinct().OrderBy(x => x).ToList();
+    int totalCount = all.Count;
+}
+
+<style>
+    :root {
+        --act-theme: @themeColor;
+        --act-bg: @pageBg;
+        --act-card: @cardBg;
+        --act-border: @borderColor;
+        --act-text: @textMain;
+        --act-sub: @textSub;
+    }
+
+    .act-page {
+        padding: 22px;
+        min-height: calc(100vh - 70px);
+        font-family: @fontFamily;
+        font-size: 14px;
+        color: var(--act-text);
+/*        background: var(--act-bg);*/
+    }
+
+    .act-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+    }
+
+    .act-title-block {
+        max-width: 520px;
+    }
+
+    .act-title {
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        color: var(--act-theme);
+    }
+
+    .act-sub {
+        font-size: 13px;
+        color: var(--act-sub);
+        margin-top: 6px;
+    }
+
+    .act-meta {
+        font-size: 12px;
+        color: var(--act-sub);
+        margin-top: 6px;
+    }
+
+    .act-filters-card {
+        background: var(--act-card);
+        border-radius: 14px;
+        border: 1px solid var(--act-border);
+        padding: 12px 14px;
+        box-shadow: 0 18px 36px rgba(0,0,0,0.6);
+        margin-bottom: 16px;
+    }
+
+    .act-filters-row {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0,1fr));
+        gap: 10px;
+        margin-bottom: 8px;
+    }
+
+    .act-filter-field {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+
+    .act-label {
+        font-size: 12px;
+        color: var(--act-sub);
+    }
+
+    .act-input,
+    .act-select {
+        width: 100%;
+        border-radius: 999px;
+        border: 1px solid var(--act-border);
+        background: #020617;
+        color: var(--act-text);
+        padding: 6px 10px;
+        font-size: 13px;
+        box-sizing: border-box;
+    }
+
+    .act-input::placeholder {
+        color: #64748b;
+        font-size: 12px;
+    }
+
+    .act-filter-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 4px;
+    }
+
+    .act-btn {
+        padding: 7px 14px;
+        border-radius: 999px;
+        border: 1px solid rgba(148,163,184,0.7);
+        background: transparent;
+        color: var(--act-text);
+        font-size: 13px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .act-btn-primary {
+        border-color: transparent;
+        background: var(--act-theme);
+        color: #020617;
+        font-weight: 600;
+        box-shadow: 0 0 14px rgba(245, 158, 11, .85);
+    }
+
+    .act-summary {
+        font-size: 12px;
+        color: var(--act-sub);
+        margin-bottom: 10px;
+    }
+
+    .act-sections {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .act-section {
+        background: var(--act-card);
+        border-radius: 14px;
+        border: 1px solid var(--act-border);
+        box-shadow: 0 18px 40px rgba(0,0,0,0.65);
+        padding: 10px 12px 12px;
+    }
+
+    .act-section-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        padding-bottom: 6px;
+        border-bottom: 1px dashed var(--act-border);
+        margin-bottom: 6px;
+    }
+
+    .act-section-title {
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .act-section-sub {
+        font-size: 12px;
+        color: var(--act-sub);
+        margin-top: 2px;
+    }
+
+    .act-section-tags {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        align-items: flex-end;
+        font-size: 11px;
+    }
+
+    .act-tag {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 999px;
+        border: 1px solid rgba(148,163,184,0.7);
+    }
+
+    .act-toggle-btn {
+        border: none;
+        background: transparent;
+        color: var(--act-sub);
+        cursor: pointer;
+        font-size: 16px;
+        padding: 0 2px;
+    }
+
+    .act-table-wrapper {
+        margin-top: 4px;
+        border-radius: 10px;
+        border: 1px solid rgba(15,23,42,0.8);
+        overflow: hidden;
+    }
+
+    .act-table-scroll {
+        overflow-x: auto;
+    }
+
+    .act-table-scroll::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .act-table-scroll::-webkit-scrollbar-thumb {
+        background-image: linear-gradient(90deg, #1d4ed8, var(--act-theme));
+        border-radius: 999px;
+    }
+
+    .act-table-limit {
+        max-height: 520px;
+        overflow-y: auto;
+        scrollbar-color: var(--act-theme) #020617;
+    }
+
+    .act-table-limit::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .act-table-limit::-webkit-scrollbar-track {
+        background: #020617;
+    }
+
+    .act-table-limit::-webkit-scrollbar-thumb {
+        background-image: linear-gradient(180deg, #1d4ed8, var(--act-theme));
+        border-radius: 999px;
+    }
+
+    table.act-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+        min-width: 640px;
+    }
+
+    .act-table thead tr {
+        background: rgba(15,23,42,0.92);
+    }
+
+    .act-table thead th {
+        text-align: left;
+        padding: 6px 8px;
+        border-bottom: 1px solid rgba(31,41,55,0.9);
+        font-weight: 500;
+        white-space: nowrap;
+        color: var(--act-sub);
+    }
+
+    .act-table tbody tr:nth-child(odd) {
+        background: rgba(15,23,42,0.55);
+    }
+
+    .act-table tbody tr:nth-child(even) {
+        background: rgba(15,23,42,0.85);
+    }
+
+    .act-table td {
+        padding: 5px 8px;
+        border-bottom: 1px solid rgba(15,23,42,0.9);
+        vertical-align: top;
+    }
+
+    .act-col-time {
+        width: 165px;
+        white-space: nowrap;
+    }
+
+    .act-col-id {
+        width: 60px;
+        text-align: right;
+    }
+
+    .act-col-user {
+        width: 120px;
+        white-space: nowrap;
+    }
+
+    @@media (max-width: 992px) {
+        .act-page {
+            padding: 18px 12px;
+        }
+        .act-filters-row {
+            grid-template-columns: repeat(2, minmax(0,1fr));
+        }
+    }
+
+    @@media (max-width: 640px) {
+        .act-header {
+            flex-direction: column;
+            gap: 10px;
+        }
+        .act-filters-row {
+            grid-template-columns: minmax(0,1fr);
+        }
+        .act-filter-actions {
+            justify-content: flex-start;
+        }
+    }
+</style>
+
+<div class="act-page">
+
+    <div class="act-header">
+        <div class="act-title-block">
+            <div class="act-title">User activity logs</div>
+            <div class="act-sub">Monitor user actions.</div>
+            <div class="act-meta">Total records: <strong>@totalCount</strong></div>
+        </div>
+    </div>
+
+    <div class="act-filters-card">
+        <form method="get" action="@Url.Action("Index", "Activity", new { area = "Admin" })">
+            <div class="act-filters-row">
+                <div class="act-filter-field">
+                    <label class="act-label" for="actionCode">Action</label>
+                    <select id="actionCode" name="actionCode" class="act-select">
+                        <option value="">All actions</option>
+                        @foreach (var ac in actionCodes)
+                        {
+                            <option value="@ac" @(ac == currentActionCode ? "selected" : "")>@ac</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="act-filter-field">
+                    <label class="act-label" for="user">User</label>
+                    <select id="user" name="user" class="act-select">
+                        <option value="">All users</option>
+                        @foreach (var u in users)
+                        {
+                            <option value="@u" @(u == currentUser ? "selected" : "")>@u</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="act-filter-field">
+                    <label class="act-label" for="from">From</label>
+                    <input id="from" name="from" type="date" class="act-input" value="@fromValue" />
+                </div>
+
+                <div class="act-filter-field">
+                    <label class="act-label" for="to">To</label>
+                    <input id="to" name="to" type="date" class="act-input" value="@toValue" />
+                </div>
+            </div>
+
+            <div class="act-filter-actions">
+                <button type="submit" class="act-btn act-btn-primary">Apply filters</button>
+
+                <a href="@Url.Action("Index", "Activity", new { area = "Admin" })"
+                   class="act-btn">Reset</a>
+
+                <a href="@Url.Action("ExportExcel", "Activity", new { area = "Admin",
+                        actionCode = currentActionCode,
+                        user = currentUser,
+                        from = fromValue,
+                        to = toValue })"
+                   class="act-btn">Export Excel</a>
+            </div>
+        </form>
+    </div>
+
+    @if (!all.Any())
+    {
+        <div class="act-empty">No activity records.</div>
+    }
+    else
+    {
+        <div class="act-summary">Grouped by <strong>ActionCode</strong>.</div>
+
+        <div class="act-sections">
+            @foreach (var group in all.GroupBy(x => x.ActionCode).OrderBy(g => g.Key))
+            {
+                var groupKey = group.Key ?? "(unknown)";
+                var latest = group.Max(x => x.ActionTime);
+                var count = group.Count();
+
+                <div class="act-section" data-action="@groupKey">
+                    <div class="act-section-header">
+                        <div>
+                            <div class="act-section-title">@groupKey</div>
+                            <div class="act-section-sub">@String.Format("{0:dd/MM/yyyy HH:mm:ss}", latest)</div>
+                        </div>
+                        <div class="act-section-tags">
+                            <span class="act-tag">Records: @count</span>
+                            <button type="button" class="act-toggle-btn" onclick="toggleSection(this)">▾</button>
+                        </div>
+                    </div>
+
+                    <div class="act-table-wrapper">
+                        <div class="act-table-scroll">
+                            <div class="act-table-limit">
+                                <table class="act-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="act-col-id">ID</th>
+                                            <th class="act-col-time">Time</th>
+                                            <th class="act-col-user">User</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in group.OrderByDescending(x => x.ActionTime))
+                                        {
+                                            <tr>
+                                                <td class="act-col-id">@item.LogId</td>
+                                                <td class="act-col-time">@String.Format("{0:dd/MM/yyyy HH:mm:ss}", item.ActionTime)</td>
+                                                <td class="act-col-user">@item.PerformedBy</td>
+                                                <td class="act-description">@item.Description</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<script>
+    function toggleSection(btn) {
+        var section = btn.closest('.act-section');
+        var wrapper = section.querySelector('.act-table-wrapper');
+        if (!wrapper) return;
+
+        if (wrapper.style.display === 'none') {
+            wrapper.style.display = '';
+            btn.textContent = '▾';
+        } else {
+            wrapper.style.display = 'none';
+            btn.textContent = '▸';
+        }
+    }
+</script>

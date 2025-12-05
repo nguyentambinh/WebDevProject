@@ -2,7 +2,7 @@
 @using QLNSVATC.Models
 
 @{
-    Layout = "~/Areas/HR/Views/Shared/_LayoutHR.cshtml";
+    Layout = "~/Views/Shared/_LayoutGuest.cshtml";
 
     var settings = ViewBag.Settings as UserViewBagModel;
 
@@ -806,12 +806,12 @@
                         </div>
                     </div>
                 </div>
-
-                <button type="button"
+                @*// không cho chỉnh*@
+                @*<button type="button"
                         class="hr-edit-btn"
                         data-section="orgsalary">
                     ✎
-                </button>
+                </button>*@
             </div>
 
             <!-- Relative-->

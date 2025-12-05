@@ -55,8 +55,8 @@ namespace QLNSVATC.Controllers
             }
 
             string codeBus = authInfo.CODEBUS;
-            string prefix = auth.Substring(0, 2).ToUpper();
-            string code = authInfo.CODE;
+            string prefix = auth.Substring(0, 2).ToUpper();  
+            string code = authInfo.CODE;                      
 
             var nv = db.NHANVIENs.FirstOrDefault(x => x.MANV == code);
 
@@ -64,7 +64,12 @@ namespace QLNSVATC.Controllers
             {
                 Session["UserId"] = nv.MANV;
                 Session["FullName"] = nv.TENNV;
-                Session["Role"] = auth;
+                Session["Role"] = prefix;
+
+                Session["AuthCode"] = auth;
+
+                Session["BusinessCode"] = codeBus;
+
                 var st = db.USER_SETTINGS.FirstOrDefault(x => x.UserId == nv.MANV);
 
                 if (st != null)
@@ -76,6 +81,7 @@ namespace QLNSVATC.Controllers
                     Session["FontSize"] = st.FontSize;
                     Session["LayoutCode"] = st.LayoutCode;
                 }
+
                 LogHelper.WriteLog(
                     db,
                     "Login",
@@ -83,7 +89,6 @@ namespace QLNSVATC.Controllers
                     $"Nhân viên có mã {nv.MANV} đã đăng nhập hệ thống."
                 );
             }
-
             switch (prefix)
             {
                 case "AD": return RedirectToAction("Index", "Home", new { area = "Admin" });
@@ -93,9 +98,10 @@ namespace QLNSVATC.Controllers
                 case "EM": return RedirectToAction("Index", "Home", new { area = "Employee", id = codeBus });
             }
 
-            ModelState.AddModelError("", "Invalid role.");   
+            ModelState.AddModelError("", "Invalid role.");
             return View(new USER { USERNAME = username });
         }
+
 
         //REGISTER
 
@@ -542,6 +548,506 @@ namespace QLNSVATC.Controllers
         {
             Session.Clear();
             return RedirectToAction("Login");
+        }
+        [HttpGet]
+        [ActionName("Profile")]
+        public ActionResult ProfileGet(string id)
+        {
+            var userId = Session["UserId"] as string;
+            var st = SettingsHelper.BuildViewBagData(db, userId);
+            ViewBag.Settings = st;
+
+            ViewBag.Departments = db.PHONGBANs
+                .OrderBy(p => p.TENPB)
+                .ToList();
+
+            ViewBag.Positions = db.VITRICONGVIECs
+                .OrderBy(c => c.TENCV)
+                .ToList();
+
+            ViewBag.LoaiNVs = db.LUONGs
+                .Where(l => l.LOAINV != null && l.LOAINV != "")
+                .Select(l => l.LOAINV)
+                .Distinct()
+                .OrderBy(x => x)
+                .ToList();
+
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                var first = db.NHANVIENs.OrderBy(x => x.MANV).FirstOrDefault();
+                if (first == null) return HttpNotFound();
+                id = first.MANV;
+            }
+
+            var emp = (from nv in db.NHANVIENs
+                       join pb in db.PHONGBANs on nv.MAPB equals pb.MAPB into gpb
+                       from pb in gpb.DefaultIfEmpty()
+                       join cv in db.VITRICONGVIECs on nv.MACV equals cv.MACV into gcv
+                       from cv in gcv.DefaultIfEmpty()
+                       join dn in db.THONGTINDOANHNGHIEPs on nv.MADN equals dn.MADN into gdn
+                       from dn in gdn.DefaultIfEmpty()
+                       join tt in db.THONGTINLIENHEs on nv.MANV equals tt.MANV into gtt
+                       from tt in gtt.DefaultIfEmpty()
+                       where nv.MANV == id
+                       select new { nv, pb, cv, dn, tt })
+                      .FirstOrDefault();
+
+            if (emp == null) return HttpNotFound();
+
+            var today = DateTime.Today;
+            int? tuoi = emp.nv.NAMSINH.HasValue
+                ? today.Year - emp.nv.NAMSINH.Value
+                : (int?)null;
+
+            var luong = db.LUONGs.FirstOrDefault(x => x.MANV == emp.nv.MANV);
+
+            double? heSoLuong = db.LICHLAMVIECs
+                .Where(x => x.MANV == emp.nv.MANV)
+                .OrderByDescending(x => x.NGAYLAMVIEC)
+                .Select(x => (double?)x.HESOLUONG)
+                .FirstOrDefault();
+
+            var lichDauTien = db.LICHLAMVIECs
+                .Where(x => x.MANV == emp.nv.MANV)
+                .OrderBy(x => x.NGAYLAMVIEC)
+                .FirstOrDefault();
+            DateTime? ngayBatDau = lichDauTien != null ? lichDauTien.NGAYLAMVIEC : emp.nv.HDLD;
+
+            var fromDate = today.AddMonths(-2).AddDays(1 - today.Day);
+            var toDate = today;
+            double tongCa3Thang = db.CHAMCONGs
+                .Where(c => c.MANV == emp.nv.MANV
+                            && c.NGAYCC >= fromDate
+                            && c.NGAYCC <= toDate)
+                .Select(c => (double?)c.TONGCA)
+                .DefaultIfEmpty(0)
+                .Sum() ?? 0.0;
+
+            var thuongPhatList = db.DSTHUONGPHATs
+                .Where(x => x.MANV == emp.nv.MANV)
+                .ToList();
+
+            decimal? tongThuong = thuongPhatList
+                .Where(x => x.HINHTHUC == "KT")
+                .Select(x => (decimal?)x.TONG)
+                .DefaultIfEmpty(0)
+                .Sum();
+
+            decimal? tongPhat = thuongPhatList
+                .Where(x => x.HINHTHUC == "KL")
+                .Select(x => (decimal?)x.TONG)
+                .DefaultIfEmpty(0)
+                .Sum();
+
+            var thanNhan = db.NHANTHANs
+                .Where(t => t.MANV == emp.nv.MANV)
+                .Select(t => new
+                {
+                    t.TENNT,
+                    t.QUANHE,
+                    t.DIENTHOAI,
+                    t.DIACHI
+                })
+                .FirstOrDefault();
+
+            var sk = db.THONGTINSUCKHOEs.FirstOrDefault(x => x.MANV == emp.nv.MANV);
+            if (sk == null)
+            {
+                sk = new THONGTINSUCKHOE
+                {
+                    MANV = emp.nv.MANV,
+                    NGAYCAPNHAT = DateTime.Today
+                };
+                db.THONGTINSUCKHOEs.Add(sk);
+                db.SaveChanges();
+            }
+
+            var bh = db.THONGTINBAOHIEMs.FirstOrDefault(x => x.MANV == emp.nv.MANV);
+            if (bh == null)
+            {
+                bh = new THONGTINBAOHIEM
+                {
+                    MANV = emp.nv.MANV
+                };
+                db.THONGTINBAOHIEMs.Add(bh);
+                db.SaveChanges();
+            }
+
+            string queQuanText = emp.tt != null && emp.tt.QUEQUAN.HasValue
+                ? "Area code: " + emp.tt.QUEQUAN.Value
+                : null;
+
+            var model = new HREmployeeInformationViewModel
+            {
+                MaNV = emp.nv.MANV,
+                HoLot = emp.nv.HOLOT,
+                TenNV = emp.nv.TENNV,
+                GioiTinh = emp.nv.GIOITINH ?? true,
+                NamSinh = emp.nv.NAMSINH,
+                Tuoi = tuoi,
+
+                MaPB = emp.nv.MAPB,
+                TenPhongBan = emp.pb != null ? emp.pb.TENPB : null,
+                MaCV = emp.nv.MACV,
+                TenChucVu = emp.cv != null ? emp.cv.TENCV : null,
+
+                MaDN = emp.nv.MADN,
+                TenDoanhNghiep = emp.dn != null ? emp.dn.TENDN : null,
+                DiaChiDoanhNghiep = emp.dn != null ? emp.dn.DIACHI : null,
+
+                NgayBatDau = ngayBatDau,
+                NgayHDLD = emp.nv.HDLD,
+
+                QueQuanText = queQuanText,
+                SDT = emp.tt != null ? emp.tt.SODT : null,
+                Email = emp.tt != null ? emp.tt.GMAIL : null,
+                DiaChi = emp.tt != null ? emp.tt.DIACHI : null,
+                Facebook = emp.tt != null ? emp.tt.FB : null,
+
+                LoaiNV = luong != null ? luong.LOAINV : null,
+                HeSoLuong = heSoLuong,
+                LuongCoBan = luong != null ? luong.LUONGCOBAN : null,
+
+                NguoiThanTen = thanNhan?.TENNT,
+                NguoiThanQuanHe = thanNhan?.QUANHE,
+                NguoiThanSDT = thanNhan?.DIENTHOAI,
+                NguoiThanDiaChi = thanNhan?.DIACHI,
+
+                TongCa3Thang = tongCa3Thang,
+                TongThuong = tongThuong,
+                TongPhat = tongPhat,
+
+                ChieuCao = sk.CHIEUCAO,
+                CanNang = sk.CANNANG,
+                TienSuBenh = sk.TIENSUBENH,
+                ThiLucTren10 = sk.THILUCTREN10,
+                NgayCapNhatSucKhoe = sk.NGAYCAPNHAT,
+                LoaiBaoHiem = bh.LOAIBAOHIEM,
+                SoBaoHiem = bh.SOBAOHIEM,
+                ThoiHanBaoHiem = bh.THOIHAN
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ActionName("Profile")]
+        public ActionResult SaveProfile(HREmployeeInformationViewModel model)
+        {
+            var userId = Session["UserId"] as string;
+            var st = SettingsHelper.BuildViewBagData(db, userId);
+            ViewBag.Settings = st;
+
+            if (model == null || string.IsNullOrWhiteSpace(model.MaNV))
+                return RedirectToAction("Information", "Employee", new { area = "HR" });
+
+            var nv = db.NHANVIENs.FirstOrDefault(x => x.MANV == model.MaNV);
+            if (nv == null) return HttpNotFound();
+
+            nv.HOLOT = model.HoLot;
+            nv.TENNV = model.TenNV;
+            nv.GIOITINH = model.GioiTinh;
+
+            if (model.NamSinh.HasValue)
+                nv.NAMSINH = (short?)model.NamSinh.Value;
+            else
+                nv.NAMSINH = null;
+
+            nv.MAPB = model.MaPB;
+            nv.MACV = model.MaCV;
+            nv.MADN = model.MaDN;
+            nv.HDLD = model.NgayHDLD ?? nv.HDLD;
+
+            var tt = db.THONGTINLIENHEs.FirstOrDefault(x => x.MANV == model.MaNV);
+            if (tt == null)
+            {
+                tt = new THONGTINLIENHE { MANV = model.MaNV };
+                db.THONGTINLIENHEs.Add(tt);
+            }
+
+            int? queCode = null;
+            if (!string.IsNullOrWhiteSpace(model.QueQuanText))
+            {
+                int tmp;
+                if (int.TryParse(model.QueQuanText, out tmp))
+                    queCode = tmp;
+            }
+
+            tt.SODT = model.SDT;
+            tt.GMAIL = model.Email;
+            tt.DIACHI = model.DiaChi;
+            tt.FB = model.Facebook;
+
+            var luong = db.LUONGs.FirstOrDefault(x => x.MANV == model.MaNV);
+            if (luong == null)
+            {
+                luong = new LUONG { MANV = model.MaNV };
+                db.LUONGs.Add(luong);
+            }
+
+            luong.LOAINV = string.IsNullOrWhiteSpace(model.LoaiNV) ? null : model.LoaiNV;
+            luong.LUONGCOBAN = model.LuongCoBan;
+
+            var thanNhan = db.NHANTHANs.FirstOrDefault(x => x.MANV == model.MaNV);
+            if (thanNhan == null && !string.IsNullOrWhiteSpace(model.NguoiThanTen))
+            {
+                thanNhan = new NHANTHAN
+                {
+                    MANV = model.MaNV,
+                    TENNT = model.NguoiThanTen
+                };
+                db.NHANTHANs.Add(thanNhan);
+            }
+
+            if (thanNhan != null)
+            {
+                if (!string.IsNullOrWhiteSpace(model.NguoiThanTen))
+                    thanNhan.TENNT = model.NguoiThanTen;
+
+                thanNhan.QUANHE = model.NguoiThanQuanHe;
+                thanNhan.DIENTHOAI = model.NguoiThanSDT;
+                thanNhan.DIACHI = model.NguoiThanDiaChi;
+            }
+
+            var sk = db.THONGTINSUCKHOEs.FirstOrDefault(x => x.MANV == model.MaNV);
+            if (sk == null)
+            {
+                sk = new THONGTINSUCKHOE { MANV = model.MaNV };
+                db.THONGTINSUCKHOEs.Add(sk);
+            }
+
+            if (model.ChieuCao.HasValue)
+                sk.CHIEUCAO = (byte?)model.ChieuCao.Value;
+            else
+                sk.CHIEUCAO = null;
+
+            if (model.CanNang.HasValue)
+                sk.CANNANG = (byte?)model.CanNang.Value;
+            else
+                sk.CANNANG = null;
+
+            sk.TIENSUBENH = model.TienSuBenh;
+
+            if (model.ThiLucTren10.HasValue)
+                sk.THILUCTREN10 = (byte?)model.ThiLucTren10.Value;
+            else
+                sk.THILUCTREN10 = null;
+
+            sk.NGAYCAPNHAT = model.NgayCapNhatSucKhoe ?? DateTime.Today;
+
+            var bh = db.THONGTINBAOHIEMs.FirstOrDefault(x => x.MANV == model.MaNV);
+            if (bh == null)
+            {
+                bh = new THONGTINBAOHIEM { MANV = model.MaNV };
+                db.THONGTINBAOHIEMs.Add(bh);
+            }
+
+            bh.LOAIBAOHIEM = model.LoaiBaoHiem;
+            bh.SOBAOHIEM = model.SoBaoHiem;
+            bh.THOIHAN = model.ThoiHanBaoHiem;
+
+            db.SaveChanges();
+
+            TempData["ProfileSuccess"] = "Profile has been updated.";
+            return RedirectToAction("Profile", new { id = model.MaNV });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult UpdatePersonal(HREmployeeInformationViewModel model)
+        {
+            if (string.IsNullOrWhiteSpace(model.MaNV))
+            {
+                return Json(new { success = false, message = "Invalid employee id." });
+            }
+
+            var nv = db.NHANVIENs.Find(model.MaNV);
+            if (nv == null)
+            {
+                return Json(new { success = false, message = "Employee not found." });
+            }
+
+            try
+            {
+                nv.HOLOT = model.HoLot;
+                nv.TENNV = model.TenNV;
+                nv.GIOITINH = model.GioiTinh;
+                nv.NAMSINH = model.NamSinh;
+                nv.HDLD = model.NgayBatDau;
+
+                var tt = db.THONGTINLIENHEs.FirstOrDefault(x => x.MANV == model.MaNV);
+                if (tt == null)
+                {
+                    tt = new THONGTINLIENHE { MANV = model.MaNV };
+                    db.THONGTINLIENHEs.Add(tt);
+                }
+
+                db.SaveChanges();
+
+                return Json(new { success = true, message = "Personal information has been updated." });
+            }
+            catch (Exception)
+            {
+                return Json(new { success = false, message = "System error when saving personal information." });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult UpdateContact(HREmployeeInformationViewModel model)
+        {
+            if (string.IsNullOrWhiteSpace(model.MaNV))
+            {
+                return Json(new { success = false, message = "Invalid employee id." });
+            }
+
+            var tt = db.THONGTINLIENHEs.FirstOrDefault(x => x.MANV == model.MaNV);
+            if (tt == null)
+            {
+                tt = new THONGTINLIENHE { MANV = model.MaNV };
+                db.THONGTINLIENHEs.Add(tt);
+            }
+
+            try
+            {
+                tt.SODT = model.SDT;
+                tt.GMAIL = model.Email;
+                tt.DIACHI = model.DiaChi;
+                tt.FB = model.Facebook;
+
+                db.SaveChanges();
+
+                return Json(new { success = true, message = "Contact information has been updated." });
+            }
+            catch (Exception)
+            {
+                return Json(new { success = false, message = "System error when saving contact information." });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult UpdateOrgSalary(HREmployeeInformationViewModel model)
+        {
+            if (string.IsNullOrWhiteSpace(model.MaNV))
+            {
+                return Json(new { success = false, message = "Invalid employee id." });
+            }
+
+            var nv = db.NHANVIENs.Find(model.MaNV);
+            if (nv == null)
+            {
+                return Json(new { success = false, message = "Employee not found." });
+            }
+
+            var luong = db.LUONGs.FirstOrDefault(x => x.MANV == model.MaNV);
+            if (luong == null)
+            {
+                luong = new LUONG { MANV = model.MaNV };
+                db.LUONGs.Add(luong);
+            }
+
+            try
+            {
+                nv.MAPB = model.MaPB;
+                nv.MACV = model.MaCV;
+
+                luong.LOAINV = model.LoaiNV;
+                luong.LUONGCOBAN = model.LuongCoBan;
+
+                db.SaveChanges();
+
+                return Json(new { success = true, message = "Department, position and salary have been updated." });
+            }
+            catch (Exception)
+            {
+                return Json(new { success = false, message = "System error when saving department / position / salary information." });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult UpdateRelative(HREmployeeInformationViewModel model)
+        {
+            if (string.IsNullOrWhiteSpace(model.MaNV))
+            {
+                return Json(new { success = false, message = "Invalid employee id." });
+            }
+
+            var nt = db.NHANTHANs.FirstOrDefault(x => x.MANV == model.MaNV);
+            if (nt == null)
+            {
+                nt = new NHANTHAN { MANV = model.MaNV };
+                db.NHANTHANs.Add(nt);
+            }
+
+            try
+            {
+                nt.TENNT = model.NguoiThanTen;
+                nt.QUANHE = model.NguoiThanQuanHe;
+                nt.DIENTHOAI = model.NguoiThanSDT;
+                nt.DIACHI = model.NguoiThanDiaChi;
+
+                db.SaveChanges();
+
+                return Json(new { success = true, message = "Relative information has been updated." });
+            }
+            catch (Exception)
+            {
+                return Json(new { success = false, message = "System error when saving relative information." });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult UpdateHealthInsurance(HREmployeeInformationViewModel model)
+        {
+            if (string.IsNullOrWhiteSpace(model.MaNV))
+            {
+                return Json(new { success = false, message = "Invalid employee id." });
+            }
+
+            var sk = db.THONGTINSUCKHOEs.FirstOrDefault(x => x.MANV == model.MaNV);
+            if (sk == null)
+            {
+                sk = new THONGTINSUCKHOE { MANV = model.MaNV };
+                db.THONGTINSUCKHOEs.Add(sk);
+            }
+
+            var bh = db.THONGTINBAOHIEMs.FirstOrDefault(x => x.MANV == model.MaNV);
+            if (bh == null)
+            {
+                bh = new THONGTINBAOHIEM { MANV = model.MaNV };
+                db.THONGTINBAOHIEMs.Add(bh);
+            }
+
+            try
+            {
+                sk.CHIEUCAO = model.ChieuCao;
+                sk.CANNANG = model.CanNang;
+                sk.TIENSUBENH = string.IsNullOrWhiteSpace(model.TienSuBenh)
+                    ? null
+                    : model.TienSuBenh;
+                sk.THILUCTREN10 = model.ThiLucTren10;
+                sk.NGAYCAPNHAT = model.NgayCapNhatSucKhoe ?? DateTime.Today;
+
+                bh.LOAIBAOHIEM = string.IsNullOrWhiteSpace(model.LoaiBaoHiem)
+                    ? null
+                    : model.LoaiBaoHiem;
+                bh.SOBAOHIEM = string.IsNullOrWhiteSpace(model.SoBaoHiem)
+                    ? null
+                    : model.SoBaoHiem;
+                bh.THOIHAN = model.ThoiHanBaoHiem;
+
+                db.SaveChanges();
+
+                return Json(new { success = true, message = "Health and insurance information has been updated." });
+            }
+            catch (Exception)
+            {
+                return Json(new { success = false, message = "System error when saving health / insurance information." });
+            }
         }
     }
 }

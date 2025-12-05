@@ -1,0 +1,656 @@
+﻿@model QLNSVATC.Areas.HR.Data.ProjectDetailsViewModel
+@using QLNSVATC.Models
+@using System.Linq
+
+@{
+    Layout = "~/Areas/HR/Views/Shared/_LayoutHR.cshtml";
+
+    var settings = ViewBag.Settings as UserViewBagModel;
+
+    string themeColor = (settings != null && !string.IsNullOrEmpty(settings.ThemeHex))
+        ? settings.ThemeHex
+        : "#f97316";
+
+    string fontFamily = (settings != null && !string.IsNullOrEmpty(settings.FontFamily))
+        ? settings.FontFamily
+        : "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
+    int fontSize = (settings != null && settings.FontSize > 0)
+        ? settings.FontSize
+        : 16;
+
+    bool isDarkMode = settings != null ? settings.DarkMode : true;
+
+    string pageBg = isDarkMode ? "#020617" : "#f3f4f6";
+    string cardBg = isDarkMode ? "#020617" : "#ffffff";
+    string borderColor = isDarkMode ? "#1f2937" : "#e5e7eb";
+    string mainTextColor = isDarkMode ? "#e5e7eb" : "#111827";
+    string subTextColor = isDarkMode ? "#9ca3af" : "#6b7280";
+
+    string currentLang = ViewBag.CurrentLang as string ?? "vi_VN";
+    var txt = new Dictionary<string, string>();
+
+    if (currentLang == "en_US")
+    {
+        txt["PageTitlePrefix"] = "Project details";
+        txt["SubLine"] = "Project code and contract overview.";
+        txt["Client"] = "Client";
+        txt["Timeline"] = "Timeline";
+        txt["Status"] = "Status";
+        txt["From"] = "from";
+        txt["To"] = "to";
+
+        txt["CardInProject"] = "Employees in project";
+        txt["CardAvailable"] = "Available employees to add";
+        txt["TableEmpId"] = "Employee ID";
+        txt["TableName"] = "Name";
+        txt["TableActions"] = "Action";
+        txt["BtnRemove"] = "Remove";
+        txt["BtnAdd"] = "Add";
+        txt["BtnViewProfile"] = "View profile";
+        txt["BtnBack"] = "Back to projects";
+        txt["EmptyInProject"] = "No employees in this project.";
+        txt["EmptyAvailable"] = "No valid employees to add (all employees are assigned to active projects).";
+        txt["HintTop"] = "Drag an employee from the right table into this project table to add (desktop).";
+
+        txt["ToastMissingToken"] = "Missing security token.";
+        txt["ToastSuccess"] = "Success.";
+        txt["ToastActionFailed"] = "Action failed.";
+        txt["ToastSystemError"] = "System error.";
+    }
+    else if (currentLang == "jp_JP")
+    {
+        txt["PageTitlePrefix"] = "プロジェクト詳細";
+        txt["SubLine"] = "プロジェクトコードと契約の概要。";
+        txt["Client"] = "顧客";
+        txt["Timeline"] = "期間";
+        txt["Status"] = "ステータス";
+        txt["From"] = "開始";
+        txt["To"] = "終了";
+
+        txt["CardInProject"] = "プロジェクトの参加社員";
+        txt["CardAvailable"] = "追加可能な社員";
+        txt["TableEmpId"] = "社員ID";
+        txt["TableName"] = "氏名";
+        txt["TableActions"] = "操作";
+        txt["BtnRemove"] = "削除";
+        txt["BtnAdd"] = "追加";
+        txt["BtnViewProfile"] = "プロフィール表示";
+        txt["BtnBack"] = "一覧に戻る";
+        txt["EmptyInProject"] = "このプロジェクトに参加している社員はいません。";
+        txt["EmptyAvailable"] = "有効な社員がいません（全員が他のプロジェクトに参加中）。";
+        txt["HintTop"] = "右側の表からこの表へドラッグするとプロジェクトに追加できます（デスクトップ）。";
+
+        txt["ToastMissingToken"] = "セキュリティトークンがありません。";
+        txt["ToastSuccess"] = "成功しました。";
+        txt["ToastActionFailed"] = "処理に失敗しました。";
+        txt["ToastSystemError"] = "システムエラーが発生しました。";
+    }
+    else if (currentLang == "kr_KR")
+    {
+        txt["PageTitlePrefix"] = "프로젝트 상세";
+        txt["SubLine"] = "프로젝트 코드 및 계약 요약.";
+        txt["Client"] = "고객";
+        txt["Timeline"] = "기간";
+        txt["Status"] = "상태";
+        txt["From"] = "시작";
+        txt["To"] = "종료";
+
+        txt["CardInProject"] = "프로젝트에 배정된 직원";
+        txt["CardAvailable"] = "배정 가능한 직원";
+        txt["TableEmpId"] = "사번";
+        txt["TableName"] = "이름";
+        txt["TableActions"] = "동작";
+        txt["BtnRemove"] = "제외";
+        txt["BtnAdd"] = "추가";
+        txt["BtnViewProfile"] = "프로필 보기";
+        txt["BtnBack"] = "목록으로 돌아가기";
+        txt["EmptyInProject"] = "이 프로젝트에 배정된 직원이 없습니다.";
+        txt["EmptyAvailable"] = "추가 가능한 직원이 없습니다 (모두 다른 프로젝트에 배정됨).";
+        txt["HintTop"] = "오른쪽 표에서 이 표로 드래그하면 프로젝트에 추가됩니다 (데스크톱).";
+
+        txt["ToastMissingToken"] = "보안 토큰이 없습니다.";
+        txt["ToastSuccess"] = "성공했습니다.";
+        txt["ToastActionFailed"] = "작업에 실패했습니다.";
+        txt["ToastSystemError"] = "시스템 오류입니다.";
+    }
+    else if (currentLang == "cn_CN")
+    {
+        txt["PageTitlePrefix"] = "项目详情";
+        txt["SubLine"] = "项目编码与合同概览。";
+        txt["Client"] = "客户";
+        txt["Timeline"] = "时间范围";
+        txt["Status"] = "状态";
+        txt["From"] = "开始";
+        txt["To"] = "结束";
+
+        txt["CardInProject"] = "项目中的员工";
+        txt["CardAvailable"] = "可添加的员工";
+        txt["TableEmpId"] = "员工编号";
+        txt["TableName"] = "姓名";
+        txt["TableActions"] = "操作";
+        txt["BtnRemove"] = "移除";
+        txt["BtnAdd"] = "添加";
+        txt["BtnViewProfile"] = "查看档案";
+        txt["BtnBack"] = "返回项目列表";
+        txt["EmptyInProject"] = "该项目暂时没有员工。";
+        txt["EmptyAvailable"] = "没有可添加的员工（所有员工都在其它项目中）。";
+        txt["HintTop"] = "从右侧表格拖动员工到此表格，即可添加到项目（桌面端）。";
+
+        txt["ToastMissingToken"] = "缺少安全令牌。";
+        txt["ToastSuccess"] = "操作成功。";
+        txt["ToastActionFailed"] = "操作失败。";
+        txt["ToastSystemError"] = "系统错误。";
+    }
+    else
+    {
+        // vi_VN mặc định
+        txt["PageTitlePrefix"] = "Chi tiết dự án";
+        txt["SubLine"] = "Mã dự án, hợp đồng và thông tin tổng quan.";
+        txt["Client"] = "Khách hàng";
+        txt["Timeline"] = "Thời gian";
+        txt["Status"] = "Trạng thái";
+        txt["From"] = "Từ";
+        txt["To"] = "Đến";
+
+        txt["CardInProject"] = "Nhân sự trong dự án";
+        txt["CardAvailable"] = "Nhân sự có thể thêm";
+        txt["TableEmpId"] = "Mã nhân viên";
+        txt["TableName"] = "Họ tên";
+        txt["TableActions"] = "Thao tác";
+        txt["BtnRemove"] = "Xóa khỏi DA";
+        txt["BtnAdd"] = "Thêm vào DA";
+        txt["BtnViewProfile"] = "Xem hồ sơ";
+        txt["BtnBack"] = "Quay lại danh sách dự án";
+        txt["EmptyInProject"] = "Chưa có nhân sự nào trong dự án.";
+        txt["EmptyAvailable"] = "Không còn nhân sự hợp lệ để thêm (đều đang tham gia dự án khác).";
+        txt["HintTop"] = "Kéo nhân viên từ bảng bên phải sang bảng dự án để thêm (desktop).";
+
+        txt["ToastMissingToken"] = "Thiếu mã bảo mật.";
+        txt["ToastSuccess"] = "Thao tác thành công.";
+        txt["ToastActionFailed"] = "Thao tác thất bại.";
+        txt["ToastSystemError"] = "Lỗi hệ thống.";
+    }
+
+    var curList = Model.CurrentEmployees ?? new List<QLNSVATC.Areas.HR.Data.EmployeeInProjectItem>();
+    var availList = Model.AvailableEmployees ?? new List<QLNSVATC.Areas.HR.Data.EmployeeOptionItem>();
+
+    var curTop10 = curList.Take(10).ToList();
+    var availTop10 = availList.Take(10).ToList();
+}
+
+<style>
+    .pd-page {
+        padding:22px;
+        font-family:@fontFamily;
+        font-size:@(fontSize);
+        color:@mainTextColor;
+        @*background:@pageBg;*@
+        min-height:calc(100vh - 80px);
+    }
+
+    .pd-header {
+        margin-bottom:18px;
+        display:flex;
+        justify-content:space-between;
+        align-items:flex-start;
+        gap:16px;
+        flex-wrap:wrap;
+    }
+
+    .pd-header-left {
+        min-width:0;
+    }
+
+    .pd-header-right {
+        display:flex;
+        align-items:flex-start;
+    }
+
+    .pd-back-btn {
+        border-radius:999px;
+        border:1px solid rgba(148,163,184,0.8);
+        background:transparent;
+        color:@subTextColor;
+        font-size:11px;
+        padding:6px 12px;
+        cursor:pointer;
+        white-space:nowrap;
+    }
+
+    .pd-back-btn:hover {
+        border-color:@themeColor;
+        color:@themeColor;
+    }
+
+    .pd-title {
+        font-size:22px;
+        font-weight:700;
+        letter-spacing:.04em;
+        text-transform:uppercase;
+        color:@themeColor;
+    }
+
+    .pd-sub {
+        margin-top:4px;
+        font-size:13px;
+        color:@subTextColor;
+    }
+
+    .pd-meta {
+        margin-top:10px;
+        display:flex;
+        flex-wrap:wrap;
+        gap:14px;
+        font-size:12px;
+        color:@subTextColor;
+    }
+
+    .pd-meta span strong {
+        color:@mainTextColor;
+    }
+
+    .pd-status-pill {
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+        padding:3px 9px;
+        border-radius:999px;
+        border:1px solid rgba(148,163,184,0.8);
+        font-size:11px;
+        text-transform:uppercase;
+        letter-spacing:.08em;
+    }
+
+    .pd-status-pill[data-status="upcoming"] { border-color:#22c55e; }
+    .pd-status-pill[data-status="ongoing"] { border-color:#38bdf8; }
+    .pd-status-pill[data-status="done"]     { border-color:#a855f7; }
+    .pd-status-pill[data-status="overdue"]  { border-color:#f97316; }
+
+    .pd-columns {
+        display:grid;
+        grid-template-columns:1.1fr 1.1fr;
+        gap:18px;
+    }
+
+    .pd-card {
+        background:@cardBg;
+        border-radius:16px;
+        border:1px solid @borderColor;
+        padding:14px;
+        box-shadow:0 18px 40px rgba(15,23,42,0.7);
+    }
+
+    .pd-card-title {
+        font-size:14px;
+        font-weight:600;
+        margin-bottom:8px;
+        letter-spacing:.06em;
+        text-transform:uppercase;
+        color:@themeColor;
+    }
+
+    .pd-hint {
+        font-size:11px;
+        color:@subTextColor;
+        margin-bottom:6px;
+    }
+
+    .pd-table {
+        width:100%;
+        border-collapse:collapse;
+        font-size:13px;
+    }
+
+    .pd-table thead {
+        background:rgba(15,23,42,0.9);
+    }
+
+    .pd-table th,
+    .pd-table td {
+        padding:6px 8px;
+        border-bottom:1px solid rgba(31,41,55,0.7);
+        text-align:left;
+    }
+
+    .pd-table th {
+        font-weight:600;
+        color:@subTextColor;
+        text-transform:uppercase;
+        font-size:11px;
+    }
+
+    .pd-table tbody tr:hover {
+        background:rgba(15,23,42,0.6);
+    }
+
+    .pd-btn {
+        border-radius:999px;
+        border:1px solid transparent;
+        padding:4px 9px;
+        font-size:11px;
+        cursor:pointer;
+        white-space:nowrap;
+    }
+
+    .pd-btn-remove {
+        background:rgba(127,29,29,0.9);
+        border-color:#b91c1c;
+        color:#fee2e2;
+    }
+
+    .pd-btn-add {
+        background:@themeColor;
+        border-color:@themeColor;
+        color:#111827;
+        font-weight:600;
+    }
+
+    .pd-btn-link {
+        background:transparent;
+        border-color:rgba(148,163,184,0.7);
+        color:@subTextColor;
+    }
+
+    .pd-btn-link:hover {
+        border-color:@themeColor;
+        color:@themeColor;
+    }
+
+    .pd-empty {
+        font-size:12px;
+        color:@subTextColor;
+        padding:4px 2px;
+    }
+
+    .pd-toast {
+        position:fixed;
+        left:50%;
+        top:-70px;
+        transform:translateX(-50%);
+        background:#020617;
+        border-radius:999px;
+        border:1px solid @themeColor;
+        padding:9px 15px;
+        color:#e5e7eb;
+        font-size:13px;
+        box-shadow:0 18px 40px rgba(15,23,42,0.8);
+        opacity:0;
+        transition:all .25s ease;
+        z-index:9999;
+        max-width:90vw;
+        text-align:center;
+        white-space:nowrap;
+        text-overflow:ellipsis;
+        overflow:hidden;
+    }
+
+    .pd-toast.show {
+        top:22px;
+        opacity:1;
+    }
+
+    .pd-drop-target {
+        outline:1px dashed rgba(248,113,22,0.7);
+        outline-offset:2px;
+    }
+
+    .pd-row-dragging {
+        opacity:0.6;
+    }
+
+    @@media (max-width: 900px) {
+        .pd-columns {
+            grid-template-columns:1fr;
+        }
+        .pd-header {
+            align-items:flex-start;
+        }
+    }
+</style>
+
+<div class="pd-page">
+    @Html.AntiForgeryToken()
+
+    <div class="pd-header">
+        <div class="pd-header-left">
+            <div class="pd-title">
+                @txt["PageTitlePrefix"]: @Model.ProjectName
+            </div>
+            <div class="pd-sub">
+                Code: @Model.ProjectCode · Contract: @Model.ContractCode
+            </div>
+            <div class="pd-meta">
+                <span><strong>@txt["Client"]:</strong> @(string.IsNullOrEmpty(Model.CustomerName) ? "-" : Model.CustomerName)</span>
+                <span>
+                    <strong>@txt["Timeline"]:</strong>
+                    @(Model.StartDate.HasValue ? Model.StartDate.Value.ToString("dd/MM/yyyy") : "?")
+                    –
+                    @(Model.EndDate.HasValue ? Model.EndDate.Value.ToString("dd/MM/yyyy") : "?")
+                </span>
+                <span class="pd-status-pill" data-status="@Model.StatusCode">
+                    @txt["Status"]: @Model.StatusLabel
+                </span>
+            </div>
+        </div>
+
+        <div class="pd-header-right">
+            <button type="button"
+                    class="pd-back-btn"
+                    onclick="window.location.href='@Url.Action("Information", "Project", new { area = "HR" })'">
+                @txt["BtnBack"]
+            </button>
+        </div>
+    </div>
+
+    <div class="pd-columns">
+        <div class="pd-card">
+            <div class="pd-card-title">@txt["CardInProject"]</div>
+            <div class="pd-hint">@txt["HintTop"]</div>
+
+            @if (curTop10.Any())
+            {
+                <table class="pd-table">
+                    <thead>
+                        <tr>
+                            <th style="width:130px;">@txt["TableEmpId"]</th>
+                            <th>@txt["TableName"]</th>
+                            <th style="width:170px;">@txt["TableActions"]</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pdCurrentBody">
+                        @foreach (var e in curTop10)
+                        {
+                            var profileUrl = Url.Action("Profile", "Employee", new { area = "HR", id = e.EmployeeId });
+                            <tr>
+                                <td>@e.EmployeeId</td>
+                                <td>@e.FullName</td>
+                                <td>
+                                    <button type="button"
+                                            class="pd-btn pd-btn-link"
+                                            onclick="window.location.href='@profileUrl'">
+                                        @txt["BtnViewProfile"]
+                                    </button>
+                                    <button type="button"
+                                            class="pd-btn pd-btn-remove pd-remove-emp"
+                                            data-emp-id="@e.EmployeeId">
+                                        @txt["BtnRemove"]
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="pd-empty">@txt["EmptyInProject"]</div>
+            }
+        </div>
+
+        <div class="pd-card">
+            <div class="pd-card-title">@txt["CardAvailable"]</div>
+            @if (availTop10.Any())
+            {
+                <table class="pd-table">
+                    <thead>
+                        <tr>
+                            <th style="width:130px;">@txt["TableEmpId"]</th>
+                            <th>@txt["TableName"]</th>
+                            <th style="width:170px;">@txt["TableActions"]</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pdAvailableBody">
+                        @foreach (var e in availTop10)
+                        {
+                            var profileUrl = Url.Action("Profile", "Employee", new { area = "HR", id = e.EmployeeId });
+                            <tr class="pd-row-available"
+                                draggable="true"
+                                data-emp-id="@e.EmployeeId">
+                                <td>@e.EmployeeId</td>
+                                <td>@e.FullName</td>
+                                <td>
+                                    <button type="button"
+                                            class="pd-btn pd-btn-link"
+                                            onclick="window.location.href='@profileUrl'">
+                                        @txt["BtnViewProfile"]
+                                    </button>
+                                    <button type="button"
+                                            class="pd-btn pd-btn-add pd-add-emp"
+                                            data-emp-id="@e.EmployeeId">
+                                        @txt["BtnAdd"]
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="pd-empty">
+                    @txt["EmptyAvailable"]
+                </div>
+            }
+        </div>
+    </div>
+
+    <div id="pdToast" class="pd-toast"></div>
+</div>
+
+<script>
+    (function () {
+        var toast = document.getElementById("pdToast");
+        var tokenInput = document.querySelector("input[name='__RequestVerificationToken']");
+        var token = tokenInput ? tokenInput.value : "";
+        var projectId = '@Model.ProjectKey';
+
+        var addUrl = '@Url.Action("AddEmployee", "Project", new { area = "HR" })';
+        var removeUrl = '@Url.Action("RemoveEmployee", "Project", new { area = "HR" })';
+
+        var i18n = {
+            missingToken: '@txt["ToastMissingToken"]',
+            success: '@txt["ToastSuccess"]',
+            actionFailed: '@txt["ToastActionFailed"]',
+            systemError: '@txt["ToastSystemError"]'
+        };
+
+        function showToast(msg) {
+            if (!toast) return;
+            toast.textContent = msg;
+            toast.classList.add("show");
+            setTimeout(function () {
+                toast.classList.remove("show");
+            }, 2200);
+        }
+
+        function postAction(url, employeeId) {
+            if (!token) {
+                showToast(i18n.missingToken);
+                return;
+            }
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+                },
+                body: "__RequestVerificationToken=" + encodeURIComponent(token) +
+                    "&projectId=" + encodeURIComponent(projectId) +
+                    "&employeeId=" + encodeURIComponent(employeeId)
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    if (res && res.success) {
+                        showToast(res.message || i18n.success);
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 800);
+                    } else {
+                        showToast((res && res.message) || i18n.actionFailed);
+                    }
+                })
+                .catch(function () {
+                    showToast(i18n.systemError);
+                });
+        }
+
+        var addBtns = document.querySelectorAll(".pd-add-emp");
+        addBtns.forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                var id = this.getAttribute("data-emp-id");
+                if (id) {
+                    postAction(addUrl, id);
+                }
+            });
+        });
+
+        var removeBtns = document.querySelectorAll(".pd-remove-emp");
+        removeBtns.forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                var id = this.getAttribute("data-emp-id");
+                if (id) {
+                    postAction(removeUrl, id);
+                }
+            });
+        });
+
+        // Drag & drop: kéo từ bảng Available sang bảng In Project
+        var currentBody = document.getElementById("pdCurrentBody");
+        var availableRows = document.querySelectorAll(".pd-row-available");
+        var dragEmpId = null;
+
+        availableRows.forEach(function (row) {
+            row.addEventListener("dragstart", function (e) {
+                dragEmpId = this.getAttribute("data-emp-id");
+                e.dataTransfer.setData("text/plain", dragEmpId);
+                this.classList.add("pd-row-dragging");
+                if (currentBody) {
+                    currentBody.classList.add("pd-drop-target");
+                }
+            });
+
+            row.addEventListener("dragend", function () {
+                this.classList.remove("pd-row-dragging");
+                dragEmpId = null;
+                if (currentBody) {
+                    currentBody.classList.remove("pd-drop-target");
+                }
+            });
+        });
+
+        if (currentBody) {
+            currentBody.addEventListener("dragover", function (e) {
+                e.preventDefault();
+            });
+
+            currentBody.addEventListener("drop", function (e) {
+                e.preventDefault();
+                currentBody.classList.remove("pd-drop-target");
+                var id = e.dataTransfer.getData("text/plain") || dragEmpId;
+                if (id) {
+                    postAction(addUrl, id);
+                }
+            });
+        }
+    })();
+</script>

@@ -36,11 +36,8 @@
 
     string lblPageTitle, lblPageSubtitle, lblSearchPlaceholder, lblAllDept, lblAllPos,
        lblAllTypes, lblFilter, lblReset, lblAddEmployee, lblDropToRemove,
-       lblConfirmDelete, lblReward, lblPenalty, lblChangePos, lblViewProfile,
-       lblHealth, lblInsurance, lblModalSave, lblModalCancel, lblNewEmployee,
-       lblEmployeeCodeLabel,
-       lblCreateLastName, lblCreateFirstName, lblCreateGender, lblCreateBirthYear,
-       lblCreateDept, lblCreatePosition, lblCreatePhoto;
+       lblConfirmDelete, lblReward, lblPenalty, lblChangePos, lblViewProfile, lblModalSave, lblModalCancel, lblNewEmployee,
+       lblEmployeeCodeLabel;
 
     string msgNoEmployeeFilter, msgDeleteSuccess, msgDeleteFailed, msgDeleteSystemError,
            msgRewardSaved, msgPenaltySaved, msgRewardPenaltyFailed, msgSystemError,
@@ -65,19 +62,10 @@
             lblPenalty = "Penalty";
             lblChangePos = "Change position";
             lblViewProfile = "Profile";
-            lblHealth = "Health";
-            lblInsurance = "Insurance";
             lblModalSave = "Save";
             lblModalCancel = "Cancel";
             lblNewEmployee = "New employee";
             lblEmployeeCodeLabel = "Employee code";
-            lblCreateLastName = "Last / middle name";
-            lblCreateFirstName = "First name";
-            lblCreateGender = "Gender";
-            lblCreateBirthYear = "Birth year";
-            lblCreateDept = "Department";
-            lblCreatePosition = "Position";
-            lblCreatePhoto = "Employee photo";
 
             msgNoEmployeeFilter = "No employees match the current filters.";
             msgDeleteSuccess = "Employee has been deleted.";
@@ -109,19 +97,10 @@
             lblPenalty = "ペナルティ";
             lblChangePos = "役職変更";
             lblViewProfile = "プロフィール";
-            lblHealth = "健康情報";
-            lblInsurance = "保険";
             lblModalSave = "保存";
             lblModalCancel = "キャンセル";
             lblNewEmployee = "新しい従業員";
             lblEmployeeCodeLabel = "社員コード";
-            lblCreateLastName = "姓・ミドルネーム";
-            lblCreateFirstName = "名";
-            lblCreateGender = "性別";
-            lblCreateBirthYear = "生年";
-            lblCreateDept = "部署";
-            lblCreatePosition = "役職";
-            lblCreatePhoto = "社員写真";
 
             msgNoEmployeeFilter = "現在の条件に一致する従業員がいません。";
             msgDeleteSuccess = "従業員を削除しました。";
@@ -153,20 +132,10 @@
             lblPenalty = "惩罚";
             lblChangePos = "调整职位";
             lblViewProfile = "档案";
-            lblHealth = "健康";
-            lblInsurance = "保险";
             lblModalSave = "保存";
             lblModalCancel = "取消";
             lblNewEmployee = "新员工";
             lblEmployeeCodeLabel = "员工编号";
-            lblCreateLastName = "姓 / 中间名";
-            lblCreateFirstName = "名字";
-            lblCreateGender = "性别";
-            lblCreateBirthYear = "出生年份";
-            lblCreateDept = "部门";
-            lblCreatePosition = "职位";
-            lblCreatePhoto = "员工照片";
-
             msgNoEmployeeFilter = "没有员工符合当前筛选条件。";
             msgDeleteSuccess = "已删除该员工。";
             msgDeleteFailed = "删除员工失败。";
@@ -197,20 +166,10 @@
             lblPenalty = "징계";
             lblChangePos = "직책 변경";
             lblViewProfile = "프로필";
-            lblHealth = "건강";
-            lblInsurance = "보험";
             lblModalSave = "저장";
             lblModalCancel = "취소";
             lblNewEmployee = "새 직원";
             lblEmployeeCodeLabel = "직원 코드";
-            lblCreateLastName = "성 / 중간 이름";
-            lblCreateFirstName = "이름";
-            lblCreateGender = "성별";
-            lblCreateBirthYear = "출생 연도";
-            lblCreateDept = "부서";
-            lblCreatePosition = "직책";
-            lblCreatePhoto = "직원 사진";
-
             msgNoEmployeeFilter = "현재 조건에 해당하는 직원이 없습니다.";
             msgDeleteSuccess = "직원을 삭제했습니다.";
             msgDeleteFailed = "직원 삭제에 실패했습니다.";
@@ -241,20 +200,10 @@
             lblPenalty = "Phạt";
             lblChangePos = "Đổi vị trí";
             lblViewProfile = "Hồ sơ";
-            lblHealth = "Sức khỏe";
-            lblInsurance = "Bảo hiểm";
             lblModalSave = "Lưu";
             lblModalCancel = "Hủy";
             lblNewEmployee = "Nhân viên mới";
             lblEmployeeCodeLabel = "Mã nhân viên";
-            lblCreateLastName = "Họ lót";
-            lblCreateFirstName = "Tên nhân viên";
-            lblCreateGender = "Giới tính";
-            lblCreateBirthYear = "Năm sinh";
-            lblCreateDept = "Phòng ban";
-            lblCreatePosition = "Vị trí công việc";
-            lblCreatePhoto = "Ảnh nhân viên";
-
             msgNoEmployeeFilter = "Không có nhân viên nào phù hợp điều kiện lọc.";
             msgDeleteSuccess = "Đã xóa nhân viên.";
             msgDeleteFailed = "Xóa nhân viên thất bại.";
@@ -839,7 +788,7 @@
 
             <button type="submit" class="emp-btn">@lblFilter</button>
             <a href="@Url.Action("Information", "Employee", new { area = "HR" })"
-               class="emp-btn emp-btn-ghost">@lblReset</a>
+               class="emp-btn emp-btn-ghost" style="list-style:none">@lblReset</a>
         </form>
     </div>
 

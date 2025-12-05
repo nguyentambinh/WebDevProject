@@ -19,27 +19,22 @@ namespace QLNSVATC.Helpers
             return Path.GetFileNameWithoutExtension(filePath);
         }
 
-        // Hàm bỏ dấu Unicode (kể cả tiếng Việt) khỏi chuỗi
+        // Hàm bỏ dấu Unicode khỏi chuỗi
         public static string RemoveDiacritics(string text)
         {
             if (string.IsNullOrWhiteSpace(text))
                 return text;
-
-            // Chuẩn hoá về dạng tách dấu
             var normalized = text.Normalize(NormalizationForm.FormD);
             var sb = new StringBuilder();
 
             foreach (var ch in normalized)
             {
                 var uc = CharUnicodeInfo.GetUnicodeCategory(ch);
-                // Bỏ các ký tự dấu (NonSpacingMark)
                 if (uc != UnicodeCategory.NonSpacingMark)
                 {
                     sb.Append(ch);
                 }
             }
-
-            // Trả về dạng đã bỏ dấu
             return sb.ToString().Normalize(NormalizationForm.FormC);
         }
 
@@ -49,10 +44,8 @@ namespace QLNSVATC.Helpers
             if (string.IsNullOrWhiteSpace(text))
                 return "unknown";
 
-            // Bỏ dấu trước
             string noDiacritics = RemoveDiacritics(text);
 
-            // Chỉ giữ ký tự chữ + số
             var sb = new StringBuilder();
             foreach (char c in noDiacritics)
             {
@@ -68,7 +61,6 @@ namespace QLNSVATC.Helpers
             string cleanName = NormalizeSimpleName(fullName);
             string timestamp = time.ToString("yyyyMMddHHmmss");
 
-            // extension phải bao gồm dấu .
             if (!extension.StartsWith("."))
                 extension = "." + extension;
 
@@ -78,18 +70,13 @@ namespace QLNSVATC.Helpers
         {
             if (string.IsNullOrWhiteSpace(raw))
                 return "Unknown";
-
-            // CHANGED: bỏ dấu trước khi xử lý ký tự cấm + space
-            raw = RemoveDiacritics(raw);   // CHANGED
+            raw = RemoveDiacritics(raw);  
 
             var invalidChars = Path.GetInvalidFileNameChars();
 
-            // Trim, gom nhiều space về 1 space
             string cleaned = raw.Trim();
             while (cleaned.Contains("  "))
                 cleaned = cleaned.Replace("  ", " ");
-
-            // Thay space = '_' và loại ký tự cấm => '_' luôn
             cleaned = new string(cleaned
                 .Select(ch =>
                 {
@@ -102,12 +89,15 @@ namespace QLNSVATC.Helpers
             return cleaned;
         }
 
-        // Tạo tên folder: yyyyMMddHH_Ho_ten_ung_vien (không dấu, không space)
-        public static string BuildCandidateFolderName(string candidateName, DateTime time)
+        // Tạo tên folder: yyyyMMddHH_Ho_ten_ung_vien 
+        public static string BuildCandidateFolderName(string fullName, DateTime time)
         {
-            // CHANGED: dùng ToSafeName đã bỏ dấu + thay space bằng '_'
-            string safeName = candidateName.ToSafeName();   // CHANGED
-            return $"{time:yyyyMMddHH}_{safeName}";
+            string name = fullName ?? "";
+            name = RemoveDiacritics(name).Trim();
+            name = name.Replace(" ", string.Empty);
+
+            string prefix = time.ToString("yyyyMMddHHmmss");
+            return $"{prefix}_{name}";
         }
     }
 }
