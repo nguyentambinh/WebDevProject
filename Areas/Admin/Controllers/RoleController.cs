@@ -134,11 +134,8 @@ namespace QLNSVATC.Areas.Admin.Controllers
                 return RedirectToAction("Index");
             }
 
-            // Giữ phần đuôi, chỉ đổi 2 ký tự đầu
             string suffix = auth.Length > 2 ? auth.Substring(2) : "";
             string newAuth = newPrefix + suffix;
-
-            // Kiểm tra trùng AUTH mới
             if (db.USERS.Any(x => x.AUTH == newAuth) || db.CONFIRMAUTHs.Any(x => x.AUTH == newAuth))
             {
                 TempData["RoleError"] = "Target permission code already exists.";
