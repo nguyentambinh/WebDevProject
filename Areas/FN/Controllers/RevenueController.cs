@@ -7,8 +7,8 @@ using QLNSVATC.Helpers;
 using System.Data.Entity;
 using System.Text;
 using QLNSVATC.Areas.FN.Data.FN_Models;
-using OfficeOpenXml.Style;
-using OfficeOpenXml;
+using System.IO;
+using ClosedXML.Excel;
 
 namespace QLNSVATC.Areas.FN.Controllers
 {
@@ -206,88 +206,92 @@ namespace QLNSVATC.Areas.FN.Controllers
         {
             var list = rows?.ToList() ?? new List<RevenueReportRowVM>();
 
-            using (var package = new ExcelPackage())
+            using (var workbook = new XLWorkbook())
             {
-                ExcelWorksheet ws = package.Workbook.Worksheets.Add("BaoCao");
+                var ws = workbook.Worksheets.Add("BaoCao");
 
                 int row = 1;
 
-                ws.Cells[row, 1, row, 9].Merge = true;
-                ws.Cells[row, 1].Value = reportTitle;
-                ws.Cells[row, 1].Style.Font.Bold = true;
-                ws.Cells[row, 1].Style.Font.Size = 14;
-                ws.Cells[row, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                // Tiêu đề
+                var titleRange = ws.Range(row, 1, row, 9);
+                titleRange.Merge();
+                ws.Cell(row, 1).Value = reportTitle;
+                ws.Cell(row, 1).Style.Font.Bold = true;
+                ws.Cell(row, 1).Style.Font.FontSize = 14;
+                ws.Cell(row, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left;
                 row += 2;
 
-                ws.Cells[row, 1].Value = "Ngày";
-                ws.Cells[row, 2].Value = "Tên dịch vụ / dự án";
-                ws.Cells[row, 3].Value = "Người phụ trách";
-                ws.Cells[row, 4].Value = "Giá trị hợp đồng";
-                ws.Cells[row, 5].Value = "Tiền thuế";
-                ws.Cells[row, 6].Value = "Đã cọc";
-                ws.Cells[row, 7].Value = "Còn thiếu";
-                ws.Cells[row, 8].Value = "Thành tiền";
-                ws.Cells[row, 9].Value = "Tình trạng";
+                // Header
+                ws.Cell(row, 1).Value = "Ngày";
+                ws.Cell(row, 2).Value = "Tên dịch vụ / dự án";
+                ws.Cell(row, 3).Value = "Người phụ trách";
+                ws.Cell(row, 4).Value = "Giá trị hợp đồng";
+                ws.Cell(row, 5).Value = "Tiền thuế";
+                ws.Cell(row, 6).Value = "Đã cọc";
+                ws.Cell(row, 7).Value = "Còn thiếu";
+                ws.Cell(row, 8).Value = "Thành tiền";
+                ws.Cell(row, 9).Value = "Tình trạng";
 
-                using (var range = ws.Cells[row, 1, row, 9])
-                {
-                    range.Style.Font.Bold = true;
-                    range.Style.Fill.PatternType = ExcelFillStyle.Solid;
-                    range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(255, 255, 204));
-                    range.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
-                }
+                var headerRange = ws.Range(row, 1, row, 9);
+                headerRange.Style.Font.Bold = true;
+                headerRange.Style.Fill.BackgroundColor = XLColor.FromArgb(255, 255, 204);
+                headerRange.Style.Border.BottomBorder = XLBorderStyleValues.Thin;
 
                 row++;
 
                 int dataStartRow = row;
 
+                // Data
                 foreach (var item in list)
                 {
-                    ws.Cells[row, 1].Value = item.Date;
-                    ws.Cells[row, 1].Style.Numberformat.Format = "dd/MM/yyyy";
+                    ws.Cell(row, 1).Value = item.Date;
+                    ws.Cell(row, 1).Style.DateFormat.Format = "dd/MM/yyyy";
 
-                    ws.Cells[row, 2].Value = item.Name;
-                    ws.Cells[row, 3].Value = item.PersonInCharge ?? "";
+                    ws.Cell(row, 2).Value = item.Name;
+                    ws.Cell(row, 3).Value = item.PersonInCharge ?? "";
 
-                    ws.Cells[row, 4].Value = item.ContractValue;
-                    ws.Cells[row, 5].Value = item.Tax;
-                    ws.Cells[row, 6].Value = item.Deposit;
-                    ws.Cells[row, 7].Value = item.Remaining;
-                    ws.Cells[row, 8].Value = item.TotalAmount;
-                    ws.Cells[row, 9].Value = item.Status;
+                    ws.Cell(row, 4).Value = item.ContractValue;
+                    ws.Cell(row, 5).Value = item.Tax;
+                    ws.Cell(row, 6).Value = item.Deposit;
+                    ws.Cell(row, 7).Value = item.Remaining;
+                    ws.Cell(row, 8).Value = item.TotalAmount;
+                    ws.Cell(row, 9).Value = item.Status;
 
-                    ws.Cells[row, 4, row, 8].Style.Numberformat.Format = "#,##0";
+                    ws.Range(row, 4, row, 8).Style.NumberFormat.Format = "#,##0";
 
                     row++;
                 }
 
-                ws.Cells[row, 1].Value = "Tổng";
-                ws.Cells[row, 1, row, 3].Merge = true;
-                ws.Cells[row, 1].Style.Font.Bold = true;
+                // Tổng
+                ws.Cell(row, 1).Value = "Tổng";
+                var totalLabelRange = ws.Range(row, 1, row, 3);
+                totalLabelRange.Merge();
+                totalLabelRange.Style.Font.Bold = true;
 
                 if (row > dataStartRow)
                 {
-                    ws.Cells[row, 4].Formula = $"SUM(D{dataStartRow}:D{row - 1})";
-                    ws.Cells[row, 5].Formula = $"SUM(E{dataStartRow}:E{row - 1})";
-                    ws.Cells[row, 6].Formula = $"SUM(F{dataStartRow}:F{row - 1})";
-                    ws.Cells[row, 7].Formula = $"SUM(G{dataStartRow}:G{row - 1})";
-                    ws.Cells[row, 8].Formula = $"SUM(H{dataStartRow}:H{row - 1})";
+                    ws.Cell(row, 4).FormulaA1 = $"SUM(D{dataStartRow}:D{row - 1})";
+                    ws.Cell(row, 5).FormulaA1 = $"SUM(E{dataStartRow}:E{row - 1})";
+                    ws.Cell(row, 6).FormulaA1 = $"SUM(F{dataStartRow}:F{row - 1})";
+                    ws.Cell(row, 7).FormulaA1 = $"SUM(G{dataStartRow}:G{row - 1})";
+                    ws.Cell(row, 8).FormulaA1 = $"SUM(H{dataStartRow}:H{row - 1})";
 
-                    ws.Cells[row, 4, row, 8].Style.Numberformat.Format = "#,##0";
-                    ws.Cells[row, 4, row, 8].Style.Font.Bold = true;
+                    ws.Range(row, 4, row, 8).Style.NumberFormat.Format = "#,##0";
+                    ws.Range(row, 4, row, 8).Style.Font.Bold = true;
                 }
 
-                using (var range = ws.Cells[dataStartRow - 1, 1, row, 9])
+                var allRange = ws.Range(dataStartRow - 1, 1, row, 9);
+                allRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                allRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+                ws.Columns(1, 9).AdjustToContents();
+
+                byte[] bytes;
+                using (var stream = new MemoryStream())
                 {
-                    range.Style.Border.BorderAround(ExcelBorderStyle.Thin);
-                    range.Style.Border.Left.Style = ExcelBorderStyle.Thin;
-                    range.Style.Border.Right.Style = ExcelBorderStyle.Thin;
-                    range.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                    workbook.SaveAs(stream);
+                    bytes = stream.ToArray();
                 }
-
-                ws.Cells.AutoFitColumns();
-
-                var bytes = package.GetAsByteArray();
 
                 string area = (string)(RouteData.DataTokens["area"] ?? "FN");
                 string serverFileName = FileHelper.BuildReportFileName(area);

@@ -199,17 +199,18 @@
         </div>
 
         <div class="pexp-toolbar">
-            <button class="pexp-btn-primary">
+            <a class="pexp-btn-primary"
+               href="@Url.Action("NewExpense", "Expense", new { area = "FN" })">
                 <span>
                     + @L(new Dictionary<string, string>{
-                      { "vi_VN","Thêm chi phí" },
-                      { "en_US","New expense" },
-                      { "jp_JP","費用を追加" },
-                      { "kr_KR","비용 추가" },
-                      { "cn_CN","新增费用" }
-                  })
+                    { "vi_VN","Thêm chi phí" },
+                    { "en_US","New expense" },
+                    { "jp_JP","費用を追加" },
+                    { "kr_KR","비용 추가" },
+                    { "cn_CN","新增费用" }
+                })
                 </span>
-            </button>
+            </a>
             <div class="pexp-toolbar-right">
                 <span class="info">
                     @L(new Dictionary<string, string>{

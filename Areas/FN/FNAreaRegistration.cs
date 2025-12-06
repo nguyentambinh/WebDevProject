@@ -12,45 +12,51 @@ namespace QLNSVATC.Areas.FN
         public override void RegisterArea(AreaRegistrationContext context)
         {
             context.MapRoute(
-                name: "FN_Expense_Transport",
-                url: "fn-quan-ly-chi/chi-van-chuyen-nvl",
+                name: "FN_Profit",
+                url: "FN/ql-loi-nhuan",
+                defaults: new { controller = "Profit", action = "Index", id = UrlParameter.Optional },
+                namespaces: new[] { "QLNSVATC.Areas.FN.Controllers" }
+            );
+            context.MapRoute(
+                name: "FN_Expense/Transport",
+                url: "FN/ql-chi-vcnvl",
                 defaults: new { controller = "Expense", action = "Transport", id = UrlParameter.Optional },
                 namespaces: new[] { "QLNSVATC.Areas.FN.Controllers" }
             );
             context.MapRoute(
                 name: "FN_Expense_Project",
-                url: "fn-quan-ly-chi/chi-du-an",
+                url: "FN/ql-chi-du-an",
                 defaults: new { controller = "Expense", action = "Project", id = UrlParameter.Optional },
                 namespaces: new[] { "QLNSVATC.Areas.FN.Controllers" }
             );
             context.MapRoute(
                 name: "FN_Expense_RawMaterialPurchase",
-                url: "fn-quan-ly-chi/chi-nhap-nvl",
+                url: "FN/ql-chi-nhapnvl",
                 defaults: new { controller = "Expense", action = "RawMaterialPurchase", id = UrlParameter.Optional },
                 namespaces: new[] { "QLNSVATC.Areas.FN.Controllers" }
             );
             context.MapRoute(
                 name: "FN_Expense_Index",
-                url: "fn-quan-ly-chi",
+                url: "FN/ql-chi",
                 defaults: new { controller = "Expense", action = "Index", id = UrlParameter.Optional },
                 namespaces: new[] { "QLNSVATC.Areas.FN.Controllers" }
             );
             context.MapRoute(
                 name: "FN_RevenuePJ",
-                url: "fn-quan-ly-doanh-thu/tu-du-an",
+                url: "FN/ql-doanh-thu-du-an",
                 defaults: new { controller = "Revenue", action = "Project", id = UrlParameter.Optional },
                 namespaces: new[] { "QLNSVATC.Areas.FN.Controllers" }
             );
             context.MapRoute(
                 name: "FN_RevenueS",
-                url: "fn-quan-ly-doanh-thu/tu-dich-vu-khac",
+                url: "FN/ql-doanh-thu-dich-vu",
                 defaults: new { controller = "Revenue", action = "Service", id = UrlParameter.Optional },
                 namespaces: new[] { "QLNSVATC.Areas.FN.Controllers" }
             );
 
             context.MapRoute(
                 name: "FN_Home",
-                url: "fn-quan-ly-doanh-thu",
+                url: "FN/ql-doanh-thu",
                 defaults: new
                 {
                     controller = "Home",

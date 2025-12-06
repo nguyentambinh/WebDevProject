@@ -23,6 +23,17 @@ namespace QLNSVATC.Areas.Admin
                 namespaces: new[] { "QLNSVATC.Areas.Admin.Controllers" }
             );
             context.MapRoute(
+                name: "AD_QLPQ",
+                url: "AD/ql-phan-quyen",
+                defaults: new
+                {
+                    controller = "Role",
+                    action = "Index",
+                    codeBus = UrlParameter.Optional
+                },
+                namespaces: new[] { "QLNSVATC.Areas.Admin.Controllers" }
+            );
+            context.MapRoute(
                 name: "AD_QLMN",
                 url: "AD/ql-menu",
                 defaults: new

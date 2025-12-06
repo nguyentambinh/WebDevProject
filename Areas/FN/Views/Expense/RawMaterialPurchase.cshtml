@@ -2,7 +2,6 @@
 @using QLNSVATC.Models
 @model QLNSVATC.Areas.FN.Data.FN_Models.MaterialPurchaseListVM
 
-
 @{
     Layout = "~/Areas/FN/Views/Shared/_LayoutFN.cshtml";
 
@@ -64,19 +63,73 @@
             <div class="mat-header-right">
                 <div class="mat-pill">
                     <i class="fa-solid fa-user-gear"></i>
-                    <span>@lang · @(fz)px</span>
+                    <span>@string.Format("{0} · {1}px", lang, fz)</span>
                 </div>
-                <button class="mat-icon-btn" title="Filter">
+                <button class="mat-icon-btn js-mat-filter" type="button" title="Filter">
                     <i class="fa-solid fa-filter"></i>
                 </button>
-                <button class="mat-icon-btn" title="More">
+                <button class="mat-icon-btn js-mat-more" type="button" title="More actions">
                     <i class="fa-solid fa-ellipsis"></i>
                 </button>
+
+                <div class="mat-more-menu" id="matMoreMenu">
+                    <a href="@Url.Action("Index", "Expense", new { area = "FN" })">
+                        <i class="fa-solid fa-gauge"></i>
+                        <span>Back to expense overview</span>
+                    </a>
+                </div>
             </div>
         </header>
 
-        @Html.Partial("_MaterialApprovalsTable", Model.Items)
+        <div class="mat-filter-bar" id="matFilterBar">
+            <div class="mat-filter-inner">
+                <div class="mat-filter-group">
+                    <label class="mat-filter-label">
+                        @L(new Dictionary<string, string>{
+                            { "vi_VN", "Tìm kiếm" },
+                            { "en_US", "Search" },
+                            { "jp_JP", "検索" },
+                            { "kr_KR", "검색" },
+                            { "cn_CN", "搜索" }
+                        })
+                    </label>
+                    <input id="matFilterKeyword"
+                           type="text"
+                           class="mat-filter-input"
+                           placeholder="@L(new Dictionary<string, string>{
+                               { "vi_VN", "Lọc theo từ khóa..." },
+                               { "en_US", "Filter by keyword..." },
+                               { "jp_JP", "キーワードで絞り込み..." },
+                               { "kr_KR", "키워드로 필터링..." },
+                               { "cn_CN", "按关键字筛选..." }
+                           })" />
+                </div>
+                <div class="mat-filter-actions">
+                    <button type="button" id="matFilterApply" class="mat-filter-btn primary">
+                        @L(new Dictionary<string, string>{
+                            { "vi_VN", "Áp dụng" },
+                            { "en_US", "Apply" },
+                            { "jp_JP", "適用" },
+                            { "kr_KR", "적용" },
+                            { "cn_CN", "应用" }
+                        })
+                    </button>
+                    <button type="button" id="matFilterClear" class="mat-filter-btn ghost">
+                        @L(new Dictionary<string, string>{
+                            { "vi_VN", "Xóa lọc" },
+                            { "en_US", "Clear" },
+                            { "jp_JP", "クリア" },
+                            { "kr_KR", "초기화" },
+                            { "cn_CN", "清除" }
+                        })
+                    </button>
+                </div>
+            </div>
+        </div>
 
+        <div id="mat-table-wrapper">
+            @Html.Partial("_MaterialApprovalsTable", Model.Items)
+        </div>
     </div>
 </div>
 
@@ -97,6 +150,237 @@
         --mat-border: @border;
         --mat-accent: @theme;
         --mat-font: @font;
-        --mat-fz: @(fz)px;
+        --mat-fz: @string.Format("{0}px", fz);
+    }
+
+    .mat-header-right {
+        position: relative;
+    }
+
+    .mat-icon-btn {
+        cursor: pointer;
+    }
+
+    .mat-filter-bar {
+        display: none;
+        margin-top: 16px;
+        margin-bottom: 8px;
+        padding: 12px 16px;
+        border-radius: 10px;
+        background: rgba(15, 23, 42, 0.75);
+        border: 1px solid var(--mat-border);
+        backdrop-filter: blur(10px);
+    }
+
+    .mat-filter-bar.is-open {
+        display: block;
+    }
+
+    .mat-filter-inner {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: flex-end;
+    }
+
+    .mat-filter-group {
+        flex: 1 1 220px;
+        min-width: 0;
+    }
+
+    .mat-filter-label {
+        display: block;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--mat-text-soft);
+        margin-bottom: 4px;
+    }
+
+    .mat-filter-input {
+        width: 100%;
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: 1px solid var(--mat-border);
+        background: rgba(15, 23, 42, 0.85);
+        color: var(--mat-text);
+        font-size: 13px;
+        font-family: var(--mat-font);
+        outline: none;
+    }
+
+    .mat-filter-input:focus {
+        border-color: var(--mat-accent);
+        box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.35);
+    }
+
+    .mat-filter-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .mat-filter-btn {
+        padding: 8px 14px;
+        border-radius: 999px;
+        border: 1px solid transparent;
+        font-size: 13px;
+        font-family: var(--mat-font);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: all 0.16s ease-out;
+    }
+
+    .mat-filter-btn.primary {
+        background: linear-gradient(135deg, var(--mat-accent), #22c55e);
+        color: #0b1120;
+        font-weight: 600;
+        border-color: transparent;
+    }
+
+    .mat-filter-btn.primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 30px rgba(34, 197, 94, 0.28);
+    }
+
+    .mat-filter-btn.ghost {
+        background: transparent;
+        color: var(--mat-text-soft);
+        border-color: var(--mat-border);
+    }
+
+    .mat-filter-btn.ghost:hover {
+        border-color: var(--mat-accent);
+        color: var(--mat-text);
+    }
+
+    .mat-more-menu {
+        position: absolute;
+        top: 40px;
+        right: 0;
+        min-width: 210px;
+        background: var(--mat-card);
+        border-radius: 10px;
+        border: 1px solid var(--mat-border);
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.45);
+        padding: 6px 0;
+        display: none;
+        z-index: 30;
+    }
+
+    .mat-more-menu.is-open {
+        display: block;
+    }
+
+    .mat-more-menu a {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        font-size: 13px;
+        color: var(--mat-text-soft);
+        text-decoration: none;
+        font-family: var(--mat-font);
+    }
+
+    .mat-more-menu a i {
+        font-size: 13px;
+        width: 16px;
+        text-align: center;
+    }
+
+    .mat-more-menu a:hover {
+        background: rgba(15, 23, 42, 0.9);
+        color: var(--mat-text);
+    }
+
+    @@media (max-width: 768px) {
+        .mat-filter-inner {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .mat-filter-actions {
+            justify-content: flex-start;
+        }
     }
 </style>
+
+<script>
+    (function () {
+        var filterBtn = document.querySelector('.js-mat-filter');
+        var moreBtn = document.querySelector('.js-mat-more');
+        var filterBar = document.getElementById('matFilterBar');
+        var moreMenu = document.getElementById('matMoreMenu');
+        var applyBtn = document.getElementById('matFilterApply');
+        var clearBtn = document.getElementById('matFilterClear');
+        var keywordInput = document.getElementById('matFilterKeyword');
+        var tableWrapper = document.getElementById('mat-table-wrapper');
+
+        if (filterBtn && filterBar) {
+            filterBtn.addEventListener('click', function () {
+                filterBar.classList.toggle('is-open');
+            });
+        }
+
+        if (moreBtn && moreMenu) {
+            moreBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                moreMenu.classList.toggle('is-open');
+            });
+
+            document.addEventListener('click', function () {
+                moreMenu.classList.remove('is-open');
+            });
+
+            moreMenu.addEventListener('click', function (e) {
+                e.stopPropagation();
+            });
+        }
+
+        function filterRows() {
+            if (!tableWrapper) return;
+
+            var keyword = (keywordInput.value || '').toLowerCase().trim();
+            var rows = tableWrapper.querySelectorAll('tbody tr');
+
+            if (!rows || rows.length === 0) return;
+
+            rows.forEach(function (row) {
+                var text = row.innerText || row.textContent || '';
+                text = text.toLowerCase();
+                if (!keyword) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = text.indexOf(keyword) !== -1 ? '' : 'none';
+                }
+            });
+        }
+
+        if (applyBtn) {
+            applyBtn.addEventListener('click', function () {
+                filterRows();
+            });
+        }
+
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function () {
+                if (keywordInput) {
+                    keywordInput.value = '';
+                }
+                filterRows();
+            });
+        }
+
+        if (keywordInput) {
+            keywordInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    filterRows();
+                }
+            });
+        }
+    })();
+</script>

@@ -1,8 +1,778 @@
-﻿
+﻿@using QLNSVATC.Areas.Admin.Data
+@model IEnumerable<RoleUserViewModel>
+
 @{
-    ViewBag.Title = "Index";
-    Layout = "~/Areas/HR/Views/Shared/_LayoutHR.cshtml";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewBag.Title = "Permission management";
+
+    var unassigned = ViewBag.UnassignedEmployees as List<UnassignedEmployeeViewModel> ?? new List<UnassignedEmployeeViewModel>();
+    string currentPrefix = ViewBag.CurrentPrefix as string ?? "";
+
+    string themeColor = "#f97316";
+    string pageBg = "#020617";
+    string cardBg = "#020617";
+    string border = "#1f2937";
+    string textMain = "#e5e7eb";
+    string textSub = "#9ca3af";
+    string fontFamily = "'Roboto', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 }
 
-<h2>Index</h2>
+<style>
+    :root {
+        --role-theme: @themeColor;
+        --role-bg: @pageBg;
+        --role-card: @cardBg;
+        --role-border: @border;
+        --role-text: @textMain;
+        --role-sub: @textSub;
+    }
 
+    .role-page {
+        padding: 22px;
+        min-height: calc(100vh - 70px);
+        font-family: @fontFamily;
+        font-size: 14px;
+        color: var(--role-text);
+        background: var(--role-bg);
+    }
+
+    .role-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+    }
+
+    .role-title-block {
+        max-width: 520px;
+    }
+
+    .role-title {
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: var(--role-theme);
+    }
+
+    .role-sub {
+        margin-top: 6px;
+        font-size: 13px;
+        color: var(--role-sub);
+    }
+
+    .role-meta {
+        margin-top: 4px;
+        font-size: 12px;
+        color: var(--role-sub);
+    }
+
+    .role-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+    }
+
+    .role-tabs {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .role-tab {
+        padding: 4px 12px;
+        border-radius: 999px;
+        border: 1px solid var(--role-border);
+        font-size: 12px;
+        text-decoration: none;
+        color: var(--role-sub);
+        background: rgba(15,23,42,0.7);
+        cursor: pointer;
+    }
+
+    .role-tab.active {
+        background: var(--role-theme);
+        color: #020617;
+        border-color: var(--role-theme);
+        font-weight: 600;
+    }
+
+    .role-btn-primary {
+        padding: 8px 14px;
+        border-radius: 999px;
+        border: none;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        background: var(--role-theme);
+        color: #020617;
+        box-shadow: 0 0 14px rgba(249,115,22,0.7);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    .role-btn-primary span.icon {
+        font-size: 16px;
+    }
+
+    .role-card {
+        background: var(--role-card);
+        border-radius: 16px;
+        border: 1px solid var(--role-border);
+        box-shadow: 0 16px 40px rgba(0,0,0,0.6);
+        padding: 10px 12px 12px;
+    }
+
+    .role-alert {
+        padding: 8px 10px;
+        border-radius: 10px;
+        font-size: 13px;
+        margin-bottom: 10px;
+    }
+
+    .role-alert.success {
+        background: rgba(34,197,94,0.15);
+        border: 1px solid #22c55e;
+        color: #bbf7d0;
+    }
+
+    .role-alert.error {
+        background: rgba(248,113,113,0.15);
+        border: 1px solid #f87171;
+        color: #fecaca;
+    }
+
+    .role-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+
+    .role-table thead {
+        background: rgba(15,23,42,0.9);
+    }
+
+    .role-table th,
+    .role-table td {
+        padding: 8px 6px;
+        border-bottom: 1px solid rgba(30,64,175,0.3);
+        text-align: left;
+    }
+
+    .role-table th {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--role-sub);
+        text-transform: uppercase;
+        letter-spacing: .05em;
+    }
+
+    .role-table tbody tr:nth-child(odd) {
+        background: rgba(15,23,42,0.5);
+    }
+
+    .role-table tbody tr:nth-child(even) {
+        background: rgba(15,23,42,0.2);
+    }
+
+    .role-tag-prefix {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 999px;
+        border: 1px solid rgba(148,163,184,0.7);
+        font-size: 11px;
+    }
+
+    .role-actions {
+        display: flex;
+        gap: 4px;
+        justify-content: flex-end;
+    }
+
+    .role-btn-chip {
+        padding: 3px 8px;
+        border-radius: 999px;
+        border: 1px solid rgba(148,163,184,0.7);
+        background: transparent;
+        color: var(--role-sub);
+        font-size: 11px;
+        cursor: pointer;
+    }
+
+    .role-btn-chip:hover {
+        border-color: var(--role-theme);
+        color: var(--role-theme);
+    }
+
+    .role-btn-delete {
+        padding: 3px 8px;
+        border-radius: 999px;
+        border: 1px solid rgba(248,113,113,0.9);
+        background: transparent;
+        color: #fecaca;
+        font-size: 11px;
+        cursor: pointer;
+    }
+
+    .role-empty {
+        padding: 18px 4px 8px;
+        font-size: 13px;
+        color: var(--role-sub);
+        text-align: center;
+    }
+
+    .role-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.6);
+        display: none;
+        z-index: 9998;
+    }
+
+    .role-overlay.show {
+        display: block;
+    }
+
+    .role-modal {
+        position: fixed;
+        top: 50vh;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 460px;
+        max-width: 96vw;
+        max-height: 95vh;
+        overflow-y: auto;
+        background: #020617;
+        border-radius: 18px;
+        padding: 18px 18px 14px;
+        box-shadow: 0 20px 55px rgba(0,0,0,0.75);
+        z-index: 9999;
+        display: none;
+        color: #e5e7eb;
+        font-family: @fontFamily;
+    }
+
+    .role-modal.show {
+        display: block;
+    }
+
+    .role-modal-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .role-modal-title {
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .role-modal-close {
+        border: none;
+        background: transparent;
+        color: #9ca3af;
+        font-size: 20px;
+        cursor: pointer;
+        line-height: 1;
+    }
+
+    .role-modal-body {
+        font-size: 13px;
+    }
+
+    .role-field {
+        margin-bottom: 8px;
+    }
+
+    .role-label {
+        font-size: 12px;
+        margin-bottom: 2px;
+        color: #9ca3af;
+    }
+
+    .role-input,
+    .role-select {
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid rgba(148,163,184,0.6);
+        background: #020617;
+        color: #e5e7eb;
+        padding: 6px 9px;
+        font-size: 13px;
+        box-sizing: border-box;
+    }
+
+    .role-select[multiple],
+    .role-select.size-list {
+        height: auto;
+    }
+
+    .role-modal-footer {
+        margin-top: 8px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+
+    .role-btn-cancel {
+        padding: 7px 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(148,163,184,0.7);
+        background: transparent;
+        color: #e5e7eb;
+        font-size: 13px;
+        cursor: pointer;
+    }
+
+    .role-btn-save {
+        padding: 7px 14px;
+        border-radius: 999px;
+        border: none;
+        background: var(--role-theme);
+        color: #020617;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .role-btn-danger {
+        padding: 7px 14px;
+        border-radius: 999px;
+        border: none;
+        background: #ef4444;
+        color: #fee2e2;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .role-unassigned-note {
+        font-size: 12px;
+        color: var(--role-sub);
+        margin-bottom: 6px;
+    }
+
+    .role-select-list {
+        max-height: 260px;
+        overflow-y: auto;
+        border-radius: 10px;
+        border: 1px solid rgba(148,163,184,0.6);
+        padding: 4px;
+    }
+
+    .role-un-item {
+        padding: 4px 6px;
+        border-radius: 8px;
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        cursor: pointer;
+    }
+
+    .role-un-item:hover {
+        background: rgba(148,163,184,0.2);
+    }
+
+    .role-un-item span.left {
+        max-width: 70%;
+    }
+
+    @@media(max-width:768px) {
+        .role-page {
+            padding: 16px 12px;
+        }
+
+        .role-modal {
+            width: 95vw;
+        }
+
+        .role-table {
+            font-size: 12px;
+        }
+
+        .role-table th,
+        .role-table td {
+            padding: 6px 4px;
+        }
+    }
+
+    @@media(max-width:480px) {
+        .role-header {
+            flex-direction: column;
+        }
+
+        .role-toolbar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .role-btn-primary {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="role-page">
+    <div class="role-header">
+        <div class="role-title-block">
+            <div class="role-title">Permission management</div>
+            <div class="role-sub">
+                Manage mapping between accounts and permission codes.
+                Changing role will only replace the first 2 characters of the AUTH code and keep the remaining part.
+            </div>
+            <div class="role-meta">
+                Total permissions: <strong>@Model.Count()</strong> &bull;
+                Employees without permission: <strong>@unassigned.Count</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="role-toolbar">
+        <div class="role-tabs">
+            <a class="role-tab @(string.IsNullOrEmpty(currentPrefix) ? "active" : "")"
+               href="@Url.Action("Index", "Role", new { area = "Admin", prefix = (string)null })">
+                All
+            </a>
+            <a class="role-tab @(currentPrefix == "AD" ? "active" : "")"
+               href="@Url.Action("Index", "Role", new { area = "Admin", prefix = "AD" })">
+                AD
+            </a>
+            <a class="role-tab @(currentPrefix == "HR" ? "active" : "")"
+               href="@Url.Action("Index", "Role", new { area = "Admin", prefix = "HR" })">
+                HR
+            </a>
+            <a class="role-tab @(currentPrefix == "FN" ? "active" : "")"
+               href="@Url.Action("Index", "Role", new { area = "Admin", prefix = "FN" })">
+                FN
+            </a>
+            <a class="role-tab @(currentPrefix == "OF" ? "active" : "")"
+               href="@Url.Action("Index", "Role", new { area = "Admin", prefix = "OF" })">
+                OF
+            </a>
+            <a class="role-tab @(currentPrefix == "EM" ? "active" : "")"
+               href="@Url.Action("Index", "Role", new { area = "Admin", prefix = "EM" })">
+                EM
+            </a>
+        </div>
+
+        <button type="button" class="role-btn-primary" onclick="openAddRole()">
+            <span class="icon">➕</span> Add permission
+        </button>
+    </div>
+
+    @if (TempData["RoleSuccess"] != null)
+    {
+        <div class="role-alert success">@TempData["RoleSuccess"]</div>
+    }
+    @if (TempData["RoleError"] != null)
+    {
+        <div class="role-alert error">@TempData["RoleError"]</div>
+    }
+
+    <div class="role-card">
+        @if (!Model.Any())
+        {
+            <div class="role-empty">
+                No permission data.
+            </div>
+        }
+        else
+        {
+            <table class="role-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Username</th>
+                        <th>AUTH</th>
+                        <th>Role</th>
+                        <th>Employee</th>
+                        <th>Position</th>
+                        <th>Business</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var idx = 1;
+                    }
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@idx</td>
+                            <td>@item.UserName</td>
+                            <td>
+                                <span class="role-tag-prefix">@item.Auth</span>
+                            </td>
+                            <td>@item.NameAuth (@item.Prefix)</td>
+                            <td>
+                                @item.EmployeeCode
+                                <br />
+                                <span style="font-size:11px;color:@textSub;">
+                                    @item.EmployeeName
+                                </span>
+                            </td>
+                            <td>@item.PositionName</td>
+                            <td>
+                                @item.BusinessCode
+                                <br />
+                                <span style="font-size:11px;color:@textSub;">
+                                    @item.BusinessName
+                                </span>
+                            </td>
+                            <td>
+                                <div class="role-actions">
+                                    <button type="button"
+                                            class="role-btn-chip"
+                                            data-username="@item.UserName"
+                                            data-auth="@item.Auth"
+                                            data-prefix="@item.Prefix"
+                                            data-nameauth="@item.NameAuth"
+                                            onclick="openEditRole(this)">
+                                        Edit
+                                    </button>
+
+                                    <button type="button"
+                                            class="role-btn-delete"
+                                            data-auth="@item.Auth"
+                                            data-username="@item.UserName"
+                                            onclick="openDeleteRole(this)">
+                                        Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        idx++;
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+<div id="roleOverlay" class="role-overlay" onclick="closeAllRoleModals()"></div>
+
+<div id="addRoleModal" class="role-modal" onclick="event.stopPropagation();">
+    <div class="role-modal-header">
+        <div class="role-modal-title">Add permission</div>
+        <button type="button" class="role-modal-close" onclick="closeAllRoleModals()">×</button>
+    </div>
+    <div class="role-modal-body">
+        @using (Html.BeginForm("AddRole", "Role", FormMethod.Post, new { area = "Admin" }))
+        {
+            @Html.AntiForgeryToken()
+            <div class="role-field">
+                <div class="role-label">Select employee</div>
+                <div class="role-unassigned-note">
+                    Only employees without permission are listed.
+                    The list shows about 10 items, scroll for more.
+                </div>
+                <div class="role-select-list">
+                    @if (!unassigned.Any())
+                    {
+                        <div style="font-size:12px;color:@textSub;padding:4px;">
+                            No employee without permission.
+                        </div>
+                    }
+                    else
+                    {
+                        foreach (var emp in unassigned)
+                        {
+                            <div class="role-un-item"
+                                 data-code="@emp.EmployeeCode"
+                                 data-name="@emp.EmployeeName"
+                                 data-bus="@emp.BusinessCode"
+                                 onclick="selectUnassignedEmployee('@emp.EmployeeCode', '@emp.EmployeeName')">
+                                <span class="left">
+                                    <strong>@emp.EmployeeCode</strong> - @emp.EmployeeName
+                                </span>
+                                <span style="font-size:11px;color:@textSub;">
+                                    @emp.BusinessCode @if (!string.IsNullOrEmpty(emp.BusinessName))
+                                    {@(" - " + emp.BusinessName)}
+                                </span>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+
+            <input type="hidden" id="addEmployeeCode" name="employeeCode" />
+
+            <div class="role-field">
+                <div class="role-label">Selected employee</div>
+                <input type="text" id="addEmployeeDisplay" class="role-input" readonly />
+            </div>
+
+            <div class="role-field">
+                <div class="role-label">Role prefix</div>
+                <select name="rolePrefix" class="role-select" required>
+                    <option value="">Select prefix</option>
+                    <option value="AD">AD</option>
+                    <option value="HR">HR</option>
+                    <option value="FN">FN</option>
+                    <option value="OF">OF</option>
+                    <option value="EM">EM</option>
+                </select>
+            </div>
+
+            <div class="role-field">
+                <div class="role-label">Role name (display)</div>
+                <input type="text" name="roleName" class="role-input" placeholder="Example: HR manager, Finance manager, Technician..." />
+            </div>
+
+            <div class="role-field" style="font-size:12px;color:@textSub;">
+                New account will be created automatically.
+                Username = employee code (lowercase). Default password = <strong>Abc@1234</strong>.
+            </div>
+
+            <div class="role-modal-footer">
+                <button type="button" class="role-btn-cancel" onclick="closeAllRoleModals()">Cancel</button>
+                <button type="submit" class="role-btn-save">Save</button>
+            </div>
+        }
+    </div>
+</div>
+
+<div id="editRoleModal" class="role-modal" onclick="event.stopPropagation();">
+    <div class="role-modal-header">
+        <div class="role-modal-title">Change role</div>
+        <button type="button" class="role-modal-close" onclick="closeAllRoleModals()">×</button>
+    </div>
+    <div class="role-modal-body">
+        @using (Html.BeginForm("ChangeRole", "Role", FormMethod.Post, new { area = "Admin" }))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="editAuth" name="auth" />
+
+            <div class="role-field">
+                <div class="role-label">Username</div>
+                <input type="text" id="editUserName" class="role-input" readonly />
+            </div>
+
+            <div class="role-field">
+                <div class="role-label">Current AUTH</div>
+                <input type="text" id="editAuthDisplay" class="role-input" readonly />
+            </div>
+
+            <div class="role-field">
+                <div class="role-label">New prefix</div>
+                <select id="editNewPrefix" name="newPrefix" class="role-select" required>
+                    <option value="">Select prefix</option>
+                    <option value="AD">AD</option>
+                    <option value="HR">HR</option>
+                    <option value="FN">FN</option>
+                    <option value="OF">OF</option>
+                    <option value="EM">EM</option>
+                </select>
+            </div>
+
+            <div class="role-field" style="font-size:12px;color:@textSub;">
+                Only the first 2 characters of AUTH will be replaced.
+                Example: EMCT972 → <strong>HR</strong>CT972.
+            </div>
+
+            <div class="role-modal-footer">
+                <button type="button" class="role-btn-cancel" onclick="closeAllRoleModals()">Cancel</button>
+                <button type="submit" class="role-btn-save">Save</button>
+            </div>
+        }
+    </div>
+</div>
+
+<div id="deleteRoleModal" class="role-modal" onclick="event.stopPropagation();">
+    <div class="role-modal-header">
+        <div class="role-modal-title">Delete permission</div>
+        <button type="button" class="role-modal-close" onclick="closeAllRoleModals()">×</button>
+    </div>
+    <div class="role-modal-body">
+        @using (Html.BeginForm("DeleteRole", "Role", FormMethod.Post, new { area = "Admin" }))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="deleteAuth" name="auth" />
+            <p style="font-size:14px;line-height:1.6;">
+                Are you sure you want to delete this permission?<br />
+                User: <strong id="deleteUserName"></strong><br />
+                AUTH: <strong id="deleteAuthDisplay"></strong>
+            </p>
+            <p style="font-size:12px;color:@textSub;margin-top:4px;">
+                User account and permission code will be removed. This action cannot be undone.
+            </p>
+
+            <div class="role-modal-footer">
+                <button type="button" class="role-btn-cancel" onclick="closeAllRoleModals()">Cancel</button>
+                <button type="submit" class="role-btn-danger">Delete</button>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    function showRoleOverlay() {
+        document.getElementById('roleOverlay').classList.add('show');
+    }
+
+    function hideRoleOverlay() {
+        document.getElementById('roleOverlay').classList.remove('show');
+    }
+
+    function closeAllRoleModals() {
+        hideRoleOverlay();
+        var modals = document.querySelectorAll('.role-modal');
+        Array.prototype.forEach.call(modals, function (m) {
+            m.classList.remove('show');
+        });
+    }
+
+    function openAddRole() {
+        var modal = document.getElementById('addRoleModal');
+        document.getElementById('addEmployeeCode').value = '';
+        document.getElementById('addEmployeeDisplay').value = '';
+        showRoleOverlay();
+        modal.classList.add('show');
+    }
+
+    function selectUnassignedEmployee(code, name) {
+        document.getElementById('addEmployeeCode').value = code;
+        document.getElementById('addEmployeeDisplay').value = code + ' - ' + name;
+    }
+
+    function openEditRole(btn) {
+        var auth = btn.getAttribute('data-auth') || '';
+        var username = btn.getAttribute('data-username') || '';
+        var prefix = btn.getAttribute('data-prefix') || '';
+
+        document.getElementById('editAuth').value = auth;
+        document.getElementById('editAuthDisplay').value = auth;
+        document.getElementById('editUserName').value = username;
+
+        var select = document.getElementById('editNewPrefix');
+        if (prefix) {
+            select.value = prefix;
+        } else {
+            select.value = '';
+        }
+
+        showRoleOverlay();
+        document.getElementById('editRoleModal').classList.add('show');
+    }
+
+    function openDeleteRole(btn) {
+        var auth = btn.getAttribute('data-auth') || '';
+        var username = btn.getAttribute('data-username') || '';
+
+        document.getElementById('deleteAuth').value = auth;
+        document.getElementById('deleteAuthDisplay').innerText = auth;
+        document.getElementById('deleteUserName').innerText = username;
+
+        showRoleOverlay();
+        document.getElementById('deleteRoleModal').classList.add('show');
+    }
+</script>
