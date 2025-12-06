@@ -22,6 +22,7 @@ namespace QLNSVATC.Areas.Admin
                 },
                 namespaces: new[] { "QLNSVATC.Areas.Admin.Controllers" }
             );
+
             context.MapRoute(
                 name: "AD_QLHD",
                 url: "AD/ql-hoat-dong",
@@ -33,6 +34,7 @@ namespace QLNSVATC.Areas.Admin
                 },
                 namespaces: new[] { "QLNSVATC.Areas.Admin.Controllers" }
             );
+
             context.MapRoute(
                 name: "AD_QLMN",
                 url: "AD/ql-menu",
@@ -44,6 +46,7 @@ namespace QLNSVATC.Areas.Admin
                 },
                 namespaces: new[] { "QLNSVATC.Areas.Admin.Controllers" }
             );
+
             context.MapRoute(
                 name: "AD_QLDT",
                 url: "AD/ql-du-lieu",
@@ -55,6 +58,7 @@ namespace QLNSVATC.Areas.Admin
                 },
                 namespaces: new[] { "QLNSVATC.Areas.Admin.Controllers" }
             );
+
             context.MapRoute(
                 name: "AD_Home",
                 url: "AD/trang-chu",
@@ -66,6 +70,7 @@ namespace QLNSVATC.Areas.Admin
                 },
                 namespaces: new[] { "QLNSVATC.Areas.Admin.Controllers" }
             );
+
             context.MapRoute(
                 name: "Admin_default",
                 url: "Admin/{controller}/{action}/{id}",

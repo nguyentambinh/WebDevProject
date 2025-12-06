@@ -288,7 +288,6 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Areas\Admin\AdminAreaRegistration.cs" />
     <Compile Include="Areas\Admin\Controllers\ActivityController.cs" />
-    <Compile Include="Areas\Admin\Controllers\DataController.cs" />
     <Compile Include="Areas\Admin\Controllers\HomeController.cs" />
     <Compile Include="Areas\Admin\Data\UserRoleViewModel.cs" />
     <Compile Include="Areas\FN\Controllers\ExpenseController.cs" />

@@ -96,6 +96,38 @@
         { "cn_CN","状态" }
     };
 
+    var tFilterTitle = new Dictionary<string, string> {
+        { "vi_VN","Lọc nhanh" },
+        { "en_US","Quick filter" },
+        { "jp_JP","クイックフィルター" },
+        { "kr_KR","빠른 필터" },
+        { "cn_CN","快速筛选" }
+    };
+
+    var tFilterSearch = new Dictionary<string, string> {
+        { "vi_VN","Tìm kiếm" },
+        { "en_US","Search" },
+        { "jp_JP","検索" },
+        { "kr_KR","검색" },
+        { "cn_CN","搜索" }
+    };
+
+    var tFilterStatus = new Dictionary<string, string> {
+        { "vi_VN","Trạng thái" },
+        { "en_US","Status" },
+        { "jp_JP","状態" },
+        { "kr_KR","상태" },
+        { "cn_CN","状态" }
+    };
+
+    var tStatusAll = new Dictionary<string, string> {
+        { "vi_VN","Tất cả trạng thái" },
+        { "en_US","All statuses" },
+        { "jp_JP","すべて" },
+        { "kr_KR","전체 상태" },
+        { "cn_CN","全部状态" }
+    };
+
     string FormatType(string code)
     {
         return L(new Dictionary<string, string>{
@@ -152,6 +184,8 @@
             default: return "pexp-badge pexp-badge-ongoing";
         }
     }
+
+    bool hasItems = Model.Items != null && Model.Items.Any();
 }
 
 <div class="pexp-root">
@@ -199,37 +233,71 @@
         </div>
 
         <div class="pexp-toolbar">
-            <a class="pexp-btn-primary"
-               href="@Url.Action("NewExpense", "Expense", new { area = "FN" })">
-                <span>
-                    + @L(new Dictionary<string, string>{
-                    { "vi_VN","Thêm chi phí" },
-                    { "en_US","New expense" },
-                    { "jp_JP","費用を追加" },
-                    { "kr_KR","비용 추가" },
-                    { "cn_CN","新增费用" }
-                })
-                </span>
-            </a>
-            <div class="pexp-toolbar-right">
-                <span class="info">
-                    @L(new Dictionary<string, string>{
-                        { "vi_VN","Chờ duyệt" },
-                        { "en_US","Pending" },
-                        { "jp_JP","保留中" },
-                        { "kr_KR","대기 중" },
-                        { "cn_CN","待审批" }
-                    }): @Model.PendingCount
-                </span>
-                <span class="info">
-                    @L(new Dictionary<string, string>{
-                        { "vi_VN","Đã duyệt" },
-                        { "en_US","Approved" },
-                        { "jp_JP","承認済み" },
-                        { "kr_KR","승인됨" },
-                        { "cn_CN","已批准" }
-                    }): @Model.ApprovedCount
-                </span>
+            <div class="pexp-toolbar-top">
+                <a class="pexp-btn-primary"
+                   href="@Url.Action("NewExpense", "Expense", new { area = "FN" })">
+                    <span>
+                        + @L(new Dictionary<string, string>{
+                      { "vi_VN","Thêm chi phí" },
+                      { "en_US","New expense" },
+                      { "jp_JP","費用を追加" },
+                      { "kr_KR","비용 추가" },
+                      { "cn_CN","新增费用" }
+                  })
+                    </span>
+                </a>
+                <div class="pexp-toolbar-right">
+                    <span class="info">
+                        @L(new Dictionary<string, string>{
+                            { "vi_VN","Chờ duyệt" },
+                            { "en_US","Pending" },
+                            { "jp_JP","保留中" },
+                            { "kr_KR","대기 중" },
+                            { "cn_CN","待审批" }
+                        }): @Model.PendingCount
+                    </span>
+                    <span class="info">
+                        @L(new Dictionary<string, string>{
+                            { "vi_VN","Đã duyệt" },
+                            { "en_US","Approved" },
+                            { "jp_JP","承認済み" },
+                            { "kr_KR","승인됨" },
+                            { "cn_CN","已批准" }
+                        }): @Model.ApprovedCount
+                    </span>
+                </div>
+            </div>
+
+            <div class="pexp-filters">
+                <div class="pexp-filter-item">
+                    <label for="pexp-search" class="pexp-filter-label">
+                        @L(tFilterSearch)
+                    </label>
+                    <input id="pexp-search"
+                           class="pexp-filter-input"
+                           type="text"
+                           autocomplete="off"
+                           placeholder="@L(new Dictionary<string, string>{
+                               { "vi_VN","Tìm theo mã / tên dự án..." },
+                               { "en_US","Search by code / project name..." },
+                               { "jp_JP","コード / プロジェクト名で検索..." },
+                               { "kr_KR","코드 / 프로젝트명으로 검색..." },
+                               { "cn_CN","按编号 / 项目名称搜索..." }
+                           })" />
+                </div>
+
+                <div class="pexp-filter-item">
+                    <label for="pexp-status-filter" class="pexp-filter-label">
+                        @L(tFilterStatus)
+                    </label>
+                    <select id="pexp-status-filter" class="pexp-filter-select">
+                        <option value="">@L(tStatusAll)</option>
+                        <option value="ongoing">@StatusText("ongoing")</option>
+                        <option value="near">@StatusText("near")</option>
+                        <option value="overdue">@StatusText("overdue")</option>
+                        <option value="done">@StatusText("done")</option>
+                    </select>
+                </div>
             </div>
         </div>
 
@@ -245,46 +313,64 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var row in Model.Items)
+                    @if (hasItems)
                     {
-                        <tr>
-                            <td class="col-details">
-                                <div class="detail-main">
-                                    <div class="detail-icon"></div>
-                                    <div class="detail-text">
-                                        <div class="detail-date">
-                                            @(row.ExpenseDate?.ToString("dd/MM/yyyy") ?? "-")
-                                        </div>
-                                        <div class="detail-label">
-                                            @row.DetailLabel
+                        foreach (var row in Model.Items)
+                        {
+                            <tr data-row="1"
+                                data-project="@row.ProjectCode"
+                                data-name="@row.ProjectName"
+                                data-label="@row.DetailLabel"
+                                data-status="@row.StatusCode">
+                                <td class="col-details">
+                                    <div class="detail-main">
+                                        <div class="detail-icon"></div>
+                                        <div class="detail-text">
+                                            <div class="detail-date">
+                                                @(row.ExpenseDate?.ToString("dd/MM/yyyy") ?? "-")
+                                            </div>
+                                            <div class="detail-label">
+                                                @row.DetailLabel
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </td>
-                            <td class="col-project">
-                                <div class="project-code">@row.ProjectCode</div>
-                                @if (!string.IsNullOrEmpty(row.ProjectName))
-                                {
-                                    <div class="project-name">@row.ProjectName</div>
-                                }
-                            </td>
-                            <td class="col-type">
-                                @FormatType(row.ExpenseType)
-                            </td>
-                            <td class="col-amount right">
-                                @row.Amount.ToCurrency(lang)
-                            </td>
-                            <td class="col-status">
-                                <span class="@StatusCss(row.StatusCode)">
-                                    @StatusText(row.StatusCode)
-                                </span>
+                                </td>
+                                <td class="col-project">
+                                    <div class="project-code">@row.ProjectCode</div>
+                                    @if (!string.IsNullOrEmpty(row.ProjectName))
+                                    {
+                                        <div class="project-name">@row.ProjectName</div>
+                                    }
+                                </td>
+                                <td class="col-type">
+                                    @FormatType(row.ExpenseType)
+                                </td>
+                                <td class="col-amount right">
+                                    @row.Amount.ToCurrency(lang)
+                                </td>
+                                <td class="col-status">
+                                    <span class="@StatusCss(row.StatusCode)">
+                                        @StatusText(row.StatusCode)
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+
+                        <tr id="pexp-empty-row" style="display:none;">
+                            <td colspan="5" class="empty">
+                                @L(new Dictionary<string, string>{
+                                    { "vi_VN","Không tìm thấy khoản chi phù hợp bộ lọc." },
+                                    { "en_US","No expense matched the current filters." },
+                                    { "jp_JP","現在のフィルターに一致する費用はありません。" },
+                                    { "kr_KR","현재 필터와 일치하는 비용이 없습니다." },
+                                    { "cn_CN","没有符合当前筛选条件的费用。" }
+                                })
                             </td>
                         </tr>
                     }
-
-                    @if (!Model.Items.Any())
+                    else
                     {
-                        <tr>
+                        <tr id="pexp-empty-row">
                             <td colspan="5" class="empty">
                                 @L(new Dictionary<string, string>{
                                     { "vi_VN","Chưa có dữ liệu chi phí." },
@@ -364,4 +450,117 @@
         --pexp-font: @font;
         --pexp-fz: @(fz)px;
     }
+
+    .pexp-toolbar {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .pexp-toolbar-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .pexp-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: flex-end;
+    }
+
+    .pexp-filter-item {
+        display: flex;
+        flex-direction: column;
+        min-width: 220px;
+    }
+
+    .pexp-filter-label {
+        font-size: 0.8rem;
+        color: var(--pexp-text-soft);
+        margin-bottom: 4px;
+    }
+
+    .pexp-filter-input,
+    .pexp-filter-select {
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid var(--pexp-border);
+        background: var(--pexp-bg);
+        color: var(--pexp-text);
+        font-family: var(--pexp-font);
+        font-size: 0.9rem;
+        outline: none;
+    }
+
+    .pexp-filter-input:focus,
+    .pexp-filter-select:focus {
+        border-color: var(--pexp-accent);
+        box-shadow: 0 0 0 1px color-mix(in srgb, var(--pexp-accent) 60%, transparent);
+    }
+
+    @@media (max-width: 640px) {
+        .pexp-filter-item {
+            min-width: 100%;
+        }
+    }
 </style>
+
+<script>
+    (function () {
+        var searchInput = document.getElementById('pexp-search');
+        var statusSelect = document.getElementById('pexp-status-filter');
+        var tableBody = document.querySelector('.pexp-table tbody');
+        if (!tableBody) return;
+
+        var rows = Array.prototype.slice.call(
+            tableBody.querySelectorAll('tr[data-row="1"]')
+        );
+        var emptyRow = document.getElementById('pexp-empty-row');
+
+        function norm(str) {
+            return (str || '').toString().toLowerCase();
+        }
+
+        function applyFilter() {
+            var term = norm(searchInput ? searchInput.value : '');
+            var status = statusSelect ? statusSelect.value : '';
+            var visibleCount = 0;
+
+            rows.forEach(function (tr) {
+                var project = norm(tr.getAttribute('data-project'));
+                var name = norm(tr.getAttribute('data-name'));
+                var label = norm(tr.getAttribute('data-label'));
+                var statusCode = (tr.getAttribute('data-status') || '').toLowerCase();
+
+                var matchStatus = !status || statusCode === status.toLowerCase();
+                var matchSearch = !term ||
+                    project.indexOf(term) >= 0 ||
+                    name.indexOf(term) >= 0 ||
+                    label.indexOf(term) >= 0;
+
+                if (matchStatus && matchSearch) {
+                    tr.style.display = '';
+                    visibleCount++;
+                } else {
+                    tr.style.display = 'none';
+                }
+            });
+
+            if (emptyRow) {
+                emptyRow.style.display = visibleCount === 0 ? '' : 'none';
+            }
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', applyFilter);
+        }
+        if (statusSelect) {
+            statusSelect.addEventListener('change', applyFilter);
+        }
+    })();
+</script>

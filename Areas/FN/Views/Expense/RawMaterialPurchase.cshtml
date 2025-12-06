@@ -51,6 +51,58 @@
 
     var title = L(titleDic);
     var sub = L(subDic);
+
+    var tFilterStatusLabel = new Dictionary<string, string> {
+        { "vi_VN", "Trạng thái dự án" },
+        { "en_US", "Project status" },
+        { "jp_JP", "プロジェクト状態" },
+        { "kr_KR", "프로젝트 상태" },
+        { "cn_CN", "项目状态" }
+    };
+
+    var tStatusAll = new Dictionary<string, string> {
+        { "vi_VN", "Tất cả" },
+        { "en_US", "All" },
+        { "jp_JP", "すべて" },
+        { "kr_KR", "전체" },
+        { "cn_CN", "全部" }
+    };
+
+    string StatusText(string code)
+    {
+        switch ((code ?? "").ToLowerInvariant())
+        {
+            case "done":
+                return L(new Dictionary<string, string>{
+                    { "vi_VN","Hoàn thành" },
+                    { "en_US","Completed" },
+                    { "jp_JP","完了" },
+                    { "kr_KR","완료" },
+                    { "cn_CN","已完成" }});
+            case "overdue":
+                return L(new Dictionary<string, string>{
+                    { "vi_VN","Quá hạn" },
+                    { "en_US","Overdue" },
+                    { "jp_JP","期限超過" },
+                    { "kr_KR","기한 초과" },
+                    { "cn_CN","已逾期" }});
+            case "near":
+                return L(new Dictionary<string, string>{
+                    { "vi_VN","Gần đến hạn" },
+                    { "en_US","Due soon" },
+                    { "jp_JP","期限間近" },
+                    { "kr_KR","마감 임박" },
+                    { "cn_CN","即将到期" }});
+            case "ongoing":
+            default:
+                return L(new Dictionary<string, string>{
+                    { "vi_VN","Đang thực hiện" },
+                    { "en_US","In progress" },
+                    { "jp_JP","進行中" },
+                    { "kr_KR","진행 중" },
+                    { "cn_CN","进行中" }});
+        }
+    }
 }
 
 <div class="mat-root">
@@ -104,6 +156,20 @@
                                { "cn_CN", "按关键字筛选..." }
                            })" />
                 </div>
+
+                <div class="mat-filter-group">
+                    <label class="mat-filter-label" for="matFilterStatus">
+                        @L(tFilterStatusLabel)
+                    </label>
+                    <select id="matFilterStatus" class="mat-filter-select">
+                        <option value="">@L(tStatusAll)</option>
+                        <option value="ongoing">@StatusText("ongoing")</option>
+                        <option value="near">@StatusText("near")</option>
+                        <option value="overdue">@StatusText("overdue")</option>
+                        <option value="done">@StatusText("done")</option>
+                    </select>
+                </div>
+
                 <div class="mat-filter-actions">
                     <button type="button" id="matFilterApply" class="mat-filter-btn primary">
                         @L(new Dictionary<string, string>{
@@ -132,6 +198,7 @@
         </div>
     </div>
 </div>
+
 <div class="mat-modal-overlay" id="matModal">
     <div class="mat-modal-dialog">
         <div class="mat-modal-header">
@@ -205,6 +272,7 @@
         </div>
     </div>
 </div>
+
 <link rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
       integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
@@ -268,7 +336,8 @@
         margin-bottom: 4px;
     }
 
-    .mat-filter-input {
+    .mat-filter-input,
+    .mat-filter-select {
         width: 100%;
         padding: 8px 10px;
         border-radius: 8px;
@@ -280,7 +349,8 @@
         outline: none;
     }
 
-    .mat-filter-input:focus {
+    .mat-filter-input:focus,
+    .mat-filter-select:focus {
         border-color: var(--mat-accent);
         box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.35);
     }
@@ -389,6 +459,7 @@
         var applyBtn = document.getElementById('matFilterApply');
         var clearBtn = document.getElementById('matFilterClear');
         var keywordInput = document.getElementById('matFilterKeyword');
+        var statusSelect = document.getElementById('matFilterStatus');
         var tableWrapper = document.getElementById('mat-table-wrapper');
 
         var detailUrl = '@Url.Action("GetMaterialDetail", "Expense", new { area = "FN" })';
@@ -439,22 +510,47 @@
             });
         }
 
+        function norm(val) {
+            return (val || '').toString().toLowerCase();
+        }
+
         function filterRows() {
-            if (!tableWrapper || !keywordInput) return;
+            if (!tableWrapper) return;
 
-            var keyword = (keywordInput.value || '').toLowerCase().trim();
+            var keyword = norm(keywordInput ? keywordInput.value : '');
+            var status = norm(statusSelect ? statusSelect.value : '');
+
             var rows = tableWrapper.querySelectorAll('tbody tr');
-
             if (!rows || rows.length === 0) return;
 
             rows.forEach(function (row) {
-                var text = (row.innerText || row.textContent || '').toLowerCase();
-                if (!keyword) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = text.indexOf(keyword) !== -1 ? '' : 'none';
+                // Chỉ lọc trên các dòng data (tr có data-code). Dòng "không có dữ liệu" thì bỏ qua.
+                var codeAttr = row.getAttribute('data-code');
+                if (!codeAttr) {
+                    // nếu là dòng thông báo rỗng thì xử lý sau
+                    return;
                 }
+
+                var rowText = norm(row.innerText || row.textContent);
+                var rowStatus = norm(row.getAttribute('data-status'));
+
+                var matchKeyword = !keyword || rowText.indexOf(keyword) !== -1;
+                var matchStatus = !status || (rowStatus && rowStatus === status);
+
+                row.style.display = (matchKeyword && matchStatus) ? '' : 'none';
             });
+
+            // xử lý dòng "Không có dữ liệu" nếu partial có
+            var emptyRow = tableWrapper.querySelector('tbody tr[data-empty="1"]');
+            if (emptyRow) {
+                var anyVisible = false;
+                rows.forEach(function (row) {
+                    if (row.getAttribute('data-code') && row.style.display !== 'none') {
+                        anyVisible = true;
+                    }
+                });
+                emptyRow.style.display = anyVisible ? 'none' : '';
+            }
         }
 
         if (applyBtn) {
@@ -463,9 +559,8 @@
 
         if (clearBtn) {
             clearBtn.addEventListener('click', function () {
-                if (keywordInput) {
-                    keywordInput.value = '';
-                }
+                if (keywordInput) keywordInput.value = '';
+                if (statusSelect) statusSelect.value = '';
                 filterRows();
             });
         }
@@ -477,6 +572,15 @@
                     filterRows();
                 }
             });
+
+            // lọc nhẹ theo realtime cho đã
+            keywordInput.addEventListener('input', function () {
+                filterRows();
+            });
+        }
+
+        if (statusSelect) {
+            statusSelect.addEventListener('change', filterRows);
         }
 
         function openModal(mode) {
@@ -576,6 +680,7 @@
                         }
                         alert(data.message || 'Đã xóa phiếu nhập.');
                         closeModal();
+                        filterRows(); // cập nhật lại trạng thái lọc sau khi xóa
                     } else {
                         alert((data && data.message) || 'Xóa không thành công.');
                     }
@@ -585,7 +690,7 @@
             });
         }
 
-        // Click trên bảng
+        // Click trên bảng: xem chi tiết / xóa
         if (tableWrapper) {
             tableWrapper.addEventListener('click', function (e) {
                 var viewBtn = e.target.closest('.js-mat-view');
@@ -644,7 +749,6 @@
                         mdDate.textContent = data.date || '';
                         mdProjectCode.textContent = data.projectCode || '';
                         mdProjectName.textContent = data.projectName || '';
-
                         mdProjectStatus.textContent = data.projectStatus || '';
                         mdChangeFactor.textContent = data.changeFactorText || '';
                         mdTotalCost.textContent = data.totalCostText || '';

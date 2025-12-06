@@ -1,4 +1,5 @@
 ﻿@using System.Collections.Generic
+@using System.Linq
 @using QLNSVATC.Models
 @model QLNSVATC.Areas.FN.Data.FN_Models.NewExpenseViewModel
 
@@ -169,7 +170,7 @@
                             <select class="nexp-select" name="TypeCode">
                                 @foreach (var opt in Model.TypeOptions)
                                 {
-                                    var selected = opt.Value == Model.TypeCode ? "selected" : null;
+                                    var selected = opt.Value == (Model.TypeCode ?? "Project") ? "selected" : null;
                                     <option value="@opt.Value" @selected>
                                         @TypeLabel(opt.Value)
                                     </option>

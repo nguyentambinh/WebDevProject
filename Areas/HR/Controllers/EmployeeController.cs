@@ -29,64 +29,76 @@ namespace QLNSVATC.Areas.HR.Controllers
 
         public ActionResult Information(string keyword, string maPB, string maCV, string loaiNV)
         {
-            if (!CheckAccess.Role("HR"))
+            try
             {
-                Session.Clear();
-                return RedirectToAction("Login", "Account", new { area = "" });
+                if (!CheckAccess.Role("HR"))
+                {
+                    Session.Clear();
+                    return RedirectToAction("Login", "Account", new { area = "" });
+                }
+
+                var userId = Session["UserId"] as string;
+                var st = SettingsHelper.BuildViewBagData(db, userId);
+                ViewBag.Settings = st;
+
+                var query = db.NHANVIENs
+                              .Include("PHONGBAN")
+                              .Include("VITRICONGVIEC")
+                              .Include("LUONG")
+                              .AsQueryable();
+
+                if (!string.IsNullOrWhiteSpace(keyword))
+                {
+                    keyword = keyword.Trim();
+                    query = query.Where(nv =>
+                        nv.MANV.Contains(keyword) ||
+                        (nv.HOLOT + " " + nv.TENNV).Contains(keyword));
+                }
+
+                if (!string.IsNullOrWhiteSpace(maPB))
+                {
+                    query = query.Where(nv => nv.MAPB == maPB);
+                }
+
+                if (!string.IsNullOrWhiteSpace(maCV))
+                {
+                    query = query.Where(nv => nv.MACV == maCV);
+                }
+
+                if (!string.IsNullOrWhiteSpace(loaiNV))
+                {
+                    query = query.Where(nv => nv.LUONG != null && nv.LUONG.LOAINV == loaiNV);
+                }
+
+                var employees = query
+                    .OrderBy(nv => nv.MANV)
+                    .ToList();
+
+                ViewBag.Departments = db.PHONGBANs
+                    .OrderBy(p => p.TENPB)
+                    .ToList();
+
+                ViewBag.Positions = db.VITRICONGVIECs
+                    .OrderBy(c => c.TENCV)
+                    .ToList();
+
+                ViewBag.LoaiNVs = db.LUONGs
+                    .Where(l => l.LOAINV != null && l.LOAINV != "")
+                    .Select(l => l.LOAINV)
+                    .Distinct()
+                    .OrderBy(x => x)
+                    .ToList();
+
+                return View(employees);
             }
-            var userId = Session["UserId"] as string;
-            var st = SettingsHelper.BuildViewBagData(db, userId);
-            ViewBag.Settings = st;
-
-            var query = db.NHANVIENs
-                          .Include("PHONGBAN")
-                          .Include("VITRICONGVIEC")
-                          .Include("LUONG")
-                          .AsQueryable();
-
-            if (!string.IsNullOrWhiteSpace(keyword))
+            catch (Exception)
             {
-                keyword = keyword.Trim();
-                query = query.Where(nv =>
-                    nv.MANV.Contains(keyword) ||
-                    (nv.HOLOT + " " + nv.TENNV).Contains(keyword));
+                TempData["EmployeeError"] = "System error while loading employee list.";
+                ViewBag.Departments = new List<PHONGBAN>();
+                ViewBag.Positions = new List<VITRICONGVIEC>();
+                ViewBag.LoaiNVs = new List<string>();
+                return View(new List<NHANVIEN>());
             }
-
-            if (!string.IsNullOrWhiteSpace(maPB))
-            {
-                query = query.Where(nv => nv.MAPB == maPB);
-            }
-
-            if (!string.IsNullOrWhiteSpace(maCV))
-            {
-                query = query.Where(nv => nv.MACV == maCV);
-            }
-
-            if (!string.IsNullOrWhiteSpace(loaiNV))
-            {
-                query = query.Where(nv => nv.LUONG != null && nv.LUONG.LOAINV == loaiNV);
-            }
-
-            var employees = query
-                .OrderBy(nv => nv.MANV)
-                .ToList();
-
-            ViewBag.Departments = db.PHONGBANs
-                .OrderBy(p => p.TENPB)
-                .ToList();
-
-            ViewBag.Positions = db.VITRICONGVIECs
-                .OrderBy(c => c.TENCV)
-                .ToList();
-
-            ViewBag.LoaiNVs = db.LUONGs
-                .Where(l => l.LOAINV != null && l.LOAINV != "")
-                .Select(l => l.LOAINV)
-                .Distinct()
-                .OrderBy(x => x)
-                .ToList();
-
-            return View(employees);
         }
 
         [HttpPost]
@@ -114,11 +126,13 @@ namespace QLNSVATC.Areas.HR.Controllers
                     {
                         pb.MATRG_PHG = null;
                     }
+
                     var chamCong = db.CHAMCONGs.Where(x => x.MANV == id);
                     db.CHAMCONGs.RemoveRange(chamCong);
 
                     var thuongPhat = db.DSTHUONGPHATs.Where(x => x.MANV == id);
                     db.DSTHUONGPHATs.RemoveRange(thuongPhat);
+
                     var lichLamViec = db.LICHLAMVIECs.Where(x => x.MANV == id);
                     db.LICHLAMVIECs.RemoveRange(lichLamViec);
 
@@ -127,6 +141,7 @@ namespace QLNSVATC.Areas.HR.Controllers
 
                     var nhanThan = db.NHANTHANs.Where(x => x.MANV == id);
                     db.NHANTHANs.RemoveRange(nhanThan);
+
                     var nvDuAn = db.NVTHAMGIADAs.Where(x => x.MANV == id);
                     db.NVTHAMGIADAs.RemoveRange(nvDuAn);
 
@@ -135,8 +150,10 @@ namespace QLNSVATC.Areas.HR.Controllers
 
                     var lienHe = db.THONGTINLIENHEs.Where(x => x.MANV == id);
                     db.THONGTINLIENHEs.RemoveRange(lienHe);
+
                     var sucKhoe = db.THONGTINSUCKHOEs.Where(x => x.MANV == id);
                     db.THONGTINSUCKHOEs.RemoveRange(sucKhoe);
+
                     db.NHANVIENs.Remove(nv);
 
                     db.SaveChanges();
@@ -148,20 +165,20 @@ namespace QLNSVATC.Areas.HR.Controllers
                         message = "Employee and all related records have been deleted successfully."
                     });
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     tran.Rollback();
 
                     return Json(new
                     {
                         success = false,
-                        message = "System error while deleting this employee. Please try again later" + ex.Message
+                        message = "System error while deleting this employee. Please try again later."
                     });
                 }
             }
         }
 
-            [HttpPost]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult UpdatePosition(string id, string maPB, string maCV)
         {
@@ -172,11 +189,18 @@ namespace QLNSVATC.Areas.HR.Controllers
             if (nv == null)
                 return Json(new { success = false, message = "Employee not found." });
 
-            nv.MAPB = maPB;
-            nv.MACV = maCV;
-            db.SaveChanges();
+            try
+            {
+                nv.MAPB = maPB;
+                nv.MACV = maCV;
+                db.SaveChanges();
 
-            return Json(new { success = true });
+                return Json(new { success = true, message = "Position has been updated." });
+            }
+            catch (Exception)
+            {
+                return Json(new { success = false, message = "System error while updating position." });
+            }
         }
 
         [HttpPost]
@@ -301,33 +325,44 @@ namespace QLNSVATC.Areas.HR.Controllers
 
         public ActionResult Create()
         {
-            var userId = Session["UserId"] as string;
-            var st = SettingsHelper.BuildViewBagData(db, userId);
-            ViewBag.Settings = st;
+            try
+            {
+                var userId = Session["UserId"] as string;
+                var st = SettingsHelper.BuildViewBagData(db, userId);
+                ViewBag.Settings = st;
 
-            ViewBag.Departments = db.PHONGBANs
-                .OrderBy(p => p.TENPB)
-                .ToList();
+                ViewBag.Departments = db.PHONGBANs
+                    .OrderBy(p => p.TENPB)
+                    .ToList();
 
-            ViewBag.Positions = db.VITRICONGVIECs
-                .OrderBy(c => c.TENCV)
-                .ToList();
+                ViewBag.Positions = db.VITRICONGVIECs
+                    .OrderBy(c => c.TENCV)
+                    .ToList();
 
-            ViewBag.LoaiNVs = db.LUONGs
-                .Where(l => l.LOAINV != null && l.LOAINV != "")
-                .Select(l => l.LOAINV)
-                .Distinct()
-                .OrderBy(x => x)
-                .ToList();
+                ViewBag.LoaiNVs = db.LUONGs
+                    .Where(l => l.LOAINV != null && l.LOAINV != "")
+                    .Select(l => l.LOAINV)
+                    .Distinct()
+                    .OrderBy(x => x)
+                    .ToList();
 
-            var employees = db.NHANVIENs
-                .Include("PHONGBAN")
-                .Include("VITRICONGVIEC")
-                .Include("LUONG")
-                .OrderBy(nv => nv.MANV)
-                .ToList();
+                var employees = db.NHANVIENs
+                    .Include("PHONGBAN")
+                    .Include("VITRICONGVIEC")
+                    .Include("LUONG")
+                    .OrderBy(nv => nv.MANV)
+                    .ToList();
 
-            return View("Information", employees);
+                return View("Information", employees);
+            }
+            catch (Exception)
+            {
+                TempData["CreateError"] = "System error while loading employee creation view.";
+                ViewBag.Departments = new List<PHONGBAN>();
+                ViewBag.Positions = new List<VITRICONGVIEC>();
+                ViewBag.LoaiNVs = new List<string>();
+                return View("Information", new List<NHANVIEN>());
+            }
         }
 
         public static string RemoveDiacritics(string text)
@@ -457,7 +492,7 @@ namespace QLNSVATC.Areas.HR.Controllers
                     .OrderBy(x => x)
                     .ToList();
 
-                var employeesList = db.NHANVIENs
+                var employeesListInvalid = db.NHANVIENs
                     .Include("PHONGBAN")
                     .Include("VITRICONGVIEC")
                     .Include("LUONG")
@@ -468,12 +503,61 @@ namespace QLNSVATC.Areas.HR.Controllers
                 ViewBag.CreateModel = model;
                 TempData["CreateError"] = "Some information is missing or invalid. Please check the form and try again.";
 
-                return View("Information", employeesList);
+                return View("Information", employeesListInvalid);
             }
 
-            model.MANV = GenerateEmployeeCode(model);
+            try
+            {
+                model.MANV = GenerateEmployeeCode(model);
 
-            if (db.NHANVIENs.Any(x => x.MANV == model.MANV))
+                if (db.NHANVIENs.Any(x => x.MANV == model.MANV))
+                {
+                    ViewBag.Departments = db.PHONGBANs
+                        .OrderBy(p => p.TENPB)
+                        .ToList();
+
+                    ViewBag.Positions = db.VITRICONGVIECs
+                        .OrderBy(c => c.TENCV)
+                        .ToList();
+
+                    ViewBag.LoaiNVs = db.LUONGs
+                        .Where(l => l.LOAINV != null && l.LOAINV != "")
+                        .Select(l => l.LOAINV)
+                        .Distinct()
+                        .OrderBy(x => x)
+                        .ToList();
+
+                    var employeesList = db.NHANVIENs
+                        .Include("PHONGBAN")
+                        .Include("VITRICONGVIEC")
+                        .Include("LUONG")
+                        .OrderBy(nv => nv.MANV)
+                        .ToList();
+
+                    ViewBag.OpenCreateModal = true;
+                    ViewBag.CreateModel = model;
+                    TempData["CreateError"] = "Employee code already exists. Please try again.";
+
+                    return View("Information", employeesList);
+                }
+
+                db.NHANVIENs.Add(model);
+                db.SaveChanges();
+
+                if (PhotoFile != null && PhotoFile.ContentLength > 0)
+                {
+                    var folder = Server.MapPath("~/Content/Images/Home/NhanVien");
+                    if (!Directory.Exists(folder))
+                        Directory.CreateDirectory(folder);
+
+                    var path = Path.Combine(folder, model.MANV + ".jpg");
+                    PhotoFile.SaveAs(path);
+                }
+
+                TempData["CreateSuccess"] = "Employee has been created successfully.";
+                return RedirectToAction("Information");
+            }
+            catch (Exception)
             {
                 ViewBag.Departments = db.PHONGBANs
                     .OrderBy(p => p.TENPB)
@@ -490,7 +574,7 @@ namespace QLNSVATC.Areas.HR.Controllers
                     .OrderBy(x => x)
                     .ToList();
 
-                var employeesList = db.NHANVIENs
+                var employeesListError = db.NHANVIENs
                     .Include("PHONGBAN")
                     .Include("VITRICONGVIEC")
                     .Include("LUONG")
@@ -499,207 +583,199 @@ namespace QLNSVATC.Areas.HR.Controllers
 
                 ViewBag.OpenCreateModal = true;
                 ViewBag.CreateModel = model;
-                TempData["CreateError"] = "Employee code already exists. Please try again.";
+                TempData["CreateError"] = "System error while creating employee. Please try again later.";
 
-                return View("Information", employeesList);
+                return View("Information", employeesListError);
             }
-
-            db.NHANVIENs.Add(model);
-            db.SaveChanges();
-
-            if (PhotoFile != null && PhotoFile.ContentLength > 0)
-            {
-                var folder = Server.MapPath("~/Content/Images/Home/NhanVien");
-                if (!Directory.Exists(folder))
-                    Directory.CreateDirectory(folder);
-
-                var path = Path.Combine(folder, model.MANV + ".jpg");
-                PhotoFile.SaveAs(path);
-            }
-
-            TempData["CreateSuccess"] = "Employee has been created successfully.";
-            return RedirectToAction("Information");
         }
 
         [HttpGet]
         [ActionName("Profile")]
         public ActionResult ProfileGet(string id)
         {
-            var userId = Session["UserId"] as string;
-            var st = SettingsHelper.BuildViewBagData(db, userId);
-            ViewBag.Settings = st;
-
-            ViewBag.Departments = db.PHONGBANs
-                .OrderBy(p => p.TENPB)
-                .ToList();
-
-            ViewBag.Positions = db.VITRICONGVIECs
-                .OrderBy(c => c.TENCV)
-                .ToList();
-
-            ViewBag.LoaiNVs = db.LUONGs
-                .Where(l => l.LOAINV != null && l.LOAINV != "")
-                .Select(l => l.LOAINV)
-                .Distinct()
-                .OrderBy(x => x)
-                .ToList();
-
-            if (string.IsNullOrWhiteSpace(id))
+            try
             {
-                var first = db.NHANVIENs.OrderBy(x => x.MANV).FirstOrDefault();
-                if (first == null) return HttpNotFound();
-                id = first.MANV;
-            }
+                var userId = Session["UserId"] as string;
+                var st = SettingsHelper.BuildViewBagData(db, userId);
+                ViewBag.Settings = st;
 
-            var emp = (from nv in db.NHANVIENs
-                       join pb in db.PHONGBANs on nv.MAPB equals pb.MAPB into gpb
-                       from pb in gpb.DefaultIfEmpty()
-                       join cv in db.VITRICONGVIECs on nv.MACV equals cv.MACV into gcv
-                       from cv in gcv.DefaultIfEmpty()
-                       join dn in db.THONGTINDOANHNGHIEPs on nv.MADN equals dn.MADN into gdn
-                       from dn in gdn.DefaultIfEmpty()
-                       join tt in db.THONGTINLIENHEs on nv.MANV equals tt.MANV into gtt
-                       from tt in gtt.DefaultIfEmpty()
-                       where nv.MANV == id
-                       select new { nv, pb, cv, dn, tt })
-                      .FirstOrDefault();
+                ViewBag.Departments = db.PHONGBANs
+                    .OrderBy(p => p.TENPB)
+                    .ToList();
 
-            if (emp == null) return HttpNotFound();
+                ViewBag.Positions = db.VITRICONGVIECs
+                    .OrderBy(c => c.TENCV)
+                    .ToList();
 
-            var today = DateTime.Today;
-            int? tuoi = emp.nv.NAMSINH.HasValue
-                ? today.Year - emp.nv.NAMSINH.Value
-                : (int?)null;
+                ViewBag.LoaiNVs = db.LUONGs
+                    .Where(l => l.LOAINV != null && l.LOAINV != "")
+                    .Select(l => l.LOAINV)
+                    .Distinct()
+                    .OrderBy(x => x)
+                    .ToList();
 
-            var luong = db.LUONGs.FirstOrDefault(x => x.MANV == emp.nv.MANV);
-
-            double? heSoLuong = db.LICHLAMVIECs
-                .Where(x => x.MANV == emp.nv.MANV)
-                .OrderByDescending(x => x.NGAYLAMVIEC)
-                .Select(x => (double?)x.HESOLUONG)
-                .FirstOrDefault();
-
-            var lichDauTien = db.LICHLAMVIECs
-                .Where(x => x.MANV == emp.nv.MANV)
-                .OrderBy(x => x.NGAYLAMVIEC)
-                .FirstOrDefault();
-            DateTime? ngayBatDau = lichDauTien != null ? lichDauTien.NGAYLAMVIEC : emp.nv.HDLD;
-
-            var fromDate = today.AddMonths(-2).AddDays(1 - today.Day);
-            var toDate = today;
-            double tongCa3Thang = db.CHAMCONGs
-                .Where(c => c.MANV == emp.nv.MANV
-                            && c.NGAYCC >= fromDate
-                            && c.NGAYCC <= toDate)
-                .Select(c => (double?)c.TONGCA)
-                .DefaultIfEmpty(0)
-                .Sum() ?? 0.0;
-
-            var thuongPhatList = db.DSTHUONGPHATs
-                .Where(x => x.MANV == emp.nv.MANV)
-                .ToList();
-
-            decimal? tongThuong = thuongPhatList
-                .Where(x => x.HINHTHUC == "KT")
-                .Select(x => (decimal?)x.TONG)
-                .DefaultIfEmpty(0)
-                .Sum();
-
-            decimal? tongPhat = thuongPhatList
-                .Where(x => x.HINHTHUC == "KL")
-                .Select(x => (decimal?)x.TONG)
-                .DefaultIfEmpty(0)
-                .Sum();
-
-            var thanNhan = db.NHANTHANs
-                .Where(t => t.MANV == emp.nv.MANV)
-                .Select(t => new
+                if (string.IsNullOrWhiteSpace(id))
                 {
-                    t.TENNT,
-                    t.QUANHE,
-                    t.DIENTHOAI,
-                    t.DIACHI
-                })
-                .FirstOrDefault();
+                    var first = db.NHANVIENs.OrderBy(x => x.MANV).FirstOrDefault();
+                    if (first == null) return HttpNotFound();
+                    id = first.MANV;
+                }
 
-            var sk = db.THONGTINSUCKHOEs.FirstOrDefault(x => x.MANV == emp.nv.MANV);
-            if (sk == null)
-            {
-                sk = new THONGTINSUCKHOE
+                var emp = (from nv in db.NHANVIENs
+                           join pb in db.PHONGBANs on nv.MAPB equals pb.MAPB into gpb
+                           from pb in gpb.DefaultIfEmpty()
+                           join cv in db.VITRICONGVIECs on nv.MACV equals cv.MACV into gcv
+                           from cv in gcv.DefaultIfEmpty()
+                           join dn in db.THONGTINDOANHNGHIEPs on nv.MADN equals dn.MADN into gdn
+                           from dn in gdn.DefaultIfEmpty()
+                           join tt in db.THONGTINLIENHEs on nv.MANV equals tt.MANV into gtt
+                           from tt in gtt.DefaultIfEmpty()
+                           where nv.MANV == id
+                           select new { nv, pb, cv, dn, tt })
+                          .FirstOrDefault();
+
+                if (emp == null) return HttpNotFound();
+
+                var today = DateTime.Today;
+                int? tuoi = emp.nv.NAMSINH.HasValue
+                    ? today.Year - emp.nv.NAMSINH.Value
+                    : (int?)null;
+
+                var luong = db.LUONGs.FirstOrDefault(x => x.MANV == emp.nv.MANV);
+
+                double? heSoLuong = db.LICHLAMVIECs
+                    .Where(x => x.MANV == emp.nv.MANV)
+                    .OrderByDescending(x => x.NGAYLAMVIEC)
+                    .Select(x => (double?)x.HESOLUONG)
+                    .FirstOrDefault();
+
+                var lichDauTien = db.LICHLAMVIECs
+                    .Where(x => x.MANV == emp.nv.MANV)
+                    .OrderBy(x => x.NGAYLAMVIEC)
+                    .FirstOrDefault();
+                DateTime? ngayBatDau = lichDauTien != null ? lichDauTien.NGAYLAMVIEC : emp.nv.HDLD;
+
+                var fromDate = today.AddMonths(-2).AddDays(1 - today.Day);
+                var toDate = today;
+                double tongCa3Thang = db.CHAMCONGs
+                    .Where(c => c.MANV == emp.nv.MANV
+                                && c.NGAYCC >= fromDate
+                                && c.NGAYCC <= toDate)
+                    .Select(c => (double?)c.TONGCA)
+                    .DefaultIfEmpty(0)
+                    .Sum() ?? 0.0;
+
+                var thuongPhatList = db.DSTHUONGPHATs
+                    .Where(x => x.MANV == emp.nv.MANV)
+                    .ToList();
+
+                decimal? tongThuong = thuongPhatList
+                    .Where(x => x.HINHTHUC == "KT")
+                    .Select(x => (decimal?)x.TONG)
+                    .DefaultIfEmpty(0)
+                    .Sum();
+
+                decimal? tongPhat = thuongPhatList
+                    .Where(x => x.HINHTHUC == "KL")
+                    .Select(x => (decimal?)x.TONG)
+                    .DefaultIfEmpty(0)
+                    .Sum();
+
+                var thanNhan = db.NHANTHANs
+                    .Where(t => t.MANV == emp.nv.MANV)
+                    .Select(t => new
+                    {
+                        t.TENNT,
+                        t.QUANHE,
+                        t.DIENTHOAI,
+                        t.DIACHI
+                    })
+                    .FirstOrDefault();
+
+                var sk = db.THONGTINSUCKHOEs.FirstOrDefault(x => x.MANV == emp.nv.MANV);
+                if (sk == null)
                 {
-                    MANV = emp.nv.MANV,
-                    NGAYCAPNHAT = DateTime.Today
+                    sk = new THONGTINSUCKHOE
+                    {
+                        MANV = emp.nv.MANV,
+                        NGAYCAPNHAT = DateTime.Today
+                    };
+                    db.THONGTINSUCKHOEs.Add(sk);
+                    db.SaveChanges();
+                }
+
+                var bh = db.THONGTINBAOHIEMs.FirstOrDefault(x => x.MANV == emp.nv.MANV);
+                if (bh == null)
+                {
+                    bh = new THONGTINBAOHIEM
+                    {
+                        MANV = emp.nv.MANV
+                    };
+                    db.THONGTINBAOHIEMs.Add(bh);
+                    db.SaveChanges();
+                }
+
+                string queQuanText = emp.tt != null && emp.tt.QUEQUAN.HasValue
+                    ? "Area code: " + emp.tt.QUEQUAN.Value
+                    : null;
+
+                var model = new HREmployeeInformationViewModel
+                {
+                    MaNV = emp.nv.MANV,
+                    HoLot = emp.nv.HOLOT,
+                    TenNV = emp.nv.TENNV,
+                    GioiTinh = emp.nv.GIOITINH ?? true,
+                    NamSinh = emp.nv.NAMSINH,
+                    Tuoi = tuoi,
+
+                    MaPB = emp.nv.MAPB,
+                    TenPhongBan = emp.pb != null ? emp.pb.TENPB : null,
+                    MaCV = emp.nv.MACV,
+                    TenChucVu = emp.cv != null ? emp.cv.TENCV : null,
+
+                    MaDN = emp.nv.MADN,
+                    TenDoanhNghiep = emp.dn != null ? emp.dn.TENDN : null,
+                    DiaChiDoanhNghiep = emp.dn != null ? emp.dn.DIACHI : null,
+
+                    NgayBatDau = ngayBatDau,
+                    NgayHDLD = emp.nv.HDLD,
+
+                    QueQuanText = queQuanText,
+                    SDT = emp.tt != null ? emp.tt.SODT : null,
+                    Email = emp.tt != null ? emp.tt.GMAIL : null,
+                    DiaChi = emp.tt != null ? emp.tt.DIACHI : null,
+                    Facebook = emp.tt != null ? emp.tt.FB : null,
+
+                    LoaiNV = luong != null ? luong.LOAINV : null,
+                    HeSoLuong = heSoLuong,
+                    LuongCoBan = luong != null ? luong.LUONGCOBAN : null,
+
+                    NguoiThanTen = thanNhan?.TENNT,
+                    NguoiThanQuanHe = thanNhan?.QUANHE,
+                    NguoiThanSDT = thanNhan?.DIENTHOAI,
+                    NguoiThanDiaChi = thanNhan?.DIACHI,
+
+                    TongCa3Thang = tongCa3Thang,
+                    TongThuong = tongThuong,
+                    TongPhat = tongPhat,
+
+                    ChieuCao = sk.CHIEUCAO,
+                    CanNang = sk.CANNANG,
+                    TienSuBenh = sk.TIENSUBENH,
+                    ThiLucTren10 = sk.THILUCTREN10,
+                    NgayCapNhatSucKhoe = sk.NGAYCAPNHAT,
+                    LoaiBaoHiem = bh.LOAIBAOHIEM,
+                    SoBaoHiem = bh.SOBAOHIEM,
+                    ThoiHanBaoHiem = bh.THOIHAN
                 };
-                db.THONGTINSUCKHOEs.Add(sk);
-                db.SaveChanges();
+
+                return View(model);
             }
-
-            var bh = db.THONGTINBAOHIEMs.FirstOrDefault(x => x.MANV == emp.nv.MANV);
-            if (bh == null)
+            catch (Exception)
             {
-                bh = new THONGTINBAOHIEM
-                {
-                    MANV = emp.nv.MANV
-                };
-                db.THONGTINBAOHIEMs.Add(bh);
-                db.SaveChanges();
+                TempData["ProfileError"] = "System error while loading profile.";
+                return RedirectToAction("Information", "Employee", new { area = "HR" });
             }
-
-            string queQuanText = emp.tt != null && emp.tt.QUEQUAN.HasValue
-                ? "Area code: " + emp.tt.QUEQUAN.Value
-                : null;
-
-            var model = new HREmployeeInformationViewModel
-            {
-                MaNV = emp.nv.MANV,
-                HoLot = emp.nv.HOLOT,
-                TenNV = emp.nv.TENNV,
-                GioiTinh = emp.nv.GIOITINH ?? true,
-                NamSinh = emp.nv.NAMSINH,
-                Tuoi = tuoi,
-
-                MaPB = emp.nv.MAPB,
-                TenPhongBan = emp.pb != null ? emp.pb.TENPB : null,
-                MaCV = emp.nv.MACV,
-                TenChucVu = emp.cv != null ? emp.cv.TENCV : null,
-
-                MaDN = emp.nv.MADN,
-                TenDoanhNghiep = emp.dn != null ? emp.dn.TENDN : null,
-                DiaChiDoanhNghiep = emp.dn != null ? emp.dn.DIACHI : null,
-
-                NgayBatDau = ngayBatDau,
-                NgayHDLD = emp.nv.HDLD,
-
-                QueQuanText = queQuanText,
-                SDT = emp.tt != null ? emp.tt.SODT : null,
-                Email = emp.tt != null ? emp.tt.GMAIL : null,
-                DiaChi = emp.tt != null ? emp.tt.DIACHI : null,
-                Facebook = emp.tt != null ? emp.tt.FB : null,
-
-                LoaiNV = luong != null ? luong.LOAINV : null,
-                HeSoLuong = heSoLuong,
-                LuongCoBan = luong != null ? luong.LUONGCOBAN : null,
-
-                NguoiThanTen = thanNhan?.TENNT,
-                NguoiThanQuanHe = thanNhan?.QUANHE,
-                NguoiThanSDT = thanNhan?.DIENTHOAI,
-                NguoiThanDiaChi = thanNhan?.DIACHI,
-
-                TongCa3Thang = tongCa3Thang,
-                TongThuong = tongThuong,
-                TongPhat = tongPhat,
-
-                ChieuCao = sk.CHIEUCAO,
-                CanNang = sk.CANNANG,
-                TienSuBenh = sk.TIENSUBENH,
-                ThiLucTren10 = sk.THILUCTREN10,
-                NgayCapNhatSucKhoe = sk.NGAYCAPNHAT,
-                LoaiBaoHiem = bh.LOAIBAOHIEM,
-                SoBaoHiem = bh.SOBAOHIEM,
-                ThoiHanBaoHiem = bh.THOIHAN
-            };
-
-            return View(model);
         }
 
         [HttpPost]
@@ -714,115 +790,123 @@ namespace QLNSVATC.Areas.HR.Controllers
             if (model == null || string.IsNullOrWhiteSpace(model.MaNV))
                 return RedirectToAction("Information", "Employee", new { area = "HR" });
 
-            var nv = db.NHANVIENs.FirstOrDefault(x => x.MANV == model.MaNV);
-            if (nv == null) return HttpNotFound();
-
-            nv.HOLOT = model.HoLot;
-            nv.TENNV = model.TenNV;
-            nv.GIOITINH = model.GioiTinh;
-
-            if (model.NamSinh.HasValue)
-                nv.NAMSINH = (short?)model.NamSinh.Value;
-            else
-                nv.NAMSINH = null;
-
-            nv.MAPB = model.MaPB;
-            nv.MACV = model.MaCV;
-            nv.MADN = model.MaDN;
-            nv.HDLD = model.NgayHDLD ?? nv.HDLD;
-
-            var tt = db.THONGTINLIENHEs.FirstOrDefault(x => x.MANV == model.MaNV);
-            if (tt == null)
+            try
             {
-                tt = new THONGTINLIENHE { MANV = model.MaNV };
-                db.THONGTINLIENHEs.Add(tt);
-            }
+                var nv = db.NHANVIENs.FirstOrDefault(x => x.MANV == model.MaNV);
+                if (nv == null) return HttpNotFound();
 
-            int? queCode = null;
-            if (!string.IsNullOrWhiteSpace(model.QueQuanText))
-            {
-                int tmp;
-                if (int.TryParse(model.QueQuanText, out tmp))
-                    queCode = tmp;
-            }
+                nv.HOLOT = model.HoLot;
+                nv.TENNV = model.TenNV;
+                nv.GIOITINH = model.GioiTinh;
 
-            tt.SODT = model.SDT;
-            tt.GMAIL = model.Email;
-            tt.DIACHI = model.DiaChi;
-            tt.FB = model.Facebook;
+                if (model.NamSinh.HasValue)
+                    nv.NAMSINH = (short?)model.NamSinh.Value;
+                else
+                    nv.NAMSINH = null;
 
-            var luong = db.LUONGs.FirstOrDefault(x => x.MANV == model.MaNV);
-            if (luong == null)
-            {
-                luong = new LUONG { MANV = model.MaNV };
-                db.LUONGs.Add(luong);
-            }
+                nv.MAPB = model.MaPB;
+                nv.MACV = model.MaCV;
+                nv.MADN = model.MaDN;
+                nv.HDLD = model.NgayHDLD ?? nv.HDLD;
 
-            luong.LOAINV = string.IsNullOrWhiteSpace(model.LoaiNV) ? null : model.LoaiNV;
-            luong.LUONGCOBAN = model.LuongCoBan;
-
-            var thanNhan = db.NHANTHANs.FirstOrDefault(x => x.MANV == model.MaNV);
-            if (thanNhan == null && !string.IsNullOrWhiteSpace(model.NguoiThanTen))
-            {
-                thanNhan = new NHANTHAN
+                var tt = db.THONGTINLIENHEs.FirstOrDefault(x => x.MANV == model.MaNV);
+                if (tt == null)
                 {
-                    MANV = model.MaNV,
-                    TENNT = model.NguoiThanTen
-                };
-                db.NHANTHANs.Add(thanNhan);
-            }
+                    tt = new THONGTINLIENHE { MANV = model.MaNV };
+                    db.THONGTINLIENHEs.Add(tt);
+                }
 
-            if (thanNhan != null)
+                int? queCode = null;
+                if (!string.IsNullOrWhiteSpace(model.QueQuanText))
+                {
+                    int tmp;
+                    if (int.TryParse(model.QueQuanText, out tmp))
+                        queCode = tmp;
+                }
+
+                tt.SODT = model.SDT;
+                tt.GMAIL = model.Email;
+                tt.DIACHI = model.DiaChi;
+                tt.FB = model.Facebook;
+
+                var luong = db.LUONGs.FirstOrDefault(x => x.MANV == model.MaNV);
+                if (luong == null)
+                {
+                    luong = new LUONG { MANV = model.MaNV };
+                    db.LUONGs.Add(luong);
+                }
+
+                luong.LOAINV = string.IsNullOrWhiteSpace(model.LoaiNV) ? null : model.LoaiNV;
+                luong.LUONGCOBAN = model.LuongCoBan;
+
+                var thanNhan = db.NHANTHANs.FirstOrDefault(x => x.MANV == model.MaNV);
+                if (thanNhan == null && !string.IsNullOrWhiteSpace(model.NguoiThanTen))
+                {
+                    thanNhan = new NHANTHAN
+                    {
+                        MANV = model.MaNV,
+                        TENNT = model.NguoiThanTen
+                    };
+                    db.NHANTHANs.Add(thanNhan);
+                }
+
+                if (thanNhan != null)
+                {
+                    if (!string.IsNullOrWhiteSpace(model.NguoiThanTen))
+                        thanNhan.TENNT = model.NguoiThanTen;
+
+                    thanNhan.QUANHE = model.NguoiThanQuanHe;
+                    thanNhan.DIENTHOAI = model.NguoiThanSDT;
+                    thanNhan.DIACHI = model.NguoiThanDiaChi;
+                }
+
+                var sk = db.THONGTINSUCKHOEs.FirstOrDefault(x => x.MANV == model.MaNV);
+                if (sk == null)
+                {
+                    sk = new THONGTINSUCKHOE { MANV = model.MaNV };
+                    db.THONGTINSUCKHOEs.Add(sk);
+                }
+
+                if (model.ChieuCao.HasValue)
+                    sk.CHIEUCAO = (byte?)model.ChieuCao.Value;
+                else
+                    sk.CHIEUCAO = null;
+
+                if (model.CanNang.HasValue)
+                    sk.CANNANG = (byte?)model.CanNang.Value;
+                else
+                    sk.CANNANG = null;
+
+                sk.TIENSUBENH = model.TienSuBenh;
+
+                if (model.ThiLucTren10.HasValue)
+                    sk.THILUCTREN10 = (byte?)model.ThiLucTren10.Value;
+                else
+                    sk.THILUCTREN10 = null;
+
+                sk.NGAYCAPNHAT = model.NgayCapNhatSucKhoe ?? DateTime.Today;
+
+                var bh = db.THONGTINBAOHIEMs.FirstOrDefault(x => x.MANV == model.MaNV);
+                if (bh == null)
+                {
+                    bh = new THONGTINBAOHIEM { MANV = model.MaNV };
+                    db.THONGTINBAOHIEMs.Add(bh);
+                }
+
+                bh.LOAIBAOHIEM = model.LoaiBaoHiem;
+                bh.SOBAOHIEM = model.SoBaoHiem;
+                bh.THOIHAN = model.ThoiHanBaoHiem;
+
+                db.SaveChanges();
+
+                TempData["ProfileSuccess"] = "Profile has been updated.";
+                return RedirectToAction("Profile", new { id = model.MaNV });
+            }
+            catch (Exception)
             {
-                if (!string.IsNullOrWhiteSpace(model.NguoiThanTen))
-                    thanNhan.TENNT = model.NguoiThanTen;
-
-                thanNhan.QUANHE = model.NguoiThanQuanHe;
-                thanNhan.DIENTHOAI = model.NguoiThanSDT;
-                thanNhan.DIACHI = model.NguoiThanDiaChi;
+                TempData["ProfileError"] = "System error while saving profile.";
+                return RedirectToAction("Profile", new { id = model.MaNV });
             }
-
-            var sk = db.THONGTINSUCKHOEs.FirstOrDefault(x => x.MANV == model.MaNV);
-            if (sk == null)
-            {
-                sk = new THONGTINSUCKHOE { MANV = model.MaNV };
-                db.THONGTINSUCKHOEs.Add(sk);
-            }
-
-            if (model.ChieuCao.HasValue)
-                sk.CHIEUCAO = (byte?)model.ChieuCao.Value;
-            else
-                sk.CHIEUCAO = null;
-
-            if (model.CanNang.HasValue)
-                sk.CANNANG = (byte?)model.CanNang.Value;
-            else
-                sk.CANNANG = null;
-
-            sk.TIENSUBENH = model.TienSuBenh;
-
-            if (model.ThiLucTren10.HasValue)
-                sk.THILUCTREN10 = (byte?)model.ThiLucTren10.Value;
-            else
-                sk.THILUCTREN10 = null;
-
-            sk.NGAYCAPNHAT = model.NgayCapNhatSucKhoe ?? DateTime.Today;
-
-            var bh = db.THONGTINBAOHIEMs.FirstOrDefault(x => x.MANV == model.MaNV);
-            if (bh == null)
-            {
-                bh = new THONGTINBAOHIEM { MANV = model.MaNV };
-                db.THONGTINBAOHIEMs.Add(bh);
-            }
-
-            bh.LOAIBAOHIEM = model.LoaiBaoHiem;
-            bh.SOBAOHIEM = model.SoBaoHiem;
-            bh.THOIHAN = model.ThoiHanBaoHiem;
-
-            db.SaveChanges();
-
-            TempData["ProfileSuccess"] = "Profile has been updated.";
-            return RedirectToAction("Profile", new { id = model.MaNV });
         }
 
         [HttpPost]
@@ -1059,79 +1143,89 @@ namespace QLNSVATC.Areas.HR.Controllers
 
         public ActionResult Candidate(string keyword, DateTime? fromDate, DateTime? toDate)
         {
-            var userId = Session["UserId"] as string;
-            var st = SettingsHelper.BuildViewBagData(db, userId);
-            ViewBag.Settings = st;
-
-            var query = db.HOSOVIECLAMs.AsQueryable();
-
-            if (!string.IsNullOrWhiteSpace(keyword))
+            try
             {
-                keyword = keyword.Trim();
-                query = query.Where(x =>
-                    x.TENUNGVIEN.Contains(keyword) ||
-                    x.EMAIL.Contains(keyword));
-            }
+                var userId = Session["UserId"] as string;
+                var st = SettingsHelper.BuildViewBagData(db, userId);
+                ViewBag.Settings = st;
 
-            var rawList = query
-                .OrderByDescending(x => x.ID)
-                .ToList();
+                var query = db.HOSOVIECLAMs.AsQueryable();
 
-            var list = rawList
-                .Select(x =>
+                if (!string.IsNullOrWhiteSpace(keyword))
                 {
-                    string mainFile = x.FILETHONGTIN;
-                    if (string.IsNullOrWhiteSpace(mainFile))
-                    {
-                        if (!string.IsNullOrWhiteSpace(x.FILEBANGCAP))
-                            mainFile = x.FILEBANGCAP;
-                        else if (!string.IsNullOrWhiteSpace(x.FILEKHAC))
-                            mainFile = x.FILEKHAC;
-                    }
+                    keyword = keyword.Trim();
+                    query = query.Where(x =>
+                        x.TENUNGVIEN.Contains(keyword) ||
+                        x.EMAIL.Contains(keyword));
+                }
 
-                    DateTime? submittedAt = ExtractDateFromFileName(mainFile);
-
-                    return new CandidateViewModel
-                    {
-                        ID = x.ID,
-                        TenUngVien = x.TENUNGVIEN,
-                        Email = x.EMAIL,
-                        FileThongTin = x.FILETHONGTIN,
-                        FileBangCap = x.FILEBANGCAP,
-                        FileKhac = x.FILEKHAC,
-                        FileThongTinUrl = BuildFileUrl(x.TENUNGVIEN, x.FILETHONGTIN),
-                        FileBangCapUrl = BuildFileUrl(x.TENUNGVIEN, x.FILEBANGCAP),
-                        FileKhacUrl = BuildFileUrl(x.TENUNGVIEN, x.FILEKHAC),
-                        SubmittedAt = submittedAt
-                    };
-                })
-                .ToList();
-
-            if (fromDate.HasValue)
-            {
-                var from = fromDate.Value.Date;
-                list = list
-                    .Where(c => c.SubmittedAt.HasValue &&
-                                c.SubmittedAt.Value.Date >= from)
+                var rawList = query
+                    .OrderByDescending(x => x.ID)
                     .ToList();
-            }
 
-            if (toDate.HasValue)
-            {
-                var to = toDate.Value.Date;
-                list = list
-                    .Where(c => c.SubmittedAt.HasValue &&
-                                c.SubmittedAt.Value.Date <= to)
+                var list = rawList
+                    .Select(x =>
+                    {
+                        string mainFile = x.FILETHONGTIN;
+                        if (string.IsNullOrWhiteSpace(mainFile))
+                        {
+                            if (!string.IsNullOrWhiteSpace(x.FILEBANGCAP))
+                                mainFile = x.FILEBANGCAP;
+                            else if (!string.IsNullOrWhiteSpace(x.FILEKHAC))
+                                mainFile = x.FILEKHAC;
+                        }
+
+                        DateTime? submittedAt = ExtractDateFromFileName(mainFile);
+
+                        return new CandidateViewModel
+                        {
+                            ID = x.ID,
+                            TenUngVien = x.TENUNGVIEN,
+                            Email = x.EMAIL,
+                            FileThongTin = x.FILETHONGTIN,
+                            FileBangCap = x.FILEBANGCAP,
+                            FileKhac = x.FILEKHAC,
+                            FileThongTinUrl = BuildFileUrl(x.TENUNGVIEN, x.FILETHONGTIN),
+                            FileBangCapUrl = BuildFileUrl(x.TENUNGVIEN, x.FILEBANGCAP),
+                            FileKhacUrl = BuildFileUrl(x.TENUNGVIEN, x.FILEKHAC),
+                            SubmittedAt = submittedAt
+                        };
+                    })
                     .ToList();
+
+                if (fromDate.HasValue)
+                {
+                    var from = fromDate.Value.Date;
+                    list = list
+                        .Where(c => c.SubmittedAt.HasValue &&
+                                    c.SubmittedAt.Value.Date >= from)
+                        .ToList();
+                }
+
+                if (toDate.HasValue)
+                {
+                    var to = toDate.Value.Date;
+                    list = list
+                        .Where(c => c.SubmittedAt.HasValue &&
+                                    c.SubmittedAt.Value.Date <= to)
+                        .ToList();
+                }
+
+                ViewBag.Keyword = keyword;
+                ViewBag.FromDate = fromDate?.ToString("yyyy-MM-dd");
+                ViewBag.ToDate = toDate?.ToString("yyyy-MM-dd");
+
+                return View(list);
             }
-
-            ViewBag.Keyword = keyword;
-            ViewBag.FromDate = fromDate?.ToString("yyyy-MM-dd");
-            ViewBag.ToDate = toDate?.ToString("yyyy-MM-dd");
-
-            return View(list);
+            catch (Exception)
+            {
+                TempData["CandidateError"] = "System error while loading candidate list.";
+                ViewBag.Keyword = keyword;
+                ViewBag.FromDate = fromDate?.ToString("yyyy-MM-dd");
+                ViewBag.ToDate = toDate?.ToString("yyyy-MM-dd");
+                return View(new List<CandidateViewModel>());
+            }
         }
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -1141,6 +1235,34 @@ namespace QLNSVATC.Areas.HR.Controllers
             {
                 return Json(new { success = false, message = "Please select both interview date and time." });
             }
+            interviewTime = interviewTime.Trim();
+
+            DateTime timePart;
+            if (!DateTime.TryParseExact(
+                    interviewTime,
+                    new[] { "HH:mm", "H:mm", "HH:mm:ss", "H:mm:ss" },
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None,
+                    out timePart))
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Interview time format is not valid. Please use HH:mm format (e.g. 14:30)."
+                });
+            }
+            var interviewDateTime = interviewDate.Value.Date
+                .AddHours(timePart.Hour)
+                .AddMinutes(timePart.Minute)
+                .AddSeconds(timePart.Second);
+            if (interviewDateTime <= DateTime.Now)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Interview time must be later than the current time."
+                });
+            }
 
             var candidate = db.HOSOVIECLAMs.FirstOrDefault(x => x.ID == id);
             if (candidate == null)
@@ -1149,10 +1271,10 @@ namespace QLNSVATC.Areas.HR.Controllers
             }
 
             string fullName = candidate.TENUNGVIEN ?? "Candidate";
-            string scheduleText = interviewDate.Value.ToString("dd/MM/yyyy") + " " + interviewTime.Trim();
+            string scheduleText = interviewDateTime.ToString("dd/MM/yyyy HH:mm");
 
             string from = "httbworkstation@gmail.com";
-            string pass = "cotu wurg gbve crbk"; // TODO: move to config in production
+            string pass = "cotu wurg gbve crbk"; 
             string to = candidate.EMAIL;
             string subject = "[TBT Center] Interview invitation";
 
@@ -1161,64 +1283,64 @@ namespace QLNSVATC.Areas.HR.Controllers
                 : $"<p style='font-size:13px;line-height:1.6;color:#d0d0d0;'>{System.Net.WebUtility.HtmlEncode(note)}</p>";
 
             string body = $@"
-                        <html>
-                        <head>
-                        <meta charset='UTF-8' />
-                        <style>
-                        @media only screen and (max-width: 600px) {{
-                            .container {{ width: 94% !important; }}
-                            .section {{ padding: 20px 18px !important; }}
-                        }}
-                        </style>
-                        </head>
+        <html>
+        <head>
+        <meta charset='UTF-8' />
+        <style>
+        @media only screen and (max-width: 600px) {{
+            .container {{ width: 94% !important; }}
+            .section {{ padding: 20px 18px !important; }}
+        }}
+        </style>
+        </head>
 
-                        <body style='font-family:Segoe UI, Arial, sans-serif;background:#f4f4f4;margin:0;padding:20px;'>
+        <body style='font-family:Segoe UI, Arial, sans-serif;background:#f4f4f4;margin:0;padding:20px;'>
 
-                        <div class='container' style='max-width:600px;margin:auto;background:#111;
-                                    color:#f5f5f5;border-radius:12px;overflow:hidden;
-                                    box-shadow:0 10px 25px rgba(0,0,0,0.35);'>
+        <div class='container' style='max-width:600px;margin:auto;background:#111;
+                    color:#f5f5f5;border-radius:12px;overflow:hidden;
+                    box-shadow:0 10px 25px rgba(0,0,0,0.35);'>
 
-                            <div style='background:linear-gradient(135deg,#fceabb,#f8b500);padding:20px 26px;'>
-                                <h2 style='margin:0;color:#1a1a1a;'>TBT Center</h2>
-                                <p style='margin:4px 0 0;font-size:13px;color:#4a3b0a;'>Interview invitation</p>
-                            </div>
+            <div style='background:linear-gradient(135deg,#fceabb,#f8b500);padding:20px 26px;'>
+                <h2 style='margin:0;color:#1a1a1a;'>TBT Center</h2>
+                <p style='margin:4px 0 0;font-size:13px;color:#4a3b0a;'>Interview invitation</p>
+            </div>
 
-                            <div class='section' style='padding:26px 32px;'>
-                                <p style='font-size:14px;line-height:1.6;margin-top:0;'>
-                                    Hello <b>{fullName}</b>,<br />
-                                    Thank you for applying to <b>TBT HR &amp; Finance Management System</b>.
-                                </p>
+            <div class='section' style='padding:26px 32px;'>
+                <p style='font-size:14px;line-height:1.6;margin-top:0;'>
+                    Hello <b>{fullName}</b>,<br />
+                    Thank you for applying to <b>TBT HR &amp; Finance Management System</b>.
+                </p>
 
-                                <p style='font-size:13px;line-height:1.6;color:#d0d0d0;'>
-                                    We would like to invite you to an interview at the following time:
-                                </p>
+                <p style='font-size:13px;line-height:1.6;color:#d0d0d0;'>
+                    We would like to invite you to an interview at the following time:
+                </p>
 
-                                <div style='text-align:center;margin:14px 0 18px;'>
-                                    <div style='display:inline-block;padding:10px 20px;border-radius:999px;
-                                                background:linear-gradient(135deg,#fceabb,#f8b500);
-                                                color:#1a1a1a;font-size:16px;font-weight:600;'>
-                                        {scheduleText}
-                                    </div>
-                                </div>
+                <div style='text-align:center;margin:14px 0 18px;'>
+                    <div style='display:inline-block;padding:10px 20px;border-radius:999px;
+                                background:linear-gradient(135deg,#fceabb,#f8b500);
+                                color:#1a1a1a;font-size:16px;font-weight:600;'>
+                        {scheduleText}
+                    </div>
+                </div>
 
-                                {extraNote}
+                {extraNote}
 
-                                <p style='font-size:13px;line-height:1.6;color:#d0d0d0;'>
-                                    Please reply to this email if you need to reschedule or have any questions.
-                                </p>
+                <p style='font-size:13px;line-height:1.6;color:#d0d0d0;'>
+                    Please reply to this email if you need to reschedule or have any questions.
+                </p>
 
-                                <p style='font-size:12px;color:#9c9c9c;margin-top:6px;'>
-                                    If you did not expect this email, you can ignore it.
-                                </p>
-                            </div>
+                <p style='font-size:12px;color:#9c9c9c;margin-top:6px;'>
+                    If you did not expect this email, you can ignore it.
+                </p>
+            </div>
 
-                            <div style='padding:14px 22px;border-top:1px solid #333;font-size:11px;color:#777;'>
-                                © {DateTime.Now.Year} TBT Center. All rights reserved.
-                            </div>
-                        </div>
+            <div style='padding:14px 22px;border-top:1px solid #333;font-size:11px;color:#777;'>
+                © {DateTime.Now.Year} TBT Center. All rights reserved.
+            </div>
+        </div>
 
-                        </body>
-                        </html>";
+        </body>
+        </html>";
 
             try
             {
@@ -1239,69 +1361,78 @@ namespace QLNSVATC.Areas.HR.Controllers
 
                 return Json(new { success = true, message = "Interview invitation has been sent." });
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return Json(new { success = false, message = "Error while sending email: " + ex.Message });
+                return Json(new { success = false, message = "Error while sending email. Please try again later." });
             }
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult DownloadCandidateFiles(int id)
         {
-            var candidate = db.HOSOVIECLAMs.FirstOrDefault(x => x.ID == id);
-            if (candidate == null)
+            try
             {
-                TempData["CandidateError"] = "Candidate not found.";
-                return RedirectToAction("Candidate");
-            }
-
-            string root = Server.MapPath("~/Uploads/HoSoUngVien");
-            var files = new List<Tuple<string, string>>();
-
-            void AddFileIfExists(string fileName)
-            {
-                if (string.IsNullOrWhiteSpace(fileName)) return;
-
-                string folderName = BuildFolderName(candidate.TENUNGVIEN, fileName);
-                string path = string.IsNullOrEmpty(folderName)
-                    ? Path.Combine(root, fileName)
-                    : Path.Combine(root, folderName, fileName);
-
-                if (System.IO.File.Exists(path))
+                var candidate = db.HOSOVIECLAMs.FirstOrDefault(x => x.ID == id);
+                if (candidate == null)
                 {
-                    files.Add(Tuple.Create(path, fileName));
+                    TempData["CandidateError"] = "Candidate not found.";
+                    return RedirectToAction("Candidate");
                 }
-            }
 
-            AddFileIfExists(candidate.FILETHONGTIN);
-            AddFileIfExists(candidate.FILEBANGCAP);
-            AddFileIfExists(candidate.FILEKHAC);
+                string root = Server.MapPath("~/Uploads/HoSoUngVien");
+                var files = new List<Tuple<string, string>>();
 
-            if (!files.Any())
-            {
-                TempData["CandidateError"] = "No files were found for this candidate.";
-                return RedirectToAction("Candidate");
-            }
-
-            using (var ms = new MemoryStream())
-            {
-                using (var archive = new ZipArchive(ms, ZipArchiveMode.Create, true))
+                void AddFileIfExists(string fileName)
                 {
-                    foreach (var f in files)
+                    if (string.IsNullOrWhiteSpace(fileName)) return;
+
+                    string folderName = BuildFolderName(candidate.TENUNGVIEN, fileName);
+                    string path = string.IsNullOrEmpty(folderName)
+                        ? Path.Combine(root, fileName)
+                        : Path.Combine(root, folderName, fileName);
+
+                    if (System.IO.File.Exists(path))
                     {
-                        var entry = archive.CreateEntry(f.Item2, CompressionLevel.Fastest);
-                        using (var entryStream = entry.Open())
-                        using (var fileStream = System.IO.File.OpenRead(f.Item1))
-                        {
-                            fileStream.CopyTo(entryStream);
-                        }
+                        files.Add(Tuple.Create(path, fileName));
                     }
                 }
 
-                ms.Position = 0;
-                string zipName = "Candidate_" + id + "_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".zip";
-                return File(ms.ToArray(), "application/zip", zipName);
+                AddFileIfExists(candidate.FILETHONGTIN);
+                AddFileIfExists(candidate.FILEBANGCAP);
+                AddFileIfExists(candidate.FILEKHAC);
+
+                if (!files.Any())
+                {
+                    TempData["CandidateError"] = "No files were found for this candidate.";
+                    return RedirectToAction("Candidate");
+                }
+
+                using (var ms = new MemoryStream())
+                {
+                    using (var archive = new ZipArchive(ms, ZipArchiveMode.Create, true))
+                    {
+                        foreach (var f in files)
+                        {
+                            var entry = archive.CreateEntry(f.Item2, CompressionLevel.Fastest);
+                            using (var entryStream = entry.Open())
+                            using (var fileStream = System.IO.File.OpenRead(f.Item1))
+                            {
+                                fileStream.CopyTo(entryStream);
+                            }
+                        }
+                    }
+
+                    ms.Position = 0;
+                    string zipName = "Candidate_" + id + "_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".zip";
+                    return File(ms.ToArray(), "application/zip", zipName);
+                }
+            }
+            catch (Exception)
+            {
+                TempData["CandidateError"] = "System error while preparing candidate files.";
+                return RedirectToAction("Candidate");
             }
         }
 
@@ -1328,52 +1459,61 @@ namespace QLNSVATC.Areas.HR.Controllers
                 return RedirectToAction("Candidate");
             }
 
-            var candidates = db.HOSOVIECLAMs
-                .Where(x => idList.Contains(x.ID))
-                .OrderBy(x => x.ID)
-                .ToList();
-
-            if (!candidates.Any())
+            try
             {
-                TempData["CandidateError"] = "No selected candidates were found.";
-                return RedirectToAction("Candidate");
-            }
+                var candidates = db.HOSOVIECLAMs
+                    .Where(x => idList.Contains(x.ID))
+                    .OrderBy(x => x.ID)
+                    .ToList();
 
-            byte[] bytes;
-            using (var ms = new MemoryStream())
-            {
-                var doc = new Document(PageSize.A4, 40, 40, 40, 40);
-                PdfWriter.GetInstance(doc, ms);
-                doc.Open();
-
-                iTextFont titleFont = FontFactory.GetFont("Helvetica", 16, iTextFont.BOLD);
-                iTextFont normalFont = FontFactory.GetFont("Helvetica", 11, iTextFont.NORMAL);
-
-                foreach (var c in candidates)
+                if (!candidates.Any())
                 {
-                    doc.Add(new Paragraph("Candidate #" + c.ID, titleFont));
-                    doc.Add(new Paragraph("Full name: " + c.TENUNGVIEN, normalFont));
-                    doc.Add(new Paragraph("Email: " + c.EMAIL, normalFont));
-                    doc.Add(new Paragraph("File - Info: " + c.FILETHONGTIN, normalFont));
-                    doc.Add(new Paragraph("File - Degree: " + c.FILEBANGCAP, normalFont));
-                    doc.Add(new Paragraph("File - Others: " + c.FILEKHAC, normalFont));
-                    doc.Add(new Paragraph("Generated at: " + DateTime.Now.ToString("dd/MM/yyyy HH:mm"), normalFont));
-
-                    doc.Add(new Paragraph(" ", normalFont));
-                    doc.Add(new LineSeparator());
-                    doc.Add(new Paragraph(" ", normalFont));
+                    TempData["CandidateError"] = "No selected candidates were found.";
+                    return RedirectToAction("Candidate");
                 }
 
-                doc.Close();
-                bytes = ms.ToArray();
+                byte[] bytes;
+                using (var ms = new MemoryStream())
+                {
+                    var doc = new Document(PageSize.A4, 40, 40, 40, 40);
+                    PdfWriter.GetInstance(doc, ms);
+                    doc.Open();
+
+                    iTextFont titleFont = FontFactory.GetFont("Helvetica", 16, iTextFont.BOLD);
+                    iTextFont normalFont = FontFactory.GetFont("Helvetica", 11, iTextFont.NORMAL);
+
+                    foreach (var c in candidates)
+                    {
+                        doc.Add(new Paragraph("Candidate #" + c.ID, titleFont));
+                        doc.Add(new Paragraph("Full name: " + c.TENUNGVIEN, normalFont));
+                        doc.Add(new Paragraph("Email: " + c.EMAIL, normalFont));
+                        doc.Add(new Paragraph("File - Info: " + c.FILETHONGTIN, normalFont));
+                        doc.Add(new Paragraph("File - Degree: " + c.FILEBANGCAP, normalFont));
+                        doc.Add(new Paragraph("File - Others: " + c.FILEKHAC, normalFont));
+                        doc.Add(new Paragraph("Generated at: " + DateTime.Now.ToString("dd/MM/yyyy HH:mm"), normalFont));
+
+                        doc.Add(new Paragraph(" ", normalFont));
+                        doc.Add(new LineSeparator());
+                        doc.Add(new Paragraph(" ", normalFont));
+                    }
+
+                    doc.Close();
+                    bytes = ms.ToArray();
+                }
+
+                db.HOSOVIECLAMs.RemoveRange(candidates);
+                db.SaveChanges();
+
+                string fileName = "Candidates_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".pdf";
+                return File(bytes, "application/pdf", fileName);
             }
-
-            db.HOSOVIECLAMs.RemoveRange(candidates);
-            db.SaveChanges();
-
-            string fileName = "Candidates_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".pdf";
-            return File(bytes, "application/pdf", fileName);
+            catch (Exception)
+            {
+                TempData["CandidateError"] = "System error while exporting / deleting candidates.";
+                return RedirectToAction("Candidate");
+            }
         }
+
         private static DateTime? ExtractDateFromFileName(string fileName)
         {
             if (string.IsNullOrWhiteSpace(fileName)) return null;

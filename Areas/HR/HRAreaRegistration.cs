@@ -23,7 +23,7 @@ namespace QLNSVATC.Areas.HR
                 },
                 namespaces: new[] { "QLNSVATC.Areas.HR.Controllers" }
             );
-            
+
             context.MapRoute(
                 name: "HR_QLNV_Thongtin",
                 url: "HR/ql-thong-tin-nhan-vien",
@@ -34,9 +34,10 @@ namespace QLNSVATC.Areas.HR
                     codeBus = UrlParameter.Optional
                 },
                 namespaces: new[] { "QLNSVATC.Areas.HR.Controllers" }
-            ); 
+            );
+
             context.MapRoute(
-                name: "HR_QLNV_ung-vien",
+                name: "HR_QLNV_UngVien",
                 url: "HR/xem-ho-so-ung-vien",
                 defaults: new
                 {
@@ -46,6 +47,7 @@ namespace QLNSVATC.Areas.HR
                 },
                 namespaces: new[] { "QLNSVATC.Areas.HR.Controllers" }
             );
+
             context.MapRoute(
                 name: "HR_QLPB_Thongtin",
                 url: "HR/ql-phong-ban",
@@ -57,6 +59,19 @@ namespace QLNSVATC.Areas.HR
                 },
                 namespaces: new[] { "QLNSVATC.Areas.HR.Controllers" }
             );
+
+            context.MapRoute(
+                name: "HR_QLPB_ChiTiet",
+                url: "HR/ql-phong-ban/chi-tiet/{id}",
+                defaults: new
+                {
+                    controller = "Department",
+                    action = "Details",
+                    id = UrlParameter.Optional
+                },
+                namespaces: new[] { "QLNSVATC.Areas.HR.Controllers" }
+            );
+
             context.MapRoute(
                 name: "HR_QLDA_Thongtin",
                 url: "HR/ql-du-an",
@@ -68,21 +83,35 @@ namespace QLNSVATC.Areas.HR
                 },
                 namespaces: new[] { "QLNSVATC.Areas.HR.Controllers" }
             );
+
+            context.MapRoute(
+                name: "HR_QLDA_ChiTiet",
+                url: "HR/ql-du-an/chi-tiet/{id}",
+                defaults: new
+                {
+                    controller = "Project",
+                    action = "Details",
+                    id = UrlParameter.Optional
+                },
+                namespaces: new[] { "QLNSVATC.Areas.HR.Controllers" }
+            );
+
             context.MapRoute(
                 name: "HR_QLLLV",
-                url: "HR/lich-lam-viec",
+                url: "HR/lich-lam-viec/{anchor}",
                 defaults: new
                 {
                     controller = "Work",
                     action = "Index",
-                    codeBus = UrlParameter.Optional
+                    anchor = UrlParameter.Optional
                 },
                 namespaces: new[] { "QLNSVATC.Areas.HR.Controllers" }
             );
+
             context.MapRoute(
-                "HR_default",
-                "HR/{controller}/{action}/{id}",
-                new { controller = "Home", action = "Index", id = UrlParameter.Optional },
+                name: "HR_default",
+                url: "HR/{controller}/{action}/{id}",
+                defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional },
                 namespaces: new[] { "QLNSVATC.Areas.HR.Controllers" }
             );
         }

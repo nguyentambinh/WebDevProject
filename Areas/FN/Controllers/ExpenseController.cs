@@ -52,15 +52,22 @@ namespace QLNSVATC.Areas.FN.Controllers
                 vm.PendingTransport = db.CPDUANs.Count(x => x.MAVC != null && !x.CHIPHITONG.HasValue);
 
                 var recent = db.CPDUANs
+                    .Include(x => x.NHAPNVL)
+                    .Include(x => x.VANCHUYENNVL)
                     .OrderByDescending(x => x.NHAPNVL.NGAYNHAP ?? x.VANCHUYENNVL.NGAYVC)
                     .Take(5)
                     .ToList()
                     .Select(x => new RecentExpenseVM
                     {
-                        Type = x.MANHAP != null && x.MAVC == null ? "Material"
-                             : x.MAVC != null && x.MANHAP == null ? "Transport"
-                             : "Project",
-                        Description = x.NHAPNVL != null
+                        Type = x.NHAPNVL != null && (x.NHAPNVL.CPNHAP ?? 0) > 0 && (x.VANCHUYENNVL == null || (x.VANCHUYENNVL.CPVC ?? 0) == 0)
+                            ? "Material"
+                            : x.VANCHUYENNVL != null && (x.VANCHUYENNVL.CPVC ?? 0) > 0 && (x.NHAPNVL == null || (x.NHAPNVL.CPNHAP ?? 0) == 0)
+                                ? "Transport"
+                                : ((x.NHAPNVL == null || (x.NHAPNVL.CPNHAP ?? 0) == 0) &&
+                                   (x.VANCHUYENNVL == null || (x.VANCHUYENNVL.CPVC ?? 0) == 0))
+                                    ? "Project"
+                                    : "Other",
+                        Description = x.NHAPNVL != null && !string.IsNullOrEmpty(x.NHAPNVL.TENNVL)
                             ? x.NHAPNVL.TENNVL
                             : x.MADA,
                         Date = x.NHAPNVL?.NGAYNHAP ?? x.VANCHUYENNVL?.NGAYVC,
@@ -125,26 +132,39 @@ namespace QLNSVATC.Areas.FN.Controllers
                 }
                 vm.TeamSpendings = teamSpending;
 
-                decimal catProject = db.CPDUANs
-                    .Where(c => c.MANHAP == null && c.MAVC == null)
+                var catsQuery = db.CPDUANs
+                    .Include(c => c.NHAPNVL)
+                    .Include(c => c.VANCHUYENNVL)
+                    .ToList();
+
+                decimal catProject = catsQuery
+                    .Where(c =>
+                        ((c.NHAPNVL == null) || (c.NHAPNVL.CPNHAP ?? 0) == 0) &&
+                        ((c.VANCHUYENNVL == null) || (c.VANCHUYENNVL.CPVC ?? 0) == 0))
                     .Select(c => c.CHIPHITONG ?? 0)
                     .DefaultIfEmpty(0)
                     .Sum();
 
-                decimal catMaterial = db.CPDUANs
-                    .Where(c => c.MANHAP != null && c.MAVC == null)
+                decimal catMaterial = catsQuery
+                    .Where(c =>
+                        (c.NHAPNVL != null && (c.NHAPNVL.CPNHAP ?? 0) > 0) &&
+                        ((c.VANCHUYENNVL == null) || (c.VANCHUYENNVL.CPVC ?? 0) == 0))
                     .Select(c => c.CHIPHITONG ?? 0)
                     .DefaultIfEmpty(0)
                     .Sum();
 
-                decimal catTransport = db.CPDUANs
-                    .Where(c => c.MAVC != null && c.MANHAP == null)
+                decimal catTransport = catsQuery
+                    .Where(c =>
+                        (c.VANCHUYENNVL != null && (c.VANCHUYENNVL.CPVC ?? 0) > 0) &&
+                        ((c.NHAPNVL == null) || (c.NHAPNVL.CPNHAP ?? 0) == 0))
                     .Select(c => c.CHIPHITONG ?? 0)
                     .DefaultIfEmpty(0)
                     .Sum();
 
-                decimal catOther = db.CPDUANs
-                    .Where(c => c.MAVC != null && c.MANHAP != null)
+                decimal catOther = catsQuery
+                    .Where(c =>
+                        (c.NHAPNVL != null && (c.NHAPNVL.CPNHAP ?? 0) > 0) &&
+                        (c.VANCHUYENNVL != null && (c.VANCHUYENNVL.CPVC ?? 0) > 0))
                     .Select(c => c.CHIPHITONG ?? 0)
                     .DefaultIfEmpty(0)
                     .Sum();
@@ -178,8 +198,6 @@ namespace QLNSVATC.Areas.FN.Controllers
             }
         }
 
-        // ================= RAW MATERIAL PURCHASE ================
-
         public ActionResult RawMaterialPurchase()
         {
             try
@@ -187,10 +205,8 @@ namespace QLNSVATC.Areas.FN.Controllers
                 BuildSettings();
 
                 var vm = new MaterialPurchaseListVM();
-
                 var today = DateTime.Today;
 
-                // Lấy thông tin dự án: tên + trạng thái
                 var projectMeta = db.DUANTHEOHOPDONGs
                     .Include(d => d.HOPDONG)
                     .ToList()
@@ -229,10 +245,9 @@ namespace QLNSVATC.Areas.FN.Controllers
                     .GroupBy(x => x.MADA)
                     .ToDictionary(g => g.Key, g => g.First());
 
-                // Lấy chi phí NVL theo CPDUAN + NHAPNVL
                 var cpQuery = db.CPDUANs
                     .Include(c => c.NHAPNVL)
-                    .Where(c => c.MANHAP != null) // chỉ các dòng có phiếu nhập NVL
+                    .Where(c => c.NHAPNVL != null && (c.NHAPNVL.CPNHAP ?? 0) > 0)
                     .OrderByDescending(c => c.NHAPNVL.NGAYNHAP)
                     .ToList();
 
@@ -242,14 +257,14 @@ namespace QLNSVATC.Areas.FN.Controllers
 
                     return new MaterialPurchaseRowVM
                     {
-                        RequestCode = c.MANHAP,                         // MANHAP
-                        MaterialName = c.NHAPNVL?.TENNVL,               // TENNVL
-                        Amount = c.NHAPNVL?.CPNHAP ?? 0m,               // CPNHAP
-                        Date = c.NHAPNVL?.NGAYNHAP,                     // NGAYNHAP
-                        ProjectCode = c.MADA,                           // MADA
-                        ProjectName = pi?.ProjectName ?? c.MADA,        // TENHD
+                        RequestCode = c.MANHAP,
+                        MaterialName = c.NHAPNVL?.TENNVL,
+                        Amount = c.NHAPNVL?.CPNHAP ?? 0m,
+                        Date = c.NHAPNVL?.NGAYNHAP,
+                        ProjectCode = c.MADA,
+                        ProjectName = pi?.ProjectName ?? c.MADA,
                         ProjectStatusCode = pi?.StatusCode ?? "unknown",
-                        ChangeFactor = c.HSTHAYDOI                      // HSTHAYDOI
+                        ChangeFactor = c.HSTHAYDOI
                     };
                 }).ToList();
 
@@ -261,9 +276,6 @@ namespace QLNSVATC.Areas.FN.Controllers
                 return View(new MaterialPurchaseListVM());
             }
         }
-
-
-        // ================= PROJECT EXPENSE ======================
 
         public ActionResult Project(int page = 1)
         {
@@ -377,6 +389,7 @@ namespace QLNSVATC.Areas.FN.Controllers
                 });
             }
         }
+
         [HttpGet]
         public ActionResult GetMaterialDetail(string requestCode, string projectCode)
         {
@@ -407,7 +420,6 @@ namespace QLNSVATC.Areas.FN.Controllers
                 var dahd = duan?.DUANTHEOHOPDONGs.FirstOrDefault();
                 var hopdong = dahd?.HOPDONG;
 
-                // Trạng thái dự án giống trang Project
                 string status = "unknown";
                 if (dahd != null)
                 {
@@ -476,7 +488,6 @@ namespace QLNSVATC.Areas.FN.Controllers
                     return Json(new { success = false, message = "Missing request code." });
                 }
 
-                // Tìm phiếu nhập NVL + toàn bộ CPDUAN liên quan
                 var nvl = db.NHAPNVLs
                     .Include(n => n.CPDUANs)
                     .FirstOrDefault(n => n.MANHAP == requestCode);
@@ -486,8 +497,6 @@ namespace QLNSVATC.Areas.FN.Controllers
                     return Json(new { success = false, message = "Material record not found." });
                 }
 
-                // Nếu truyền projectCode, có thể chỉ xóa link với một dự án;
-                // nhưng bạn đang muốn "xóa NVL", nên mình xóa toàn bộ CPDUAN của phiếu này luôn.
                 foreach (var cp in nvl.CPDUANs.ToList())
                 {
                     db.CPDUANs.Remove(cp);
@@ -507,7 +516,6 @@ namespace QLNSVATC.Areas.FN.Controllers
                 return Json(new { success = false, message = "Error while deleting material record." });
             }
         }
-        // ================= NEW EXPENSE MANUAL ===================
 
         [HttpGet]
         public ActionResult NewExpense()
@@ -533,6 +541,8 @@ namespace QLNSVATC.Areas.FN.Controllers
                     new SelectListItem { Value = "Material",  Text = "Material" },
                     new SelectListItem { Value = "Transport", Text = "Transport" }
                 }.ToList();
+
+                vm.TypeCode = "Project";
 
                 return View(vm);
             }
@@ -573,7 +583,9 @@ namespace QLNSVATC.Areas.FN.Controllers
                         {
                             Value = d.MADA,
                             Text = d.MADA
-                        }).OrderBy(x => x.Text).ToList();
+                        })
+                        .OrderBy(x => x.Text)
+                        .ToList();
 
                     model.TypeOptions = new[]
                     {
@@ -585,12 +597,17 @@ namespace QLNSVATC.Areas.FN.Controllers
                     return View(model);
                 }
 
-                var amount = model.Amount.Value;
-                var ngay = model.Date ?? DateTime.Today;
+                decimal amount = model.Amount.Value;
+                decimal factor = model.ChangeFactor ?? 1m;
+                decimal totalCost = amount * factor;
+                DateTime ngay = model.Date ?? DateTime.Today;
+
+                string manhap;
+                string mavc;
 
                 if (model.TypeCode == "Material")
                 {
-                    var manhap = GenerateManhap();
+                    manhap = GenerateManhap();
                     var nvl = new NHAPNVL
                     {
                         MANHAP = manhap,
@@ -600,19 +617,38 @@ namespace QLNSVATC.Areas.FN.Controllers
                     };
                     db.NHAPNVLs.Add(nvl);
 
+                    mavc = GenerateMavc();
+                    var vcDummy = new VANCHUYENNVL
+                    {
+                        MAVC = mavc,
+                        CPVC = 0m,
+                        NGAYVC = ngay
+                    };
+                    db.VANCHUYENNVLs.Add(vcDummy);
+
                     var cp = new CPDUAN
                     {
                         MADA = model.ProjectCode,
                         MANHAP = manhap,
-                        MAVC = null,
-                        CHIPHITONG = amount,
+                        MAVC = mavc,
+                        CHIPHITONG = totalCost,
                         HSTHAYDOI = model.ChangeFactor
                     };
                     db.CPDUANs.Add(cp);
                 }
                 else if (model.TypeCode == "Transport")
                 {
-                    var mavc = GenerateMavc();
+                    manhap = GenerateManhap();
+                    var nvlDummy = new NHAPNVL
+                    {
+                        MANHAP = manhap,
+                        TENNVL = "[AUTO] Transport-only",
+                        CPNHAP = 0m,
+                        NGAYNHAP = ngay
+                    };
+                    db.NHAPNVLs.Add(nvlDummy);
+
+                    mavc = GenerateMavc();
                     var vc = new VANCHUYENNVL
                     {
                         MAVC = mavc,
@@ -624,21 +660,40 @@ namespace QLNSVATC.Areas.FN.Controllers
                     var cp = new CPDUAN
                     {
                         MADA = model.ProjectCode,
-                        MANHAP = null,
+                        MANHAP = manhap,
                         MAVC = mavc,
-                        CHIPHITONG = amount,
+                        CHIPHITONG = totalCost,
                         HSTHAYDOI = model.ChangeFactor
                     };
                     db.CPDUANs.Add(cp);
                 }
                 else
                 {
+                    manhap = GenerateManhap();
+                    var nvlDummy = new NHAPNVL
+                    {
+                        MANHAP = manhap,
+                        TENNVL = "[AUTO] Project expense",
+                        CPNHAP = 0m,
+                        NGAYNHAP = ngay
+                    };
+                    db.NHAPNVLs.Add(nvlDummy);
+
+                    mavc = GenerateMavc();
+                    var vcDummy = new VANCHUYENNVL
+                    {
+                        MAVC = mavc,
+                        CPVC = 0m,
+                        NGAYVC = ngay
+                    };
+                    db.VANCHUYENNVLs.Add(vcDummy);
+
                     var cp = new CPDUAN
                     {
                         MADA = model.ProjectCode,
-                        MANHAP = null,
-                        MAVC = null,
-                        CHIPHITONG = amount,
+                        MANHAP = manhap,
+                        MAVC = mavc,
+                        CHIPHITONG = totalCost,
                         HSTHAYDOI = model.ChangeFactor
                     };
                     db.CPDUANs.Add(cp);
@@ -658,7 +713,9 @@ namespace QLNSVATC.Areas.FN.Controllers
                     {
                         Value = d.MADA,
                         Text = d.MADA
-                    }).OrderBy(x => x.Text).ToList();
+                    })
+                    .OrderBy(x => x.Text)
+                    .ToList();
 
                 model.TypeOptions = new[]
                 {
@@ -685,7 +742,7 @@ namespace QLNSVATC.Areas.FN.Controllers
                 int.TryParse(digits, out num);
             }
             num++;
-            return $"N{num:D4}";
+            return $"N{num:D3}";
         }
 
         private string GenerateMavc()
@@ -702,10 +759,8 @@ namespace QLNSVATC.Areas.FN.Controllers
                 int.TryParse(digits, out num);
             }
             num++;
-            return $"VC{num:D4}";
+            return $"VC{num:D3}";
         }
-
-        // ================= TRANSPORT LIST / EXPORT ==============
 
         public ActionResult Transport(
             int page = 1,
@@ -730,7 +785,7 @@ namespace QLNSVATC.Areas.FN.Controllers
                         join nh in db.NHAPNVLs
                             on cp.MANHAP equals nh.MANHAP into nhJoin
                         from nh in nhJoin.DefaultIfEmpty()
-                        where cp.MAVC != null
+                        where vc != null && (vc.CPVC ?? 0) > 0
                         select new { cp, vc, nh };
 
                 if (from.HasValue)
@@ -823,7 +878,8 @@ namespace QLNSVATC.Areas.FN.Controllers
             try
             {
                 var q = db.VANCHUYENNVLs
-                          .Include(v => v.CPDUANs.Select(c => c.NHAPNVL));
+                          .Include(v => v.CPDUANs.Select(c => c.NHAPNVL))
+                          .Where(v => (v.CPVC ?? 0) > 0);
 
                 if (from.HasValue)
                     q = q.Where(v => v.NGAYVC >= from.Value);
