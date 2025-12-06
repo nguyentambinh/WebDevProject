@@ -35,12 +35,16 @@ namespace QLNSVATC.Areas.FN.Data.FN_Models
 
     public class MaterialPurchaseRowVM
     {
-        public string RequestCode { get; set; } 
+        public string RequestCode { get; set; }
         public string MaterialName { get; set; }
         public decimal Amount { get; set; }
         public DateTime? Date { get; set; }
         public string ProjectCode { get; set; }
+        public string ProjectName { get; set; }
+        public string ProjectStatusCode { get; set; }
+        public decimal? ChangeFactor { get; set; }
     }
+
 
     public class MaterialPurchaseListVM
     {

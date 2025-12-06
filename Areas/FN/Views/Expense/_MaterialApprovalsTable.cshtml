@@ -1,7 +1,6 @@
 ﻿@model IEnumerable<QLNSVATC.Areas.FN.Data.FN_Models.MaterialPurchaseRowVM>
 @using System.Collections.Generic
 
-@using System.Collections.Generic
 @{
     string lang = ViewBag.CurrentLang as string ?? "en_US";
 
@@ -12,19 +11,19 @@
         return d.Values.First();
     };
 
-    var tOwner = new Dictionary<string, string> {
-        { "vi_VN", "Người đề nghị" },
-        { "en_US", "Owner" },
-        { "jp_JP", "申請者" },
-        { "kr_KR", "신청자" },
-        { "cn_CN", "申请人" }
+    var tMat = new Dictionary<string, string> {
+        { "vi_VN", "Nguyên vật liệu" },
+        { "en_US", "Material" },
+        { "jp_JP", "原材料" },
+        { "kr_KR", "원자재" },
+        { "cn_CN", "原材料" }
     };
-    var tCat = new Dictionary<string, string> {
-        { "vi_VN", "Hạng mục" },
-        { "en_US", "Category" },
-        { "jp_JP", "カテゴリ" },
-        { "kr_KR", "분류" },
-        { "cn_CN", "类别" }
+    var tProject = new Dictionary<string, string> {
+        { "vi_VN", "Dự án" },
+        { "en_US", "Project" },
+        { "jp_JP", "プロジェクト" },
+        { "kr_KR", "프로젝트" },
+        { "cn_CN", "项目" }
     };
     var tAmount = new Dictionary<string, string> {
         { "vi_VN", "Giá trị" },
@@ -33,12 +32,19 @@
         { "kr_KR", "금액" },
         { "cn_CN", "金额" }
     };
-    var tFreq = new Dictionary<string, string> {
-        { "vi_VN", "Tần suất" },
-        { "en_US", "Frequency" },
-        { "jp_JP", "頻度" },
-        { "kr_KR", "주기" },
-        { "cn_CN", "频率" }
+    var tStatus = new Dictionary<string, string> {
+        { "vi_VN", "Trạng thái dự án" },
+        { "en_US", "Project status" },
+        { "jp_JP", "プロジェクト状態" },
+        { "kr_KR", "프로젝트 상태" },
+        { "cn_CN", "项目状态" }
+    };
+    var tFactor = new Dictionary<string, string> {
+        { "vi_VN", "Hệ số thay đổi" },
+        { "en_US", "Change factor" },
+        { "jp_JP", "変動係数" },
+        { "kr_KR", "변동 계수" },
+        { "cn_CN", "变动系数" }
     };
     var tAction = new Dictionary<string, string> {
         { "vi_VN", "Thao tác" },
@@ -53,62 +59,93 @@
     <div class="mat-card-title-row">
         <h3 class="mat-card-title">
             @L(new Dictionary<string, string>{
-{ "vi_VN", "Đơn mua nguyên vật liệu chờ duyệt" },
-{ "en_US", "Raw material purchase approvals" },
-{ "jp_JP", "原材料仕入れ承認一覧" },
-{ "kr_KR", "원자재 구매 승인 목록" },
-{ "cn_CN", "原材料采购审批列表" }
-})
+                { "vi_VN", "Chi phí nhập nguyên vật liệu" },
+                { "en_US", "Raw material purchase costs" },
+                { "jp_JP", "原材料仕入れコスト一覧" },
+                { "kr_KR", "원자재 구매 비용 목록" },
+                { "cn_CN", "原材料采购成本列表" }
+            })
         </h3>
     </div>
 
     <table class="mat-table">
         <thead>
             <tr>
-                <th>@L(tOwner)</th>
-                <th>@L(tCat)</th>
+                <th>@L(tMat)</th>
+                <th>@L(tProject)</th>
                 <th>@L(tAmount)</th>
-                <th>@L(tFreq)</th>
+                <th>@L(tStatus)</th>
+                <th>@L(tFactor)</th>
                 <th>@L(tAction)</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var row in Model)
             {
-                <tr>
+                var statusCode = (row.ProjectStatusCode ?? "unknown").ToLower();
+                <tr data-code="@row.RequestCode" data-project="@row.ProjectCode">
+                    <!-- Nguyên vật liệu -->
                     <td>
                         <div class="mat-owner-cell">
                             <div class="avatar-circle">
-                                @((row.RequestCode ?? "??").PadLeft(2).Substring(0,2).ToUpper())
+                                @((row.MaterialName ?? row.RequestCode ?? "??")
+                            .PadRight(2)
+                            .Substring(0, 2)
+                            .ToUpper())
                             </div>
                             <div class="owner-info">
-                                <div class="owner-name">@row.RequestCode</div>
+                                <div class="owner-name">@row.MaterialName</div>
                                 <div class="owner-role">
-                                    @row.ProjectCode ?? "No project linked"
+                                    @row.RequestCode
                                 </div>
                             </div>
                         </div>
                     </td>
+
+                    <!-- Dự án -->
                     <td>
-                        <span class="mat-tag mat-tag-steel">
-                            @row.MaterialName
-                        </span>
+                        <div class="project-cell">
+                            <div class="project-name">@row.ProjectName</div>
+                            <div class="project-code">
+                                @(string.IsNullOrEmpty(row.ProjectCode)
+                            ? "?? \"No project linked\""
+                            : row.ProjectCode)
+                            </div>
+                        </div>
                     </td>
+
+                    <!-- Giá trị -->
                     <td class="mat-amount">
                         @row.Amount.ToString("N0")
                     </td>
+
+                    <!-- Trạng thái dự án -->
                     <td>
-                        @row.Date?.ToString("dd/MM/yyyy") ?? "-"
+                        <span class="mat-status mat-status-@statusCode">
+                            @(string.IsNullOrEmpty(row.ProjectStatusCode)
+                        ? "-"
+                        : row.ProjectStatusCode)
+                        </span>
                     </td>
+
+                    <!-- Hệ số thay đổi -->
+                    <td class="mat-factor">
+                        @(row.ChangeFactor.HasValue
+                    ? row.ChangeFactor.Value.ToString("0.##")
+                    : "-")
+                    </td>
+
+                    <!-- Thao tác: Xem chi tiết + Xóa NVL -->
                     <td class="mat-actions">
-                        <button class="mat-action-btn" title="View detail">
+                        <button type="button"
+                                class="mat-action-btn js-mat-view"
+                                title="Xem chi tiết">
                             <i class="fa-regular fa-eye"></i>
                         </button>
-                        <button class="mat-action-btn ok" title="Approve">
-                            <i class="fa-solid fa-check"></i>
-                        </button>
-                        <button class="mat-action-btn reject" title="Reject">
-                            <i class="fa-solid fa-xmark"></i>
+                        <button type="button"
+                                class="mat-action-btn reject js-mat-delete"
+                                title="Xóa phiếu nhập NVL">
+                            <i class="fa-solid fa-trash"></i>
                         </button>
                     </td>
                 </tr>

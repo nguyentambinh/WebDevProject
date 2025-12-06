@@ -178,6 +178,8 @@ namespace QLNSVATC.Areas.FN.Controllers
             }
         }
 
+        // ================= RAW MATERIAL PURCHASE ================
+
         public ActionResult RawMaterialPurchase()
         {
             try
@@ -186,17 +188,69 @@ namespace QLNSVATC.Areas.FN.Controllers
 
                 var vm = new MaterialPurchaseListVM();
 
-                var query = db.NHAPNVLs
-                    .OrderByDescending(x => x.NGAYNHAP)
+                var today = DateTime.Today;
+
+                // Lấy thông tin dự án: tên + trạng thái
+                var projectMeta = db.DUANTHEOHOPDONGs
+                    .Include(d => d.HOPDONG)
+                    .ToList()
+                    .Select(d =>
+                    {
+                        var plannedEnd = d.HOPDONG?.NGAYKT_DUTINH;
+                        var actualEnd = d.NGAYKT;
+
+                        string status;
+                        if (actualEnd.HasValue)
+                        {
+                            status = "done";
+                        }
+                        else if (!plannedEnd.HasValue)
+                        {
+                            status = "ongoing";
+                        }
+                        else
+                        {
+                            var days = (plannedEnd.Value.Date - today).TotalDays;
+                            if (days < 0)
+                                status = "overdue";
+                            else if (days <= 7)
+                                status = "near";
+                            else
+                                status = "ongoing";
+                        }
+
+                        return new
+                        {
+                            d.MADA,
+                            ProjectName = d.HOPDONG?.TENHD ?? d.MADA,
+                            StatusCode = status
+                        };
+                    })
+                    .GroupBy(x => x.MADA)
+                    .ToDictionary(g => g.Key, g => g.First());
+
+                // Lấy chi phí NVL theo CPDUAN + NHAPNVL
+                var cpQuery = db.CPDUANs
+                    .Include(c => c.NHAPNVL)
+                    .Where(c => c.MANHAP != null) // chỉ các dòng có phiếu nhập NVL
+                    .OrderByDescending(c => c.NHAPNVL.NGAYNHAP)
                     .ToList();
 
-                vm.Items = query.Select(n => new MaterialPurchaseRowVM
+                vm.Items = cpQuery.Select(c =>
                 {
-                    RequestCode = n.MANHAP,
-                    MaterialName = n.TENNVL,
-                    Amount = n.CPNHAP ?? 0,
-                    Date = n.NGAYNHAP,
-                    ProjectCode = n.CPDUANs.Select(c => c.MADA).FirstOrDefault()
+                    projectMeta.TryGetValue(c.MADA, out var pi);
+
+                    return new MaterialPurchaseRowVM
+                    {
+                        RequestCode = c.MANHAP,                         // MANHAP
+                        MaterialName = c.NHAPNVL?.TENNVL,               // TENNVL
+                        Amount = c.NHAPNVL?.CPNHAP ?? 0m,               // CPNHAP
+                        Date = c.NHAPNVL?.NGAYNHAP,                     // NGAYNHAP
+                        ProjectCode = c.MADA,                           // MADA
+                        ProjectName = pi?.ProjectName ?? c.MADA,        // TENHD
+                        ProjectStatusCode = pi?.StatusCode ?? "unknown",
+                        ChangeFactor = c.HSTHAYDOI                      // HSTHAYDOI
+                    };
                 }).ToList();
 
                 return View(vm);
@@ -207,6 +261,9 @@ namespace QLNSVATC.Areas.FN.Controllers
                 return View(new MaterialPurchaseListVM());
             }
         }
+
+
+        // ================= PROJECT EXPENSE ======================
 
         public ActionResult Project(int page = 1)
         {
@@ -320,6 +377,137 @@ namespace QLNSVATC.Areas.FN.Controllers
                 });
             }
         }
+        [HttpGet]
+        public ActionResult GetMaterialDetail(string requestCode, string projectCode)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(requestCode))
+                {
+                    return Json(new { success = false, message = "Missing request code." },
+                        JsonRequestBehavior.AllowGet);
+                }
+
+                var today = DateTime.Today;
+
+                var cp = db.CPDUANs
+                    .Include(c => c.NHAPNVL)
+                    .Include(c => c.DUAN.DUANTHEOHOPDONGs.Select(d => d.HOPDONG))
+                    .FirstOrDefault(c =>
+                        c.MANHAP == requestCode &&
+                        (string.IsNullOrEmpty(projectCode) || c.MADA == projectCode));
+
+                if (cp == null)
+                {
+                    return Json(new { success = false, message = "Material record not found." },
+                        JsonRequestBehavior.AllowGet);
+                }
+
+                var duan = cp.DUAN;
+                var dahd = duan?.DUANTHEOHOPDONGs.FirstOrDefault();
+                var hopdong = dahd?.HOPDONG;
+
+                // Trạng thái dự án giống trang Project
+                string status = "unknown";
+                if (dahd != null)
+                {
+                    var plannedEnd = hopdong?.NGAYKT_DUTINH;
+                    var actualEnd = dahd.NGAYKT;
+
+                    if (actualEnd.HasValue)
+                    {
+                        status = "done";
+                    }
+                    else if (!plannedEnd.HasValue)
+                    {
+                        status = "ongoing";
+                    }
+                    else
+                    {
+                        var days = (plannedEnd.Value.Date - today).TotalDays;
+                        if (days < 0)
+                            status = "overdue";
+                        else if (days <= 7)
+                            status = "near";
+                        else
+                            status = "ongoing";
+                    }
+                }
+
+                var nvl = cp.NHAPNVL;
+
+                var detail = new
+                {
+                    success = true,
+                    code = cp.MANHAP,
+                    materialName = nvl?.TENNVL ?? "",
+                    amount = nvl?.CPNHAP ?? 0m,
+                    amountText = (nvl?.CPNHAP ?? 0m).ToString("#,##0"),
+                    date = nvl?.NGAYNHAP?.ToString("dd/MM/yyyy") ?? "",
+                    projectCode = cp.MADA,
+                    projectName = hopdong?.TENHD ?? cp.MADA,
+                    projectStatus = status,
+                    changeFactor = cp.HSTHAYDOI,
+                    changeFactorText = cp.HSTHAYDOI.HasValue ? cp.HSTHAYDOI.Value.ToString("0.##") : "",
+                    totalCost = cp.CHIPHITONG ?? 0m,
+                    totalCostText = (cp.CHIPHITONG ?? 0m).ToString("#,##0"),
+                    deposit = duan?.TIENCOC ?? 0m,
+                    depositText = (duan?.TIENCOC ?? 0m).ToString("#,##0"),
+                    expectedRevenue = duan?.TIENNGHIEMTHU_DUTINH ?? 0m,
+                    expectedRevenueText = (duan?.TIENNGHIEMTHU_DUTINH ?? 0m).ToString("#,##0")
+                };
+
+                return Json(detail, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception)
+            {
+                return Json(new { success = false, message = "Error while loading material detail." },
+                    JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public ActionResult DeleteMaterial(string requestCode, string projectCode)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(requestCode))
+                {
+                    return Json(new { success = false, message = "Missing request code." });
+                }
+
+                // Tìm phiếu nhập NVL + toàn bộ CPDUAN liên quan
+                var nvl = db.NHAPNVLs
+                    .Include(n => n.CPDUANs)
+                    .FirstOrDefault(n => n.MANHAP == requestCode);
+
+                if (nvl == null)
+                {
+                    return Json(new { success = false, message = "Material record not found." });
+                }
+
+                // Nếu truyền projectCode, có thể chỉ xóa link với một dự án;
+                // nhưng bạn đang muốn "xóa NVL", nên mình xóa toàn bộ CPDUAN của phiếu này luôn.
+                foreach (var cp in nvl.CPDUANs.ToList())
+                {
+                    db.CPDUANs.Remove(cp);
+                }
+
+                db.NHAPNVLs.Remove(nvl);
+                db.SaveChanges();
+
+                return Json(new
+                {
+                    success = true,
+                    message = "Material record and linked project costs have been deleted."
+                });
+            }
+            catch (Exception)
+            {
+                return Json(new { success = false, message = "Error while deleting material record." });
+            }
+        }
+        // ================= NEW EXPENSE MANUAL ===================
 
         [HttpGet]
         public ActionResult NewExpense()
@@ -516,6 +704,8 @@ namespace QLNSVATC.Areas.FN.Controllers
             num++;
             return $"VC{num:D4}";
         }
+
+        // ================= TRANSPORT LIST / EXPORT ==============
 
         public ActionResult Transport(
             int page = 1,

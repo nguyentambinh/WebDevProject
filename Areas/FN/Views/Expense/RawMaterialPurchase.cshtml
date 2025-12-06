@@ -132,7 +132,79 @@
         </div>
     </div>
 </div>
+<div class="mat-modal-overlay" id="matModal">
+    <div class="mat-modal-dialog">
+        <div class="mat-modal-header">
+            <h3 class="mat-modal-title" id="matModalTitle">Chi tiết</h3>
+            <button type="button" class="mat-modal-close" id="matModalClose">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
 
+        <div class="mat-modal-body">
+            <div class="mat-modal-grid">
+                <div class="mat-modal-field">
+                    <span class="label">Mã phiếu nhập</span>
+                    <span class="value" id="mdRequestCode"></span>
+                </div>
+                <div class="mat-modal-field">
+                    <span class="label">Tên nguyên vật liệu</span>
+                    <span class="value" id="mdMaterialName"></span>
+                </div>
+                <div class="mat-modal-field">
+                    <span class="label">Giá trị nhập</span>
+                    <span class="value" id="mdAmount"></span>
+                </div>
+                <div class="mat-modal-field">
+                    <span class="label">Ngày nhập</span>
+                    <span class="value" id="mdDate"></span>
+                </div>
+                <div class="mat-modal-field">
+                    <span class="label">Mã dự án</span>
+                    <span class="value" id="mdProjectCode"></span>
+                </div>
+                <div class="mat-modal-field">
+                    <span class="label">Tên dự án</span>
+                    <span class="value" id="mdProjectName"></span>
+                </div>
+                <div class="mat-modal-field">
+                    <span class="label">Trạng thái dự án</span>
+                    <span class="value" id="mdProjectStatus"></span>
+                </div>
+                <div class="mat-modal-field">
+                    <span class="label">Hệ số thay đổi</span>
+                    <span class="value" id="mdChangeFactor"></span>
+                </div>
+                <div class="mat-modal-field">
+                    <span class="label">Tổng chi phí đã ghi nhận</span>
+                    <span class="value" id="mdTotalCost"></span>
+                </div>
+                <div class="mat-modal-field">
+                    <span class="label">Tiền cọc</span>
+                    <span class="value" id="mdDeposit"></span>
+                </div>
+                <div class="mat-modal-field">
+                    <span class="label">Doanh thu dự tính nghiệm thu</span>
+                    <span class="value" id="mdExpectedRevenue"></span>
+                </div>
+            </div>
+
+            <p class="mat-modal-warning" id="matModalWarning" style="display:none;">
+                Bạn sắp xóa phiếu nhập NVL này. Hành động này sẽ xóa toàn bộ liên kết
+                chi phí dự án liên quan và không thể hoàn tác.
+            </p>
+        </div>
+
+        <div class="mat-modal-footer">
+            <button type="button" class="mat-modal-btn ghost" id="matModalCancel">
+                Đóng
+            </button>
+            <button type="button" class="mat-modal-btn danger" id="matModalPrimary" style="display:none;">
+                Xóa
+            </button>
+        </div>
+    </div>
+</div>
 <link rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
       integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
@@ -319,6 +391,33 @@
         var keywordInput = document.getElementById('matFilterKeyword');
         var tableWrapper = document.getElementById('mat-table-wrapper');
 
+        var detailUrl = '@Url.Action("GetMaterialDetail", "Expense", new { area = "FN" })';
+        var deleteUrl = '@Url.Action("DeleteMaterial", "Expense", new { area = "FN" })';
+
+        // MODAL
+        var modal = document.getElementById('matModal');
+        var modalTitle = document.getElementById('matModalTitle');
+        var modalWarning = document.getElementById('matModalWarning');
+        var modalClose = document.getElementById('matModalClose');
+        var modalCancel = document.getElementById('matModalCancel');
+        var modalPrimary = document.getElementById('matModalPrimary');
+
+        var mdRequestCode = document.getElementById('mdRequestCode');
+        var mdMaterialName = document.getElementById('mdMaterialName');
+        var mdAmount = document.getElementById('mdAmount');
+        var mdDate = document.getElementById('mdDate');
+        var mdProjectCode = document.getElementById('mdProjectCode');
+        var mdProjectName = document.getElementById('mdProjectName');
+        var mdProjectStatus = document.getElementById('mdProjectStatus');
+        var mdChangeFactor = document.getElementById('mdChangeFactor');
+        var mdTotalCost = document.getElementById('mdTotalCost');
+        var mdDeposit = document.getElementById('mdDeposit');
+        var mdExpectedRevenue = document.getElementById('mdExpectedRevenue');
+
+        var currentCode = null;
+        var currentProject = null;
+        var currentMode = null; // "detail" | "delete"
+
         if (filterBtn && filterBar) {
             filterBtn.addEventListener('click', function () {
                 filterBar.classList.toggle('is-open');
@@ -341,7 +440,7 @@
         }
 
         function filterRows() {
-            if (!tableWrapper) return;
+            if (!tableWrapper || !keywordInput) return;
 
             var keyword = (keywordInput.value || '').toLowerCase().trim();
             var rows = tableWrapper.querySelectorAll('tbody tr');
@@ -349,8 +448,7 @@
             if (!rows || rows.length === 0) return;
 
             rows.forEach(function (row) {
-                var text = row.innerText || row.textContent || '';
-                text = text.toLowerCase();
+                var text = (row.innerText || row.textContent || '').toLowerCase();
                 if (!keyword) {
                     row.style.display = '';
                 } else {
@@ -360,9 +458,7 @@
         }
 
         if (applyBtn) {
-            applyBtn.addEventListener('click', function () {
-                filterRows();
-            });
+            applyBtn.addEventListener('click', filterRows);
         }
 
         if (clearBtn) {
@@ -379,6 +475,188 @@
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     filterRows();
+                }
+            });
+        }
+
+        function openModal(mode) {
+            currentMode = mode || 'detail';
+
+            if (!modal) return;
+            modal.classList.add('is-open');
+
+            if (currentMode === 'detail') {
+                modalTitle.textContent = 'Chi tiết nhập nguyên vật liệu';
+                modalWarning.style.display = 'none';
+                modalPrimary.style.display = 'none';
+                modalCancel.textContent = 'Đóng';
+            } else {
+                modalTitle.textContent = 'Xóa phiếu nhập nguyên vật liệu';
+                modalWarning.style.display = 'block';
+                modalPrimary.style.display = 'inline-flex';
+                modalPrimary.textContent = 'Xóa';
+                modalCancel.textContent = 'Hủy';
+            }
+        }
+
+        function closeModal() {
+            if (!modal) return;
+            modal.classList.remove('is-open');
+            currentMode = null;
+            currentCode = null;
+            currentProject = null;
+        }
+
+        [modalClose, modalCancel].forEach(function (btn) {
+            if (btn) {
+                btn.addEventListener('click', function () {
+                    closeModal();
+                });
+            }
+        });
+
+        if (modal) {
+            modal.addEventListener('click', function (e) {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+        }
+
+        function loadDetail(code, project) {
+            var url = detailUrl + '?requestCode=' + encodeURIComponent(code) +
+                '&projectCode=' + encodeURIComponent(project || '');
+
+            return fetch(url, {
+                method: 'GET',
+                cache: 'no-cache'
+            }).then(function (res) {
+                if (!res.ok) throw new Error('Network error');
+                return res.json();
+            });
+        }
+
+        function postForm(url, data) {
+            var formData = [];
+            for (var key in data) {
+                if (data.hasOwnProperty(key)) {
+                    formData.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
+                }
+            }
+            return fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                },
+                body: formData.join('&')
+            }).then(function (res) {
+                if (!res.ok) throw new Error('Network error');
+                return res.json();
+            });
+        }
+
+        if (modalPrimary) {
+            modalPrimary.addEventListener('click', function () {
+                if (currentMode !== 'delete' || !currentCode) return;
+
+                if (!confirm('Bạn chắc chắn muốn xóa phiếu nhập ' + currentCode + ' ?')) {
+                    return;
+                }
+
+                postForm(deleteUrl, {
+                    requestCode: currentCode,
+                    projectCode: currentProject || ''
+                }).then(function (data) {
+                    if (data && data.success) {
+                        if (tableWrapper && currentCode) {
+                            var row = tableWrapper.querySelector('tr[data-code="' + currentCode.replace(/"/g, '\\"') + '"]');
+                            if (row) {
+                                row.parentNode.removeChild(row);
+                            }
+                        }
+                        alert(data.message || 'Đã xóa phiếu nhập.');
+                        closeModal();
+                    } else {
+                        alert((data && data.message) || 'Xóa không thành công.');
+                    }
+                }).catch(function () {
+                    alert('Có lỗi khi xóa phiếu nhập.');
+                });
+            });
+        }
+
+        // Click trên bảng
+        if (tableWrapper) {
+            tableWrapper.addEventListener('click', function (e) {
+                var viewBtn = e.target.closest('.js-mat-view');
+                var deleteBtn = e.target.closest('.js-mat-delete');
+
+                if (!viewBtn && !deleteBtn) return;
+
+                var row = e.target.closest('tr');
+                if (!row) return;
+
+                var code = row.getAttribute('data-code');
+                var project = row.getAttribute('data-project') || '';
+
+                if (!code) return;
+
+                currentCode = code;
+                currentProject = project;
+
+                if (viewBtn) {
+                    loadDetail(code, project).then(function (data) {
+                        if (!data || !data.success) {
+                            alert((data && data.message) || 'Không tải được chi tiết.');
+                            return;
+                        }
+
+                        mdRequestCode.textContent = data.code || '';
+                        mdMaterialName.textContent = data.materialName || '';
+                        mdAmount.textContent = data.amountText || '';
+                        mdDate.textContent = data.date || '';
+                        mdProjectCode.textContent = data.projectCode || '';
+                        mdProjectName.textContent = data.projectName || '';
+                        mdProjectStatus.textContent = data.projectStatus || '';
+                        mdChangeFactor.textContent = data.changeFactorText || '';
+                        mdTotalCost.textContent = data.totalCostText || '';
+                        mdDeposit.textContent = data.depositText || '';
+                        mdExpectedRevenue.textContent = data.expectedRevenueText || '';
+
+                        openModal('detail');
+                    }).catch(function () {
+                        alert('Có lỗi khi tải chi tiết phiếu nhập.');
+                    });
+
+                    return;
+                }
+
+                if (deleteBtn) {
+                    loadDetail(code, project).then(function (data) {
+                        if (!data || !data.success) {
+                            alert((data && data.message) || 'Không tải được thông tin để xóa.');
+                            return;
+                        }
+
+                        mdRequestCode.textContent = data.code || '';
+                        mdMaterialName.textContent = data.materialName || '';
+                        mdAmount.textContent = data.amountText || '';
+                        mdDate.textContent = data.date || '';
+                        mdProjectCode.textContent = data.projectCode || '';
+                        mdProjectName.textContent = data.projectName || '';
+
+                        mdProjectStatus.textContent = data.projectStatus || '';
+                        mdChangeFactor.textContent = data.changeFactorText || '';
+                        mdTotalCost.textContent = data.totalCostText || '';
+                        mdDeposit.textContent = data.depositText || '';
+                        mdExpectedRevenue.textContent = data.expectedRevenueText || '';
+
+                        openModal('delete');
+                    }).catch(function () {
+                        alert('Có lỗi khi tải thông tin để xóa.');
+                    });
+
+                    return;
                 }
             });
         }

@@ -84,9 +84,11 @@
     .nexp-input:focus,
     .nexp-select:focus {
         border-color: var(--nexp-accent);
-        box-shadow: 0 0 0 1px color-mix(in srgb, var(--nexp-accent) 40%, transparent);
+        box-shadow: 0 0 0 1px var(--nexp-accent);
+        box-shadow: 0 0 0 1px color-mix(in srgb, var(--nexp-accent) 40%, transparent 60%);
         background: #020617;
     }
+
 
 .nexp-select {
     appearance: none;
