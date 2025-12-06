@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using QLNSVATC.Models;
@@ -41,14 +40,15 @@ namespace QLNSVATC.Areas.Admin.Controllers
     public class RoleController : Controller
     {
         private readonly QLNSVATCEntities db = new QLNSVATCEntities();
-
         public ActionResult Index(string prefix)
+
         {
             if (!CheckAccess.Role("AD"))
             {
                 Session.Clear();
                 return RedirectToAction("Login", "Account", new { area = "" });
             }
+
 
             var query = from u in db.USERS
                         join c in db.CONFIRMAUTHs on u.AUTH equals c.AUTH
@@ -321,5 +321,142 @@ namespace QLNSVATC.Areas.Admin.Controllers
             TempData["RoleSuccess"] = "Permission has been deleted.";
             return RedirectToAction("Index");
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult UpdateRole(string username, string roleGroup)
+        {
+            if (!CheckAccess.Role("AD"))
+            {
+                return Json(new { success = false, message = "No permission." });
+            }
+
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(roleGroup))
+                return Json(new { success = false, message = "Dữ liệu không hợp lệ." });
+
+            var user = db.USERS.FirstOrDefault(x => x.USERNAME == username);
+            if (user == null)
+                return Json(new { success = false, message = "Không tìm thấy user." });
+
+            var ca = db.CONFIRMAUTHs.FirstOrDefault(x => x.AUTH == user.AUTH);
+            if (ca == null)
+                return Json(new { success = false, message = "Không tìm thấy bản ghi xác thực." });
+
+            string oldGroup = GetRoleGroup(ca.AUTH);
+            if (string.Equals(oldGroup, roleGroup, StringComparison.OrdinalIgnoreCase))
+            {
+                return Json(new
+                {
+                    success = true,
+                    roleName = GetRoleGroupName(roleGroup)
+                });
+            }
+
+            string manv = ca.CODE;
+            var nv = db.NHANVIENs.FirstOrDefault(x => x.MANV == manv);
+            if (nv == null)
+                return Json(new { success = false, message = "Không tìm thấy nhân viên tương ứng." });
+
+            string newAuth = BuildNewAuth(ca.AUTH, roleGroup);
+
+            ca.AUTH = newAuth;
+            ca.NAMEAUTH = GetRoleGroupName(roleGroup);
+
+            user.AUTH = newAuth;
+            user.CONFIRMAUTH = ca;
+
+            nv.MACV = MapRoleGroupToPosition(roleGroup);
+
+            db.SaveChanges();
+
+            return Json(new
+            {
+                success = true,
+                roleName = ca.NAMEAUTH
+            });
+        }
+
+        private static string GetRoleGroup(string authCode)
+        {
+            if (string.IsNullOrEmpty(authCode) || authCode.Length < 2)
+                return authCode ?? "";
+            return authCode.Substring(0, 2).ToUpperInvariant();
+        }
+
+        private static string GetRoleGroupName(string group)
+        {
+            group = (group ?? "").ToUpperInvariant();
+            switch (group)
+            {
+                case "AD": return "Admin";
+                case "HR": return "Human Resources";
+                case "FN": return "Finance Manager";
+                case "EM": return "Employee";
+                default: return "Unknown";
+            }
+        }
+
+        private static string BuildNewAuth(string oldAuth, string newGroup)
+        {
+            newGroup = (newGroup ?? "").ToUpperInvariant();
+            if (string.IsNullOrEmpty(oldAuth))
+                return newGroup;
+
+            string tail = oldAuth.Length > 2 ? oldAuth.Substring(2) : "";
+            return newGroup + tail;
+        }
+
+        private static string MapRoleGroupToPosition(string group)
+        {
+            group = (group ?? "").ToUpperInvariant();
+            switch (group)
+            {
+                case "HR": return "CV_HR01";
+                case "FN": return "CV_FN01";
+                case "AD": return "CV_AD01";
+                case "EM":
+                default: return "CV_EM01";
+            }
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Delete(string username)
+        {
+            if (!CheckAccess.Role("AD"))
+            {
+                return Json(new { success = false, message = "No permission." });
+            }
+
+            if (string.IsNullOrWhiteSpace(username))
+                return Json(new { success = false, message = "Username không hợp lệ." });
+
+            var user = db.USERS.FirstOrDefault(x => x.USERNAME == username);
+            if (user == null)
+                return Json(new { success = false, message = "Không tìm thấy user." });
+
+            var ca = db.CONFIRMAUTHs.FirstOrDefault(x => x.AUTH == user.AUTH);
+
+            try
+            {
+                if (ca != null)
+                {
+                    db.CONFIRMAUTHs.Remove(ca);
+                }
+
+                db.USERS.Remove(user);
+                db.SaveChanges();
+
+                return Json(new { success = true, message = "Đã xoá tài khoản." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Không xoá được tài khoản do còn ràng buộc dữ liệu."
+                });
+            }
+        }
+
     }
 }

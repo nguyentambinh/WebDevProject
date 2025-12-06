@@ -25,13 +25,13 @@ namespace QLNSVATC.Areas.FN
             );
             context.MapRoute(
                 name: "FN_Expense_Project",
-                url: "FN/ql-chi-du-an",
+                url: "fn-quan-ly-chi/chi-du-an",
                 defaults: new { controller = "Expense", action = "Project", id = UrlParameter.Optional },
                 namespaces: new[] { "QLNSVATC.Areas.FN.Controllers" }
             );
             context.MapRoute(
                 name: "FN_Expense_RawMaterialPurchase",
-                url: "FN/ql-chi-nhapnvl",
+                url: "ql-chi-nhapnvl",
                 defaults: new { controller = "Expense", action = "RawMaterialPurchase", id = UrlParameter.Optional },
                 namespaces: new[] { "QLNSVATC.Areas.FN.Controllers" }
             );
@@ -49,7 +49,7 @@ namespace QLNSVATC.Areas.FN
             );
             context.MapRoute(
                 name: "FN_RevenueS",
-                url: "FN/ql-doanh-thu-dich-vu",
+                url: "ql-doanh-thu-dich-vu",
                 defaults: new { controller = "Revenue", action = "Service", id = UrlParameter.Optional },
                 namespaces: new[] { "QLNSVATC.Areas.FN.Controllers" }
             );

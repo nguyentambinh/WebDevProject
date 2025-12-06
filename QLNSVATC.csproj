@@ -290,6 +290,7 @@
     <Compile Include="Areas\Admin\Controllers\ActivityController.cs" />
     <Compile Include="Areas\Admin\Controllers\DataController.cs" />
     <Compile Include="Areas\Admin\Controllers\HomeController.cs" />
+    <Compile Include="Areas\Admin\Data\UserRoleViewModel.cs" />
     <Compile Include="Areas\FN\Controllers\ExpenseController.cs" />
     <Compile Include="Areas\FN\Controllers\ProfitController.cs" />
     <Compile Include="Areas\FN\Controllers\RevenueController.cs" />
@@ -808,9 +809,10 @@
     <Content Include="Areas\HR\Views\Project\Information.cshtml" />
     <Content Include="Areas\Admin\Views\Menu\Index.cshtml" />
     <Content Include="Areas\Admin\Views\Activity\Index.cshtml" />
-    <Content Include="Areas\Admin\Views\Role\Index.cshtml" />
     <Content Include="Areas\FN\Views\Expense\Transport.cshtml" />
     <Content Include="Areas\FN\Views\Profit\Index.cshtml" />
+    <Content Include="Content\Uploads\BaoCao\20251206042502_BCCM.xlsx" />
+    <Content Include="Areas\Admin\Views\Role\Index.cshtml" />
     <None Include="packages\jQuery.3.7.0\Content\Scripts\jquery-3.7.0-vsdoc.js" />
     <Content Include="packages\jQuery.3.7.0\Content\Scripts\jquery-3.7.0.js" />
     <Content Include="packages\jQuery.3.7.0\Content\Scripts\jquery-3.7.0.min.js" />
@@ -1128,7 +1130,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Areas\Admin\Views\Data\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />

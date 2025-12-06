@@ -12,22 +12,22 @@ namespace QLNSVATC.Areas.Admin
         public override void RegisterArea(AreaRegistrationContext context)
         {
             context.MapRoute(
-                name: "AD_QLHD",
-                url: "AD/ql-hoat-dong",
+                name: "AD_QLPQ",
+                url: "AD/ql-phan-quyen",
                 defaults: new
                 {
-                    controller = "Activity",
+                    controller = "Role",
                     action = "Index",
                     codeBus = UrlParameter.Optional
                 },
                 namespaces: new[] { "QLNSVATC.Areas.Admin.Controllers" }
             );
             context.MapRoute(
-                name: "AD_QLPQ",
-                url: "AD/ql-phan-quyen",
+                name: "AD_QLHD",
+                url: "AD/ql-hoat-dong",
                 defaults: new
                 {
-                    controller = "Role",
+                    controller = "Activity",
                     action = "Index",
                     codeBus = UrlParameter.Optional
                 },
