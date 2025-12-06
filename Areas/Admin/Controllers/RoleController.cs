@@ -2,8 +2,8 @@
 using System.Linq;
 using System.Web.Mvc;
 using QLNSVATC.Models;
-using QLNSVATC.Helper; 
-using QLNSVATC.Helpers; 
+using QLNSVATC.Helper;
+using QLNSVATC.Helpers;
 
 namespace QLNSVATC.Areas.Admin.Data
 {
@@ -40,15 +40,14 @@ namespace QLNSVATC.Areas.Admin.Controllers
     public class RoleController : Controller
     {
         private readonly QLNSVATCEntities db = new QLNSVATCEntities();
-        public ActionResult Index(string prefix)
 
+        public ActionResult Index(string prefix)
         {
             if (!CheckAccess.Role("AD"))
             {
                 Session.Clear();
                 return RedirectToAction("Login", "Account", new { area = "" });
             }
-
 
             var query = from u in db.USERS
                         join c in db.CONFIRMAUTHs on u.AUTH equals c.AUTH
@@ -109,6 +108,7 @@ namespace QLNSVATC.Areas.Admin.Controllers
 
             return View(model);
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult ChangeRole(string auth, string newPrefix)
@@ -136,6 +136,7 @@ namespace QLNSVATC.Areas.Admin.Controllers
 
             string suffix = auth.Length > 2 ? auth.Substring(2) : "";
             string newAuth = newPrefix + suffix;
+
             if (db.USERS.Any(x => x.AUTH == newAuth) || db.CONFIRMAUTHs.Any(x => x.AUTH == newAuth))
             {
                 TempData["RoleError"] = "Target permission code already exists.";
@@ -177,7 +178,6 @@ namespace QLNSVATC.Areas.Admin.Controllers
             TempData["RoleSuccess"] = "Role has been updated.";
             return RedirectToAction("Index", new { prefix = newPrefix });
         }
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -262,7 +262,8 @@ namespace QLNSVATC.Areas.Admin.Controllers
                 $"New permission {auth} created for employee {nv.MANV}."
             );
 
-            TempData["RoleSuccess"] = $"Permission has been created. Username: {defaultUserName}, default password: {passPlain}.";
+            TempData["RoleSuccess"] =
+                $"Permission has been created. Username: {defaultUserName}, default password: {passPlain}.";
             return RedirectToAction("Index", new { prefix = rolePrefix });
         }
 
@@ -329,17 +330,17 @@ namespace QLNSVATC.Areas.Admin.Controllers
             }
 
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(roleGroup))
-                return Json(new { success = false, message = "Dữ liệu không hợp lệ." });
+                return Json(new { success = false, message = "Invalid data." });
 
             var user = db.USERS.FirstOrDefault(x => x.USERNAME == username);
             if (user == null)
-                return Json(new { success = false, message = "Không tìm thấy user." });
+                return Json(new { success = false, message = "User not found." });
 
-            var ca = db.CONFIRMAUTHs.FirstOrDefault(x => x.AUTH == user.AUTH);
-            if (ca == null)
-                return Json(new { success = false, message = "Không tìm thấy bản ghi xác thực." });
+            var oldCf = db.CONFIRMAUTHs.FirstOrDefault(x => x.AUTH == user.AUTH);
+            if (oldCf == null)
+                return Json(new { success = false, message = "Authentication record not found." });
 
-            string oldGroup = GetRoleGroup(ca.AUTH);
+            string oldGroup = GetRoleGroup(oldCf.AUTH);
             if (string.Equals(oldGroup, roleGroup, StringComparison.OrdinalIgnoreCase))
             {
                 return Json(new
@@ -349,18 +350,34 @@ namespace QLNSVATC.Areas.Admin.Controllers
                 });
             }
 
-            string manv = ca.CODE;
-            var nv = db.NHANVIENs.FirstOrDefault(x => x.MANV == manv);
+            var nv = db.NHANVIENs.FirstOrDefault(x => x.MANV == oldCf.CODE);
             if (nv == null)
-                return Json(new { success = false, message = "Không tìm thấy nhân viên tương ứng." });
+                return Json(new { success = false, message = "Corresponding employee not found." });
 
-            string newAuth = BuildNewAuth(ca.AUTH, roleGroup);
+            string newAuth = BuildNewAuth(oldCf.AUTH, roleGroup);
 
-            ca.AUTH = newAuth;
-            ca.NAMEAUTH = GetRoleGroupName(roleGroup);
+            if (db.USERS.Any(x => x.AUTH == newAuth) || db.CONFIRMAUTHs.Any(x => x.AUTH == newAuth))
+                return Json(new { success = false, message = "New permission code already exists." });
 
-            user.AUTH = newAuth;
-            user.CONFIRMAUTH = ca;
+            var newUser = new USER
+            {
+                USERNAME = user.USERNAME,
+                PASS = user.PASS,
+                AUTH = newAuth
+            };
+            db.USERS.Add(newUser);
+
+            var newCf = new CONFIRMAUTH
+            {
+                AUTH = newAuth,
+                NAMEAUTH = GetRoleGroupName(roleGroup),
+                CODE = oldCf.CODE,
+                CODEBUS = oldCf.CODEBUS
+            };
+            db.CONFIRMAUTHs.Add(newCf);
+
+            db.USERS.Remove(user);
+            db.CONFIRMAUTHs.Remove(oldCf);
 
             nv.MACV = MapRoleGroupToPosition(roleGroup);
 
@@ -369,7 +386,7 @@ namespace QLNSVATC.Areas.Admin.Controllers
             return Json(new
             {
                 success = true,
-                roleName = ca.NAMEAUTH
+                roleName = newCf.NAMEAUTH
             });
         }
 
@@ -415,6 +432,7 @@ namespace QLNSVATC.Areas.Admin.Controllers
                 default: return "CV_EM01";
             }
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Delete(string username)
@@ -425,11 +443,11 @@ namespace QLNSVATC.Areas.Admin.Controllers
             }
 
             if (string.IsNullOrWhiteSpace(username))
-                return Json(new { success = false, message = "Username không hợp lệ." });
+                return Json(new { success = false, message = "Invalid username." });
 
             var user = db.USERS.FirstOrDefault(x => x.USERNAME == username);
             if (user == null)
-                return Json(new { success = false, message = "Không tìm thấy user." });
+                return Json(new { success = false, message = "User not found." });
 
             var ca = db.CONFIRMAUTHs.FirstOrDefault(x => x.AUTH == user.AUTH);
 
@@ -443,17 +461,16 @@ namespace QLNSVATC.Areas.Admin.Controllers
                 db.USERS.Remove(user);
                 db.SaveChanges();
 
-                return Json(new { success = true, message = "Đã xoá tài khoản." });
+                return Json(new { success = true, message = "Account has been deleted." });
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return Json(new
                 {
                     success = false,
-                    message = "Không xoá được tài khoản do còn ràng buộc dữ liệu."
+                    message = "Cannot delete this account due to related data constraints."
                 });
             }
         }
-
     }
 }
