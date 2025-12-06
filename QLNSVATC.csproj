@@ -1122,10 +1122,6 @@
     <Content Include="Views\Account\ForgotPassword.cshtml" />
     <Content Include="Views\JobSeeker\SubmitCV.cshtml" />
     <Content Include="Views\Shared\_Footer.cshtml" />
-    <Content Include="Uploads\HoSoUngVien\2025120408_NGUYEN_TAN_SANG\nguyentansang_filekhac_20251204081612.docx" />
-    <Content Include="Uploads\HoSoUngVien\2025120409_NGUYEN_TAN_LOC\nguyentanloc_filekhac_20251204092208.docx" />
-    <Content Include="Uploads\HoSoUngVien\2025120409_NGUYEN_TAN_SANG\nguyentansang_filekhac_20251204091433.docx" />
-    <Content Include="Uploads\HoSoUngVien\20251205120722_NGUYENTAMTRANG\nguyentamtrang_filethongtin_20251205120722.docx" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Account\Profile.cshtml" />
