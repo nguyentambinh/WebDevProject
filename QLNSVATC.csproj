@@ -398,7 +398,7 @@
       <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\ForgotPasswordViewModel.cs" />
-    <Compile Include="Areas\FN\Data\FN_Models\HomeViewModel.cs" />
+    <Compile Include="Models\HomeViewModel.cs" />
     <Compile Include="Models\HOPDONG.cs">
       <DependentUpon>QLNSVATCEntities.tt</DependentUpon>
     </Compile>

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using QLNSVATC.Models;
 
-namespace QLNSVATC.Areas.FN.Data.FN_Models
+namespace QLNSVATC.Models
 { 
     public class HomeViewModel
     {

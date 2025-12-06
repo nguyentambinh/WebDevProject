@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Web.Mvc;
 using QLNSVATC.Models;
-using QLNSVATC.Areas.FN.Data.FN_Models;
 
 namespace QLNSVATC.Controllers
 {
