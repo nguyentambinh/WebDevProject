@@ -94,8 +94,8 @@ namespace QLNSVATC.Controllers
                 case "AD": return RedirectToAction("Index", "Home", new { area = "Admin" });
                 case "HR": return RedirectToAction("Index", "Home", new { area = "HR", id = codeBus });
                 case "FN": return RedirectToAction("Index", "Home", new { area = "FN", id = codeBus });
-                case "OF": return RedirectToAction("Index", "Home", new { area = "OF", id = codeBus });
-                case "EM": return RedirectToAction("Index", "Home", new { area = "Employee", id = codeBus });
+                case "OF": return RedirectToAction("Index", "Home", new { area = "", id = codeBus });
+                case "EM": return RedirectToAction("Index", "Home", new { area = "", id = codeBus });
             }
 
             ModelState.AddModelError("", "Invalid role.");

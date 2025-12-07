@@ -6,6 +6,7 @@ using System.Linq;
 using System.Web.Mvc;
 using ClosedXML.Excel;
 using QLNSVATC.Areas.FN.Data.FN_Models;
+using QLNSVATC.Helper;
 using QLNSVATC.Helpers;
 using QLNSVATC.Models;
 
@@ -25,6 +26,11 @@ namespace QLNSVATC.Areas.FN.Controllers
 
         public ActionResult Index()
         {
+            if (!CheckAccess.Role("FN"))
+            {
+                Session.Clear();
+                return RedirectToAction("Login", "Account", new { area = "" });
+            }
             try
             {
                 BuildSettings();

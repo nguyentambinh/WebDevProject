@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using QLNSVATC.Areas.FN.Data.FN_Models;
+using QLNSVATC.Helper;
 using QLNSVATC.Helpers;
 using QLNSVATC.Models;
 
@@ -15,6 +16,11 @@ namespace QLNSVATC.Areas.FN.Controllers
         [HttpGet]
         public ActionResult Index()
         {
+            if (!CheckAccess.Role("FN"))
+            {
+                Session.Clear();
+                return RedirectToAction("Login", "Account", new { area = "" });
+            }
             string userId = Session["UserId"] as string;
             var st = SettingsHelper.BuildViewBagData(db, userId);
             ViewBag.Settings = st;

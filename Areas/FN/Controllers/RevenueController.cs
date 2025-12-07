@@ -9,6 +9,7 @@ using System.Text;
 using QLNSVATC.Areas.FN.Data.FN_Models;
 using System.IO;
 using ClosedXML.Excel;
+using QLNSVATC.Helper;
 
 namespace QLNSVATC.Areas.FN.Controllers
 {
@@ -18,6 +19,11 @@ namespace QLNSVATC.Areas.FN.Controllers
 
         public ActionResult Project(DateTime? from, DateTime? to)
         {
+            if (!CheckAccess.Role("FN"))
+            {
+                Session.Clear();
+                return RedirectToAction("Login", "Account", new { area = "" });
+            }
             string userId = Session["UserId"] as string;
             var st = SettingsHelper.BuildViewBagData(db, userId);
             ViewBag.Settings = st;
