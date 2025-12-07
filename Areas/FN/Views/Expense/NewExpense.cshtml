@@ -151,6 +151,13 @@
 
                 @Html.ValidationSummary(true, "", new { @class = "field-error" })
 
+                @if (TempData["FN_Success"] != null)
+                {
+                    <div class="alert-success">
+                        @TempData["FN_Success"]
+                    </div>
+                }
+
                 <div class="nexp-body nexp-body-single">
                     <div class="nexp-left-only">
 
@@ -218,6 +225,22 @@
             </div>
         }
     </div>
+    <div id="nexp-success-modal" class="nexp-modal">
+        <div class="nexp-modal-backdrop"></div>
+        <div class="nexp-modal-box">
+            <h3 class="nexp-modal-title">
+                @(lang == "vi_VN" ? "Thêm chi phí thành công" : "Expense saved")
+            </h3>
+            <p class="nexp-modal-text">
+                @(ViewBag.SuccessMessage ?? (lang == "vi_VN"
+                ? "Chi phí đã được lưu."
+                : "The expense has been saved."))
+            </p>
+            <button type="button" id="nexp-modal-ok" class="nexp-btn-primary nexp-modal-btn">
+                @(lang == "vi_VN" ? "OK" : "OK")
+            </button>
+        </div>
+    </div>
 </div>
 
 <link href="~/Areas/FN/Data/CSS/Expense/NewExpense.css" rel="stylesheet" />
@@ -233,4 +256,71 @@
         --nexp-font: @font;
         --nexp-fz: @(fz)px;
     }
+    .nexp-modal {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        font-family: var(--nexp-font);
+    }
+
+        .nexp-modal.show {
+            display: flex;
+        }
+
+    .nexp-modal-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.75);
+        backdrop-filter: blur(4px);
+    }
+
+    .nexp-modal-box {
+        position: relative;
+        background: var(--nexp-card);
+        color: var(--nexp-text);
+        border-radius: 18px;
+        padding: 24px 24px 20px;
+        border: 1px solid var(--nexp-border);
+        min-width: 320px;
+        max-width: 420px;
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.6);
+        z-index: 1;
+    }
+
+    .nexp-modal-title {
+        font-size: 1.1rem;
+        margin-bottom: 8px;
+    }
+
+    .nexp-modal-text {
+        font-size: 0.95rem;
+        color: var(--nexp-text-soft);
+        margin-bottom: 18px;
+    }
+
+    .nexp-modal-btn {
+        width: 100%;
+        justify-content: center;
+    }
 </style>
+<script>
+    (function () {
+        var hasSuccess = '@(ViewBag.SaveSuccess == true ? "1" : "0")' === '1';
+        if (!hasSuccess) return;
+
+        var modal = document.getElementById('nexp-success-modal');
+        var btnOk = document.getElementById('nexp-modal-ok');
+
+        if (!modal || !btnOk) return;
+
+        modal.classList.add('show');
+
+        btnOk.addEventListener('click', function () {
+            modal.classList.remove('show');
+            window.location.href = '@Url.Action("Project", "Expense", new { area = "FN" })';
+        });
+    })();
+</script>

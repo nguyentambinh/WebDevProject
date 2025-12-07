@@ -102,7 +102,7 @@
 
 .field-error {
     font-size: 11px;
-    color: #fca5a5;
+    color: #ff4d4d;
 }
 
 /* actions */
@@ -131,7 +131,14 @@
         filter: brightness(1.05);
         box-shadow: 0 16px 35px rgba(0, 0, 0, 0.9);
     }
-
+.alert-success {
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    background: #16a34a22;
+    border: 1px solid #16a34a;
+    color: #bbf7d0;
+}
 /* responsive */
 
 @media (max-width: 640px) {

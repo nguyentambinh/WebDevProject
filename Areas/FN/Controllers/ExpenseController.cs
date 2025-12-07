@@ -664,7 +664,7 @@ namespace QLNSVATC.Areas.FN.Controllers
                             MANHAP = manhap,
                             MAVC = mavc,
                             CHIPHITONG = totalCost,
-                            HSTHAYDOI = model.ChangeFactor
+                            HSTHAYDOI = factor
                         };
                         db.CPDUANs.Add(cp);
 
@@ -678,8 +678,33 @@ namespace QLNSVATC.Areas.FN.Controllers
                     }
                 }
 
-                TempData["FN_Success"] = "Expense has been saved successfully.";
-                return RedirectToAction("Project");
+                model.ProjectOptions = db.DUANs
+                    .Select(d => new SelectListItem
+                    {
+                        Value = d.MADA,
+                        Text = d.MADA
+                    })
+                    .OrderBy(x => x.Text)
+                    .ToList();
+
+                        model.TypeOptions = new[]
+                        {
+                    new SelectListItem { Value = "Project",   Text = "Project" },
+                    new SelectListItem { Value = "Material",  Text = "Material" },
+                    new SelectListItem { Value = "Transport", Text = "Transport" }
+                }.ToList();
+
+                ModelState.Clear();
+                model.Amount = null;
+                model.MaterialName = null;
+                model.ChangeFactor = 1m;
+                model.Date = DateTime.Today;
+
+                ViewBag.SaveSuccess = true;
+                ViewBag.SuccessMessage = "Expense has been saved successfully.";
+
+                return View(model);
+
             }
             catch (Exception ex)
             {
@@ -689,7 +714,6 @@ namespace QLNSVATC.Areas.FN.Controllers
                 if (ex.InnerException != null && ex.InnerException.InnerException != null)
                     ModelState.AddModelError("", "Inner 2: " + ex.InnerException.InnerException.Message);
 
-                // load lại dropdown
                 model.ProjectOptions = db.DUANs
                     .Select(d => new SelectListItem
                     {

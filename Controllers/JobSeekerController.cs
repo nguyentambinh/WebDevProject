@@ -21,11 +21,6 @@ namespace QLNSVATC.Controllers
             string ext = Path.GetExtension(fileName)?.ToLower();
             return !string.IsNullOrEmpty(ext) && exts.Contains(ext);
         }
-
-<<<<<<< Updated upstream
-        // helper: bỏ dấu + bỏ khoảng trắng
-=======
->>>>>>> Stashed changes
         private static string RemoveDiacritics(string text)
         {
             if (string.IsNullOrEmpty(text)) return text;
@@ -50,26 +45,14 @@ namespace QLNSVATC.Controllers
             return name;
         }
 
-<<<<<<< Updated upstream
-        // thư mục: yyyyMMddHH_Ten
+
         private static string BuildCandidateFolderName(string tenUngVien, DateTime dt)
         {
             string timeFull = dt.ToString("yyyyMMddHHmmss");
-            string prefix10 = timeFull.Substring(0, 10); // yyyyMMddHH
-=======
-        private static string BuildCandidateFolderName(string tenUngVien, DateTime dt)
-        {
-            string timeFull = dt.ToString("yyyyMMddHHmmss");
-            string prefix10 = timeFull.Substring(0, 10); 
->>>>>>> Stashed changes
+            string prefix10 = timeFull.Substring(0, 10);
             string name = SlugCandidateName(tenUngVien);
             return $"{prefix10}_{name}";
         }
-
-<<<<<<< Updated upstream
-        // file: yyyyMMddHHmmss_LoaiFile.ext
-=======
->>>>>>> Stashed changes
         private static string BuildNormalizedFileName(string typeCode, DateTime dt, string ext)
         {
             string timeFull = dt.ToString("yyyyMMddHHmmss");
@@ -151,11 +134,6 @@ namespace QLNSVATC.Controllers
                 {
                     return View(model);
                 }
-
-<<<<<<< Updated upstream
-                // ===== LƯU FILE =====
-=======
->>>>>>> Stashed changes
                 string rootFolder = Server.MapPath("~/Content/Uploads/HoSoUngVien/");
                 if (!Directory.Exists(rootFolder))
                     Directory.CreateDirectory(rootFolder);
@@ -190,7 +168,6 @@ namespace QLNSVATC.Controllers
                     model.FILEBANGCAP = newFileName;
                 }
 
-                // Other file
                 if (fileKhac != null && fileKhac.ContentLength > 0)
                 {
                     string ext = Path.GetExtension(fileKhac.FileName);
@@ -204,7 +181,6 @@ namespace QLNSVATC.Controllers
                 db.HOSOVIECLAMs.Add(model);
                 db.SaveChanges();
 
-                // ===== GỬI MAIL XÁC NHẬN + ĐÍNH KÈM =====
                 try
                 {
                     var from = "httbworkstation@gmail.com";
