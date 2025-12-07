@@ -10,6 +10,7 @@ using System.Linq;
 using System.Net.Mail;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Mvc;
 using System.Xml.Linq;
@@ -589,8 +590,47 @@ namespace QLNSVATC.Areas.HR.Controllers
             }
         }
 
-        [HttpGet]
-        [ActionName("Profile")]
+        private static string BuildFolderName(string tenUngVien, string fileName)
+        {
+            // Dựa trên cách lưu: folder = {yyyyMMddHH}_{TenKhongDauKhongSpace}
+            if (string.IsNullOrWhiteSpace(tenUngVien) || string.IsNullOrWhiteSpace(fileName))
+                return null;
+
+            var baseName = Path.GetFileNameWithoutExtension(fileName);
+            if (string.IsNullOrEmpty(baseName)) return null;
+
+            // lấy chuỗi số đầu tiên dài 14 / 12 / 10
+            var m = Regex.Match(baseName, @"\d{14}|\d{12}|\d{10}");
+            if (!m.Success) return null;
+
+            string timeStr = m.Value;
+            // folder chỉ dùng đến yyyyMMddHH → 10 ký tự đầu
+            if (timeStr.Length > 10)
+                timeStr = timeStr.Substring(0, 10);
+
+            string name = RemoveDiacritics(tenUngVien ?? "")
+                .Trim()
+                .Replace(" ", string.Empty);
+
+            if (string.IsNullOrEmpty(name)) name = "Candidate";
+
+            return $"{timeStr}_{name}";
+        }
+
+        private static string BuildFileUrl(string tenUngVien, string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName)) return null;
+
+            string folder = BuildFolderName(tenUngVien, fileName);
+            if (string.IsNullOrEmpty(folder))
+            {
+                // fallback: không có folder
+                return "/Content/Uploads/HoSoUngVien/" + fileName;
+            }
+
+            return "/Content/Uploads/HoSoUngVien/" + folder + "/" + fileName;
+        }
+
         public ActionResult ProfileGet(string id)
         {
             try
@@ -1106,41 +1146,6 @@ namespace QLNSVATC.Areas.HR.Controllers
             }
         }
 
-        private static string BuildFolderName(string tenUngVien, string fileName)
-        {
-            if (string.IsNullOrWhiteSpace(tenUngVien) || string.IsNullOrWhiteSpace(fileName))
-                return null;
-
-            var baseName = Path.GetFileNameWithoutExtension(fileName);
-            var parts = baseName.Split('_');
-            if (parts.Length < 3) return null;
-
-            string timeStr = parts[2];
-            if (!DateTime.TryParseExact(timeStr, "yyyyMMddHHmmss",
-                CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dt))
-            {
-                return null;
-            }
-
-            string prefix = dt.ToString("yyyyMMddHHmmss");
-            string name = RemoveDiacritics(tenUngVien ?? "")
-                .Trim()
-                .Replace(" ", string.Empty);
-
-            return $"{prefix}_{name}";
-        }
-
-        private static string BuildFileUrl(string tenUngVien, string fileName)
-        {
-            if (string.IsNullOrWhiteSpace(fileName)) return null;
-
-            string folder = BuildFolderName(tenUngVien, fileName);
-            if (string.IsNullOrEmpty(folder))
-                return "/Uploads/HoSoUngVien/" + fileName;
-
-            return "/Uploads/HoSoUngVien/" + folder + "/" + fileName;
-        }
-
         public ActionResult Candidate(string keyword, DateTime? fromDate, DateTime? toDate)
         {
             try
@@ -1274,7 +1279,8 @@ namespace QLNSVATC.Areas.HR.Controllers
             string scheduleText = interviewDateTime.ToString("dd/MM/yyyy HH:mm");
 
             string from = "httbworkstation@gmail.com";
-            string pass = "cotu wurg gbve crbk"; 
+            string pass = "cotu wurg gbve crbk";
+
             string to = candidate.EMAIL;
             string subject = "[TBT Center] Interview invitation";
 
@@ -1367,7 +1373,6 @@ namespace QLNSVATC.Areas.HR.Controllers
             }
         }
 
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult DownloadCandidateFiles(int id)
@@ -1381,7 +1386,8 @@ namespace QLNSVATC.Areas.HR.Controllers
                     return RedirectToAction("Candidate");
                 }
 
-                string root = Server.MapPath("~/Uploads/HoSoUngVien");
+                // đúng với JobSeekerController: Content/Uploads/HoSoUngVien
+                string root = Server.MapPath("~/Content/Uploads/HoSoUngVien/");
                 var files = new List<Tuple<string, string>>();
 
                 void AddFileIfExists(string fileName)
@@ -1518,12 +1524,22 @@ namespace QLNSVATC.Areas.HR.Controllers
         {
             if (string.IsNullOrWhiteSpace(fileName)) return null;
 
-            string baseName = Path.GetFileNameWithoutExtension(fileName);
-            var parts = baseName.Split('_');
-            if (parts.Length < 3) return null;
+            var baseName = Path.GetFileNameWithoutExtension(fileName);
+            if (string.IsNullOrEmpty(baseName)) return null;
 
-            string timeStr = parts[2];
-            if (DateTime.TryParseExact(timeStr, "yyyyMMddHHmmss",
+            var m = Regex.Match(baseName, @"\d{14}|\d{12}|\d{10}");
+            if (!m.Success) return null;
+
+            string timeStr = m.Value;
+            string[] formats;
+            if (timeStr.Length == 14)
+                formats = new[] { "yyyyMMddHHmmss" };
+            else if (timeStr.Length == 12)
+                formats = new[] { "yyyyMMddHHmm" };
+            else
+                formats = new[] { "yyyyMMddHH" };
+
+            if (DateTime.TryParseExact(timeStr, formats,
                 CultureInfo.InvariantCulture,
                 DateTimeStyles.None,
                 out DateTime dt))

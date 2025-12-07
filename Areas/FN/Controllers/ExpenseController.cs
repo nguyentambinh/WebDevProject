@@ -561,6 +561,7 @@ namespace QLNSVATC.Areas.FN.Controllers
             {
                 BuildSettings();
 
+                // ==== VALIDATION ====
                 if (string.IsNullOrWhiteSpace(model.ProjectCode))
                     ModelState.AddModelError("ProjectCode", "Project is required.");
 
@@ -589,10 +590,10 @@ namespace QLNSVATC.Areas.FN.Controllers
 
                     model.TypeOptions = new[]
                     {
-                        new SelectListItem { Value = "Project",   Text = "Project" },
-                        new SelectListItem { Value = "Material",  Text = "Material" },
-                        new SelectListItem { Value = "Transport", Text = "Transport" }
-                    }.ToList();
+                new SelectListItem { Value = "Project",   Text = "Project" },
+                new SelectListItem { Value = "Material",  Text = "Material" },
+                new SelectListItem { Value = "Transport", Text = "Transport" }
+            }.ToList();
 
                     return View(model);
                 }
@@ -602,112 +603,87 @@ namespace QLNSVATC.Areas.FN.Controllers
                 decimal totalCost = amount * factor;
                 DateTime ngay = model.Date ?? DateTime.Today;
 
-                string manhap;
-                string mavc;
-
-                if (model.TypeCode == "Material")
+                using (var tran = db.Database.BeginTransaction())
                 {
-                    manhap = GenerateManhap();
-                    var nvl = new NHAPNVL
+                    try
                     {
-                        MANHAP = manhap,
-                        TENNVL = model.MaterialName,
-                        CPNHAP = amount,
-                        NGAYNHAP = ngay
-                    };
-                    db.NHAPNVLs.Add(nvl);
+                        string manhap = GenerateManhap();
+                        string mavc = GenerateMavc();
 
-                    mavc = GenerateMavc();
-                    var vcDummy = new VANCHUYENNVL
-                    {
-                        MAVC = mavc,
-                        CPVC = 0m,
-                        NGAYVC = ngay
-                    };
-                    db.VANCHUYENNVLs.Add(vcDummy);
+                        string materialName;
+                        decimal cpNhap;
+                        decimal cpVc;
 
-                    var cp = new CPDUAN
+                        switch (model.TypeCode)
+                        {
+                            case "Material":
+                                materialName = model.MaterialName;
+                                cpNhap = amount;
+                                cpVc = 0m;
+                                break;
+
+                            case "Transport":
+                                materialName = "[AUTO] Transport-only";
+                                cpNhap = 0m;
+                                cpVc = amount;
+                                break;
+
+                            default:
+                                materialName = "[AUTO] Project expense";
+                                cpNhap = 0m;
+                                cpVc = 0m;
+                                break;
+                        }
+
+                        var nvl = new NHAPNVL
+                        {
+                            MANHAP = manhap,
+                            TENNVL = materialName,
+                            CPNHAP = cpNhap,
+                            NGAYNHAP = ngay
+                        };
+                        db.NHAPNVLs.Add(nvl);
+
+                        var vc = new VANCHUYENNVL
+                        {
+                            MAVC = mavc,
+                            CPVC = cpVc,
+                            NGAYVC = ngay
+                        };
+                        db.VANCHUYENNVLs.Add(vc);
+
+                        var cp = new CPDUAN
+                        {
+                            MADA = model.ProjectCode,
+                            MANHAP = manhap,
+                            MAVC = mavc,
+                            CHIPHITONG = totalCost,
+                            HSTHAYDOI = model.ChangeFactor
+                        };
+                        db.CPDUANs.Add(cp);
+
+                        db.SaveChanges();
+                        tran.Commit();
+                    }
+                    catch
                     {
-                        MADA = model.ProjectCode,
-                        MANHAP = manhap,
-                        MAVC = mavc,
-                        CHIPHITONG = totalCost,
-                        HSTHAYDOI = model.ChangeFactor
-                    };
-                    db.CPDUANs.Add(cp);
+                        tran.Rollback();
+                        throw;
+                    }
                 }
-                else if (model.TypeCode == "Transport")
-                {
-                    manhap = GenerateManhap();
-                    var nvlDummy = new NHAPNVL
-                    {
-                        MANHAP = manhap,
-                        TENNVL = "[AUTO] Transport-only",
-                        CPNHAP = 0m,
-                        NGAYNHAP = ngay
-                    };
-                    db.NHAPNVLs.Add(nvlDummy);
-
-                    mavc = GenerateMavc();
-                    var vc = new VANCHUYENNVL
-                    {
-                        MAVC = mavc,
-                        CPVC = amount,
-                        NGAYVC = ngay
-                    };
-                    db.VANCHUYENNVLs.Add(vc);
-
-                    var cp = new CPDUAN
-                    {
-                        MADA = model.ProjectCode,
-                        MANHAP = manhap,
-                        MAVC = mavc,
-                        CHIPHITONG = totalCost,
-                        HSTHAYDOI = model.ChangeFactor
-                    };
-                    db.CPDUANs.Add(cp);
-                }
-                else
-                {
-                    manhap = GenerateManhap();
-                    var nvlDummy = new NHAPNVL
-                    {
-                        MANHAP = manhap,
-                        TENNVL = "[AUTO] Project expense",
-                        CPNHAP = 0m,
-                        NGAYNHAP = ngay
-                    };
-                    db.NHAPNVLs.Add(nvlDummy);
-
-                    mavc = GenerateMavc();
-                    var vcDummy = new VANCHUYENNVL
-                    {
-                        MAVC = mavc,
-                        CPVC = 0m,
-                        NGAYVC = ngay
-                    };
-                    db.VANCHUYENNVLs.Add(vcDummy);
-
-                    var cp = new CPDUAN
-                    {
-                        MADA = model.ProjectCode,
-                        MANHAP = manhap,
-                        MAVC = mavc,
-                        CHIPHITONG = totalCost,
-                        HSTHAYDOI = model.ChangeFactor
-                    };
-                    db.CPDUANs.Add(cp);
-                }
-
-                db.SaveChanges();
 
                 TempData["FN_Success"] = "Expense has been saved successfully.";
                 return RedirectToAction("Project");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 ModelState.AddModelError("", "An error occurred while saving the expense.");
+                if (ex.InnerException != null)
+                    ModelState.AddModelError("", "Inner: " + ex.InnerException.Message);
+                if (ex.InnerException != null && ex.InnerException.InnerException != null)
+                    ModelState.AddModelError("", "Inner 2: " + ex.InnerException.InnerException.Message);
 
+                // load lại dropdown
                 model.ProjectOptions = db.DUANs
                     .Select(d => new SelectListItem
                     {
@@ -719,10 +695,10 @@ namespace QLNSVATC.Areas.FN.Controllers
 
                 model.TypeOptions = new[]
                 {
-                    new SelectListItem { Value = "Project",   Text = "Project" },
-                    new SelectListItem { Value = "Material",  Text = "Material" },
-                    new SelectListItem { Value = "Transport", Text = "Transport" }
-                }.ToList();
+            new SelectListItem { Value = "Project",   Text = "Project" },
+            new SelectListItem { Value = "Material",  Text = "Material" },
+            new SelectListItem { Value = "Transport", Text = "Transport" }
+        }.ToList();
 
                 return View(model);
             }
@@ -730,37 +706,77 @@ namespace QLNSVATC.Areas.FN.Controllers
 
         private string GenerateManhap()
         {
-            var last = db.NHAPNVLs
-                .OrderByDescending(x => x.MANHAP)
-                .Select(x => x.MANHAP)
-                .FirstOrDefault();
+            const string prefix = "N";
 
-            int num = 0;
-            if (!string.IsNullOrEmpty(last))
+            var codes = db.NHAPNVLs
+                .Select(x => x.MANHAP)
+                .Where(x => x != null && x.StartsWith(prefix))
+                .ToList();
+
+            int maxNum = 0;
+
+            foreach (var code in codes)
             {
-                var digits = new string(last.Reverse().TakeWhile(char.IsDigit).Reverse().ToArray());
-                int.TryParse(digits, out num);
+                var digits = new string(
+                    code
+                        .Skip(prefix.Length)
+                        .TakeWhile(char.IsDigit)
+                        .ToArray()
+                );
+
+                if (int.TryParse(digits, out int n) && n > maxNum)
+                    maxNum = n;
             }
-            num++;
-            return $"N{num:D3}";
+
+            int next = maxNum + 1;
+            string result = $"{prefix}{next:D3}";
+
+            while (codes.Contains(result))
+            {
+                next++;
+                result = $"{prefix}{next:D3}";
+            }
+
+            return result;
         }
+
 
         private string GenerateMavc()
         {
-            var last = db.VANCHUYENNVLs
-                .OrderByDescending(x => x.MAVC)
-                .Select(x => x.MAVC)
-                .FirstOrDefault();
+            const string prefix = "VC";
 
-            int num = 0;
-            if (!string.IsNullOrEmpty(last))
+            var codes = db.VANCHUYENNVLs
+                .Select(x => x.MAVC)
+                .Where(x => x != null && x.StartsWith(prefix))
+                .ToList();
+
+            int maxNum = 0;
+
+            foreach (var code in codes)
             {
-                var digits = new string(last.Reverse().TakeWhile(char.IsDigit).Reverse().ToArray());
-                int.TryParse(digits, out num);
+                var digits = new string(
+                    code
+                        .Skip(prefix.Length)
+                        .TakeWhile(char.IsDigit)
+                        .ToArray()
+                );
+
+                if (int.TryParse(digits, out int n) && n > maxNum)
+                    maxNum = n;
             }
-            num++;
-            return $"VC{num:D3}";
+
+            int next = maxNum + 1;
+            string result = $"{prefix}{next:D3}";
+
+            while (codes.Contains(result))
+            {
+                next++;
+                result = $"{prefix}{next:D3}";
+            }
+
+            return result;
         }
+
 
         public ActionResult Transport(
             int page = 1,
